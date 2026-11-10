@@ -9,9 +9,12 @@ function usePreviewState() {
   const [offers, setOffers] = useState<string[]>(["Copywriting", "Email marketing", "Social media"]);
   const [needs, setNeeds] = useState<string[]>(["SEO", "Paid ads", "LinkedIn outreach"]);
   const [saved, setSaved] = useState<string[]>([]);
-  const [proposed, setProposed] = useState<string[]>([]);
+  const [proposed, setProposed] = useState<string[]>(["1"]);
   const [messages, setMessages] = useState<PreviewMessage[]>([]);
-  const [cooperations, setCooperations] = useState<Cooperation[]>([]);
+  // Demo always opens with one example cooperation so the page is never empty.
+  const [cooperations, setCooperations] = useState<Cooperation[]>([
+    { businessId: "1", title: "Your business × Northline Sales Co.", completed: false },
+  ]);
   const matches = findMatches(offers, needs);
   const toggleSaved = (id: string) => setSaved((previous) => previous.includes(id) ? previous.filter((x) => x !== id) : [...previous, id]);
   const sendMessage = (businessId: string, text: string) => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { BUSINESSES, SKILLS, SKILL_GROUPS, findMatches } from "@/lib/businesses";
+import { BUSINESSES, SKILLS, SKILL_GROUPS, findMatches, matchForBusiness } from "@/lib/businesses";
 
 // Swapkit is scoped to Sales and Marketing functions only. These tests lock that
 // scope in: the skill picker must stay inside those two groups, and every
@@ -41,5 +41,22 @@ describe("Sales & Marketing scope", () => {
       expect(m.theyGive.length).toBeGreaterThan(0);
       expect(m.youGive.length).toBeGreaterThan(0);
     }
+  });
+
+  it("builds a campaign-ready match for any cooperation partner", () => {
+    const offers = ["Copywriting", "Email marketing", "Social media"];
+    const needs = ["SEO", "Paid ads", "LinkedIn outreach"];
+
+    const northline = matchForBusiness("1", offers, needs);
+    expect(northline?.business.name).toBe("Northline Sales Co.");
+    expect(northline?.theyGive.length).toBeGreaterThan(0);
+    expect(northline?.youGive.length).toBeGreaterThan(0);
+
+    // Even with no skill overlap, both sides still have skills to draft with.
+    const fallback = matchForBusiness("1", [], []);
+    expect(fallback?.theyGive.length).toBeGreaterThan(0);
+    expect(fallback?.youGive.length).toBeGreaterThan(0);
+
+    expect(matchForBusiness("unknown", offers, needs)).toBeNull();
   });
 });

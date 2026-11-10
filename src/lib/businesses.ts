@@ -146,3 +146,21 @@ export function findMatches(myOffers: string[], myNeeds: string[], list = BUSINE
     .filter((m) => m.theyGive.length > 0 && m.youGive.length > 0)
     .sort((a, b) => b.score - a.score);
 }
+
+/**
+ * Build a match for one specific business, e.g. a cooperation partner. Falls
+ * back to each side's own skills when the current picker selection overlaps
+ * nothing, so a joint campaign can always be drafted.
+ */
+export function matchForBusiness(id: string, myOffers: string[], myNeeds: string[]): Match | null {
+  const business = BUSINESSES.find((b) => b.id === id);
+  if (!business) return null;
+  const theyGive = business.offers.filter((s) => myNeeds.includes(s));
+  const youGive = business.needs.filter((s) => myOffers.includes(s));
+  return {
+    business,
+    theyGive: theyGive.length ? theyGive : [...business.offers],
+    youGive: youGive.length ? youGive : [...myOffers],
+    score: theyGive.length + youGive.length,
+  };
+}
