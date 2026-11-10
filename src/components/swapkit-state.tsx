@@ -5,7 +5,7 @@ export type PreviewMessage = { id: string; businessId: string; text: string; min
 export type Cooperation = { businessId: string; title: string; completed: boolean };
 
 function usePreviewState() {
-  const [profile, setProfile] = useState({ name: "Your business", owner: "Alex Morgan", city: "London", blurb: "Content and email marketing for growing small businesses." });
+  const [profile, setProfile] = useState({ name: "Morgan Growth Studio", owner: "Alex Morgan", city: "London", blurb: "Content and email marketing for growing small businesses." });
   const [offers, setOffers] = useState<string[]>(["Copywriting", "Email marketing", "Social media"]);
   const [needs, setNeeds] = useState<string[]>(["SEO", "Paid ads", "LinkedIn outreach"]);
   const [saved, setSaved] = useState<string[]>([]);
@@ -13,7 +13,7 @@ function usePreviewState() {
   const [messages, setMessages] = useState<PreviewMessage[]>([]);
   // Demo always opens with one example cooperation so the page is never empty.
   const [cooperations, setCooperations] = useState<Cooperation[]>([
-    { businessId: "1", title: "Your business × Northline Sales Co.", completed: false },
+    { businessId: "1", title: "Morgan Growth Studio × Northline Sales Co.", completed: false },
   ]);
   const matches = findMatches(offers, needs);
   const toggleSaved = (id: string) => setSaved((previous) => previous.includes(id) ? previous.filter((x) => x !== id) : [...previous, id]);
