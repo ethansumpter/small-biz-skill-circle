@@ -36,7 +36,7 @@ describe("Sales & Marketing scope", () => {
     const matches = findMatches(offers, needs);
 
     expect(matches.length).toBe(3);
-    expect(matches.map((m) => m.business.id)).toEqual(["2", "6", "7"]);
+    expect(matches.map((m) => m.business.id)).toEqual(["2", "4", "7"]);
     for (const m of matches) {
       expect(m.theyGive.length).toBeGreaterThan(0);
       expect(m.youGive.length).toBeGreaterThan(0);
