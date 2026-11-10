@@ -50,7 +50,7 @@ npm install        # or: bun install
 npm run dev        # or: bun run dev
 ```
 
-Then open the local URL Vite prints in the terminal (usually http://localhost:8080 or http://localhost:5173).
+Then open http://localhost:8080 (the dev server's default port).
 
 ### Scripts
 
