@@ -3,35 +3,134 @@ export type Business = {
   name: string;
   owner: string;
   city: string;
+  focus: string;
   offers: string[];
   needs: string[];
   blurb: string;
 };
 
-export const SKILLS = [
-  "Web design",
-  "Photography",
-  "Bookkeeping",
-  "Copywriting",
-  "Social media",
-  "Legal advice",
-  "Carpentry",
-  "Catering",
-  "Video editing",
-  "SEO",
-  "Branding",
-  "Event space",
+/**
+ * Swapkit is scoped to the two functions small businesses most often need
+ * outside help with: Sales and Marketing. Every skill a member can offer or
+ * ask for comes from these two groups.
+ */
+export const SKILL_GROUPS = [
+  {
+    name: "Sales",
+    skills: [
+      "Sales calls & demos",
+      "Cold email",
+      "LinkedIn outreach",
+      "Appointment setting",
+      "Sales scripts",
+      "Pipeline reviews",
+      "CRM setup",
+      "Partnership deals",
+    ],
+  },
+  {
+    name: "Marketing",
+    skills: [
+      "SEO",
+      "Paid ads",
+      "Email marketing",
+      "Social media",
+      "Copywriting",
+      "Content strategy",
+      "Brand identity",
+      "Website CRO",
+      "Analytics & reporting",
+      "Video & reels",
+    ],
+  },
 ] as const;
 
+export type SkillGroup = (typeof SKILL_GROUPS)[number];
+export type Skill = SkillGroup["skills"][number];
+
+export const SKILLS: string[] = SKILL_GROUPS.flatMap((g) => [...g.skills]);
+
 export const BUSINESSES: Business[] = [
-  { id: "1", name: "Oak & Iron Workshop", owner: "Priya Shah", city: "Bristol", offers: ["Carpentry", "Event space"], needs: ["Web design", "Photography"], blurb: "Handmade furniture studio with a big open workshop." },
-  { id: "2", name: "Lens Lane Studio", owner: "Tom Becker", city: "Leeds", offers: ["Photography", "Video editing"], needs: ["Bookkeeping", "SEO"], blurb: "Product and portrait photography for local brands." },
-  { id: "3", name: "Ledger Light", owner: "Amara Okafor", city: "London", offers: ["Bookkeeping"], needs: ["Branding", "Copywriting", "Social media"], blurb: "Friendly bookkeeping for sole traders and micro-businesses." },
-  { id: "4", name: "Pixel Pantry", owner: "Jonas Reed", city: "Manchester", offers: ["Web design", "SEO"], needs: ["Photography", "Catering"], blurb: "Two-person web studio building fast, simple sites." },
-  { id: "5", name: "Crumb & Co.", owner: "Lucia Moretti", city: "Bristol", offers: ["Catering", "Event space"], needs: ["Social media", "Web design"], blurb: "Neighbourhood bakery that caters launches and workshops." },
-  { id: "6", name: "Wordsmith Works", owner: "Ellie Grant", city: "Edinburgh", offers: ["Copywriting", "Social media"], needs: ["Legal advice", "Bookkeeping"], blurb: "Copy and content for small brands with big voices." },
-  { id: "7", name: "Fairway Legal", owner: "Daniel Cho", city: "London", offers: ["Legal advice"], needs: ["Web design", "Copywriting"], blurb: "Plain-English contracts and advice for start-ups." },
-  { id: "8", name: "Mark & Muse", owner: "Sofia Alvarez", city: "Leeds", offers: ["Branding", "Social media"], needs: ["Video editing", "Carpentry"], blurb: "Brand identities that feel local and personal." },
+  {
+    id: "1",
+    name: "Northline Sales Co.",
+    owner: "Priya Shah",
+    city: "Bristol",
+    focus: "Outbound sales",
+    offers: ["Cold email", "Appointment setting", "CRM setup"],
+    needs: ["SEO", "Email marketing", "Copywriting"],
+    blurb: "Two-person outbound team booking meetings for local service businesses.",
+  },
+  {
+    id: "2",
+    name: "Bright Signal Media",
+    owner: "Tom Becker",
+    city: "Leeds",
+    focus: "Performance marketing",
+    offers: ["Paid ads", "Analytics & reporting", "Website CRO"],
+    needs: ["Copywriting", "Sales calls & demos", "Email marketing"],
+    blurb: "Runs Google and Meta budgets for brands under £1m turnover.",
+  },
+  {
+    id: "3",
+    name: "Quill & Quote",
+    owner: "Amara Okafor",
+    city: "Manchester",
+    focus: "Content & email",
+    offers: ["Copywriting", "Email marketing", "Content strategy"],
+    needs: ["SEO", "Paid ads", "LinkedIn outreach"],
+    blurb: "Writes newsletters and landing page copy for small brands.",
+  },
+  {
+    id: "4",
+    name: "Foundry Digital",
+    owner: "Jonas Reed",
+    city: "London",
+    focus: "Search & conversion",
+    offers: ["SEO", "Website CRO", "Analytics & reporting"],
+    needs: ["Cold email", "Copywriting", "Video & reels"],
+    blurb: "Technical SEO and funnel fixes for shops and SaaS startups.",
+  },
+  {
+    id: "5",
+    name: "Ladder & Co.",
+    owner: "Lucia Moretti",
+    city: "Edinburgh",
+    focus: "Sales coaching",
+    offers: ["Sales calls & demos", "Sales scripts", "Pipeline reviews"],
+    needs: ["Social media", "Email marketing", "Brand identity"],
+    blurb: "Fractional sales lead who trains founders to close their own deals.",
+  },
+  {
+    id: "6",
+    name: "Halo Content Studio",
+    owner: "Ellie Grant",
+    city: "Bristol",
+    focus: "Short-form video",
+    offers: ["Video & reels", "Social media", "LinkedIn outreach"],
+    needs: ["Cold email", "Website CRO", "SEO"],
+    blurb: "Films and edits reels, UGC and product clips for local brands.",
+  },
+  {
+    id: "7",
+    name: "Meridian Partners",
+    owner: "Daniel Cho",
+    city: "London",
+    focus: "Channel & partnerships",
+    offers: ["Partnership deals", "LinkedIn outreach", "CRM setup"],
+    needs: ["Email marketing", "Paid ads", "Content strategy"],
+    blurb: "Sets up referral and reseller deals between small businesses.",
+  },
+  {
+    id: "8",
+    name: "Signal & Sage",
+    owner: "Sofia Alvarez",
+    city: "Leeds",
+    focus: "Brand & messaging",
+    offers: ["Brand identity", "Content strategy", "Email marketing"],
+    needs: ["Sales calls & demos", "SEO", "Analytics & reporting"],
+    blurb: "Brand identities and messaging for businesses finding their voice.",
+  },
 ];
 
 export type Match = { business: Business; theyGive: string[]; youGive: string[]; score: number };
