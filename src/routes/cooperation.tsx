@@ -5,6 +5,8 @@ import { BUSINESSES, matchForBusiness } from '@/lib/businesses';
 import { useSwapkit } from '@/components/swapkit-state';
 import { Button } from '@/components/ui/button';
 import { JointCampaign } from '@/components/joint-campaign';
+import { ExpertDialog } from '@/components/expert-dialog';
+import { DataNotice } from '@/components/data-notice';
 
 export const Route = createFileRoute('/cooperation')({
   head: () => pageHead('Cooperation', 'Keep track of your sales and marketing skill swap collaborations.'),
@@ -16,11 +18,15 @@ function Cooperation() {
 
   return (
     <>
-      <div className="page-heading">
-        <span className="label">Turn a match into momentum</span>
-        <h1>Cooperation</h1>
-        <p>Shared work. Shared wins.</p>
+      <div className="page-heading flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <span className="label">Turn a match into momentum</span>
+          <h1>Cooperation</h1>
+          <p>Shared work. Shared wins.</p>
+        </div>
+        <ExpertDialog />
       </div>
+      <DataNotice />
       {!cooperations.length ? (
         <div className="empty-state">
           <Handshake className="mx-auto mb-4 size-8 text-secondary" />
@@ -39,7 +45,7 @@ function Cooperation() {
             const business = BUSINESSES.find((b) => b.id === c.businessId);
             const match = matchForBusiness(c.businessId, offers, needs);
             return (
-              <article className="cooperation-row" key={c.businessId}>
+              <article className="cooperation-row block" key={c.businessId}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <span className="preview-badge">{c.completed ? 'Completed' : 'In progress'} · Preview</span>
