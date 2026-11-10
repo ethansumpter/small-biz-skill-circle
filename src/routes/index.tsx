@@ -1,11 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { SKILL_GROUPS, findMatches } from "@/lib/businesses";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowUpRight, HeartHandshake, Bookmark, Handshake, MessageSquare } from "lucide-react";
+import { useSwapkit } from "@/components/swapkit-state";
+import { PartnerCard } from "@/components/partner-card";
+import { Button } from "@/components/ui/button";
+import collaboration from "@/assets/business-collaboration.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Swapkit — Swap sales & marketing skills with other small businesses" },
+      { title: "Overview — Swapkit sales & marketing circle" },
       {
         name: "description",
         content:
@@ -23,103 +26,18 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-function Chips({ selected, onToggle, tone }: { selected: string[]; onToggle: (s: string) => void; tone: "give" | "get" }) {
-  return (
-    <div className="space-y-4">
-      {SKILL_GROUPS.map((group) => (
-        <div key={group.name}>
-          <span className="label">{group.name}</span>
-          <div className="flex flex-wrap">
-            {group.skills.map((s) => {
-              const on = selected.includes(s);
-              return (
-                <button
-                  key={s}
-                  onClick={() => onToggle(s)}
-                  className={`chip ${on ? (tone === "give" ? "chip-give" : "chip-get") : ""}`}
-                >
-                  {s}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function Index() {
-  const [offers, setOffers] = useState<string[]>(["Copywriting", "Email marketing", "Social media"]);
-  const [needs, setNeeds] = useState<string[]>(["SEO", "Paid ads", "LinkedIn outreach"]);
-  const [sent, setSent] = useState<string[]>([]);
-  const toggle = (set: typeof setOffers) => (s: string) =>
-    set((p) => (p.includes(s) ? p.filter((x) => x !== s) : [...p, s]));
-  const matches = useMemo(() => findMatches(offers, needs), [offers, needs]);
-
-  return (
-    <main className="min-h-screen bg-background">
-      <header className="mx-auto max-w-6xl px-6 pt-10">
-        <span className="font-display text-2xl">Swapkit<span className="text-primary">.</span></span>
-        <p className="mt-3 text-sm text-muted-foreground">Sales &amp; marketing swaps for small business owners</p>
-        <h1 className="font-display mt-10 max-w-3xl text-5xl leading-[1.05] md:text-7xl">
-          Swap sales and marketing muscle with owners who <em className="text-primary">need it</em>.
-        </h1>
-        <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-          Pick the sales and marketing skills you can offer and the ones you're short on. We'll find owners
-          where the swap works both ways.
-        </p>
-      </header>
-
-      <section className="mx-auto mt-12 grid max-w-6xl gap-6 px-6 md:grid-cols-2">
-        <div className="panel">
-          <h2 className="font-display text-2xl">I can offer</h2>
-          <p className="mb-5 text-sm text-muted-foreground">Sales or marketing work you could take on</p>
-          <Chips selected={offers} onToggle={toggle(setOffers)} tone="give" />
-        </div>
-        <div className="panel">
-          <h2 className="font-display text-2xl">I'm looking for</h2>
-          <p className="mb-5 text-sm text-muted-foreground">Sales or marketing help you need right now</p>
-          <Chips selected={needs} onToggle={toggle(setNeeds)} tone="get" />
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-6 py-14">
-        <h2 className="font-display text-3xl">
-          {matches.length} mutual {matches.length === 1 ? "match" : "matches"}
-        </h2>
-        {matches.length === 0 && (
-          <p className="mt-4 text-muted-foreground">
-            No two-way swaps yet — try adding more sales or marketing skills on either side.
-          </p>
-        )}
-        <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {matches.map(({ business: b, theyGive, youGive }) => (
-            <article key={b.id} className="panel flex flex-col">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-display text-xl">{b.name}</h3>
-                  <p className="text-sm text-muted-foreground">{b.owner} · {b.city}</p>
-                </div>
-                <span className="avatar">{b.owner.split(" ").map((w) => w[0]).join("")}</span>
-              </div>
-              <p className="mt-3 text-sm">{b.blurb}</p>
-              <p className="mt-2"><span className="chip chip-sm">{b.focus}</span></p>
-              <div className="mt-4 space-y-2 text-sm">
-                <p><span className="label">They give you</span> {theyGive.map((s) => <span key={s} className="chip chip-get chip-sm">{s}</span>)}</p>
-                <p><span className="label">You give them</span> {youGive.map((s) => <span key={s} className="chip chip-give chip-sm">{s}</span>)}</p>
-              </div>
-              <button
-                disabled={sent.includes(b.id)}
-                onClick={() => setSent((p) => [...p, b.id])}
-                className="btn-swap mt-5"
-              >
-                {sent.includes(b.id) ? "Swap request sent ✓" : "Propose a swap"}
-              </button>
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
-  );
+  const { profile, matches, saved, messages, cooperations } = useSwapkit();
+  const stats = [
+    { label: "Mutual matches", value: matches.length, icon: HeartHandshake, to: "/matches" },
+    { label: "Saved partners", value: saved.length, icon: Bookmark, to: "/matches" },
+    { label: "Conversations", value: new Set(messages.map((m) => m.businessId)).size, icon: MessageSquare, to: "/messages" },
+    { label: "Cooperations", value: cooperations.length, icon: Handshake, to: "/cooperation" },
+  ] as const;
+  return <>
+    <div className="page-heading"><span className="label">Your business, connected</span><h1>Overview</h1><p>Welcome back, {profile.owner.split(" ")[0]}. Let’s grow your circle.</p></div>
+    <section className="overview-cover"><img src={collaboration} width={1536} height={768} alt="Small business owners discussing sales and marketing around a studio table" /><div className="cover-shade" /><div className="cover-copy"><span className="text-xs font-semibold uppercase">Sales &amp; marketing, together</span><h2 className="mt-3 font-display text-4xl">Swapkit.<br />Different strengths.<br /><em>Shared growth.</em></h2><Button asChild className="mt-6"><Link to="/discover">Discover your partner<ArrowUpRight /></Link></Button></div></section>
+    <section className="stats-grid" aria-label="Your circle at a glance">{stats.map(({ label, value, icon: Icon, to }) => <Link to={to} key={label} className="stat-item"><div className="flex items-center justify-between"><Icon className="size-5 text-secondary" /><ArrowUpRight className="size-4 text-muted-foreground" /></div><strong className="mt-4 block font-display text-3xl">{value}</strong><span className="text-xs text-muted-foreground">{label}</span></Link>)}</section>
+    <section className="mt-10"><div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><span className="label">Made for each other</span><h2 className="font-display text-2xl">Your mutual matches</h2></div><Button asChild variant="ghost"><Link to="/matches">View all matches<ArrowUpRight /></Link></Button></div><div className="partner-grid">{matches.slice(0, 3).map(({ business }) => <PartnerCard key={business.id} business={business} mutual />)}</div>{!matches.length && <p className="text-muted-foreground">No mutual matches yet. Update your sales and marketing skills in your profile.</p>}</section>
+  </>;
 }

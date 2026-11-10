@@ -28,3 +28,6 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- Use separate TanStack content routes inside a shared app shell so every navigation destination has its own URL and metadata.
+- Keep preview-only business, match, conversation and cooperation state in one React provider; it is intentionally reset on reload and must not imply real delivery or billing.
