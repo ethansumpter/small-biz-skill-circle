@@ -23,3 +23,18 @@ export function draftCampaign(me: { name: string; skills: string[] }, partner: {
     offer: `10% off any combined ${a} + ${b} package booked with either business this week. Code: ${code}`,
   };
 }
+
+export type CampaignResults = { uses: number; mine: number; theirs: number };
+
+/** Example results shown after a preview launch. Nothing is really tracked. */
+export function exampleResults(): CampaignResults {
+  return { uses: 31, mine: 14, theirs: 9 };
+}
+
+/** Plain-English next step based on how many new customers the collab brought in. */
+export function resultsSuggestion(r: CampaignResults) {
+  const total = r.mine + r.theirs;
+  return total >= 10
+    ? `This collab brought in ${total} new customers. Worth running again next month?`
+    : `This collab brought in ${total} new customers. Try a different partner next time?`;
+}

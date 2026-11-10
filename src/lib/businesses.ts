@@ -160,7 +160,7 @@ export function matchForBusiness(id: string, myOffers: string[], myNeeds: string
   return {
     business,
     theyGive: theyGive.length ? theyGive : [...business.offers],
-    youGive: youGive.length ? youGive : [...myOffers],
+    youGive: youGive.length ? youGive : myOffers.length ? [...myOffers] : [...business.needs],
     score: theyGive.length + youGive.length,
   };
 }
