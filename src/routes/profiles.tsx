@@ -8,7 +8,7 @@ import { SkillPicker } from '@/components/skill-picker';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-export const Route = createFileRoute('/profiles')({ validateSearch: (search: Record<string, unknown>): { member?: string } => ({ member: typeof search.member === 'string' ? search.member : undefined }), head: () => pageHead('Profiles', 'Business profiles and sales and marketing skills in your Swapkit circle.'), component: Profiles });
+export const Route = createFileRoute('/profiles')({ validateSearch: (search: Record<string, unknown>): { member?: string } => typeof search['member'] === 'string' ? { member: search['member'] } : {}, head: () => pageHead('Profiles', 'Business profiles and sales and marketing skills in your Swapkit circle.'), component: Profiles });
 function Profiles() {
  const { member } = Route.useSearch();
  const { profile, setProfile, offers, setOffers, needs, setNeeds, propose, proposed } = useSwapkit();
