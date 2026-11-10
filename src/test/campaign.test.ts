@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canLaunch, discountCode, draftCampaign } from "@/lib/campaign";
+import { canLaunch, discountCode, draftCampaign, exampleResults, resultsSuggestion } from "@/lib/campaign";
 
 describe("joint campaign", () => {
   it("builds the discount code from both names", () => {
@@ -15,5 +15,9 @@ describe("joint campaign", () => {
     expect(d.name).toContain("Jade Studio");
     expect(d.name).toContain("Signal & Sage");
     expect(d.offer).toContain("COLLAB-JS10");
+  });
+  it("suggests repeating a collab that brought in customers", () => {
+    expect(resultsSuggestion(exampleResults())).toContain("23 new customers");
+    expect(resultsSuggestion({ uses: 2, mine: 1, theirs: 1 })).toContain("different partner");
   });
 });
