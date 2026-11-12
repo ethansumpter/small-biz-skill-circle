@@ -24,8 +24,6 @@ export const demoUser = {
   ],
   links: ['kilnandclay.example', 'Instagram @kilnandclay.example'],
   activity: {
-    activeProposals: 1,
-    maxProposals: 3,
     incomingProposals: 2,
     saved: 1,
     matches: 2,

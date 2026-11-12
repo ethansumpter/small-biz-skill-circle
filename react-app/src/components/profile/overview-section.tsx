@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card, Chip, SectionTitle } from '@/components/ui';
 import { demoUser } from '@/data/demo-user';
+import { MAX_ACTIVE_PROPOSALS, useProposals } from '@/state/proposals';
 import { space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
@@ -14,9 +15,10 @@ import { notInPreview } from '@/utils/preview';
 export function OverviewSection() {
   const colors = useBondColors();
   const { activity } = demoUser;
+  const { proposals } = useProposals();
 
   const stats = [
-    { value: `${activity.activeProposals} of ${activity.maxProposals}`, label: 'Active proposals' },
+    { value: `${proposals.length} of ${MAX_ACTIVE_PROPOSALS}`, label: 'Active proposals' },
     { value: String(activity.incomingProposals), label: 'Proposals to you' },
     { value: String(activity.matches), label: 'Matches' },
   ];
