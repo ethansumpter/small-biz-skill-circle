@@ -49,3 +49,13 @@ export const fonts = {
   medium: 'Lexend_500Medium',
   semibold: 'Lexend_600SemiBold',
 } as const;
+
+/** Type scale from the brand kit (Lexend only). Apply a colour token alongside. */
+export const type = {
+  display: { fontFamily: fonts.semibold, fontSize: 40, lineHeight: 48, letterSpacing: -0.4 },
+  heading: { fontFamily: fonts.semibold, fontSize: 24, lineHeight: 32 },
+  subheading: { fontFamily: fonts.medium, fontSize: 18, lineHeight: 26 },
+  body: { fontFamily: fonts.regular, fontSize: 16, lineHeight: 24 },
+  label: { fontFamily: fonts.medium, fontSize: 14, lineHeight: 20 },
+  caption: { fontFamily: fonts.regular, fontSize: 12, lineHeight: 16, letterSpacing: 0.24 },
+} as const;
