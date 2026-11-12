@@ -1,4 +1,4 @@
-import { getCompany } from '@/data/companies';
+import type { Company } from '@/data/companies';
 
 /**
  * The logged-in demo account. Defaults to c01 Kiln & Clay Studio and can be
@@ -8,9 +8,9 @@ import { getCompany } from '@/data/companies';
  *
  * Read it with `useCurrentUser()` from '@/state/preview'.
  */
-export function buildDemoUser(companyId: string) {
+export function buildDemoUser(company: Company) {
   return {
-    ...getCompany(companyId),
+    ...company,
     // App state for the demo account (not part of the public company profile).
     plan: 'Free',
     activity: {

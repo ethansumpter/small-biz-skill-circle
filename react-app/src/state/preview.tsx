@@ -1,6 +1,6 @@
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
-import { DEMO_USER_ID, getCompany } from '@/data/companies';
+import { companies as BUNDLED_COMPANIES, type Company, DEMO_USER_ID } from '@/data/companies';
 import { DEMO_LEADS, type Lead } from '@/data/demo-leads';
 import { DEMO_INCOMING, type IncomingProposal } from '@/data/demo-network';
 import { buildDemoUser } from '@/data/demo-user';
@@ -8,7 +8,9 @@ import { buildDemoUser } from '@/data/demo-user';
 /**
  * All preview-only app state (proposals, matches, conversations) lives in this
  * one provider. It's seeded from docs/bond-demo-data.md, kept in memory, resets
- * on reload, and never sends anything anywhere.
+ * on reload, and never sends anything anywhere. That includes the demo
+ * companies: the demo panel can edit them for the session (hosted demos can't
+ * write companies.json, so this is the only place edits live there).
  */
 
 // ── Proposals ────────────────────────────────────────────────────────────────
@@ -69,6 +71,10 @@ const seedDiscover = (userId: string): DiscoverState => ({
 // ── Context ──────────────────────────────────────────────────────────────────
 
 type PreviewState = {
+  /** The demo companies for this session. Seeded from companies.json; editable in the demo panel. */
+  companies: Company[];
+  setCompanies: (companies: Company[]) => void;
+  getCompany: (id: string) => Company;
   /** Which demo company the app is "logged in" as. Switched from the demo panel. */
   currentUserId: string;
   setCurrentUserId: (id: string) => void;
@@ -92,6 +98,17 @@ type PreviewState = {
 const PreviewContext = createContext<PreviewState | null>(null);
 
 export function PreviewProvider({ children }: { children: ReactNode }) {
+  const [companies, setCompanies] = useState<Company[]>(BUNDLED_COMPANIES);
+  const companyById = useMemo(() => new Map(companies.map((c) => [c.id, c])), [companies]);
+  const getCompany = useCallback(
+    (id: string) => {
+      const company = companyById.get(id);
+      if (!company) throw new Error(`Unknown company id: ${id}`);
+      return company;
+    },
+    [companyById],
+  );
+
   const [currentUserId, setCurrentUserIdState] = useState<string>(DEMO_USER_ID);
   const [discover, setDiscover] = useState<DiscoverState>(() => seedDiscover(DEMO_USER_ID));
   const [incoming, setIncoming] = useState<IncomingProposal[]>(DEMO_INCOMING);
@@ -128,7 +145,7 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
             ],
       );
     },
-    [incoming],
+    [incoming, getCompany],
   );
 
   const rejectProposal = useCallback((companyId: string) => {
@@ -198,13 +215,26 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
     setLeads((current) => current.filter((lead) => lead.id !== leadId));
   }, []);
 
+  // Leads copy a company's name, industry and location; keep them in step with demo panel edits.
+  const liveLeads = useMemo(
+    () =>
+      leads.map((lead) => {
+        const c = companyById.get(lead.id);
+        return c ? { ...lead, company: c.name, industry: c.industry, location: c.location } : lead;
+      }),
+    [leads, companyById],
+  );
+
   const value = useMemo(
     () => ({
+      companies,
+      setCompanies,
+      getCompany,
       currentUserId,
       setCurrentUserId,
       proposals,
       addProposal,
-      leads,
+      leads: liveLeads,
       sendMessage,
       toggleMute,
       unmatch,
@@ -219,11 +249,13 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
       rejectProposal,
     }),
     [
+      companies,
+      getCompany,
       currentUserId,
       setCurrentUserId,
       proposals,
       addProposal,
-      leads,
+      liveLeads,
       sendMessage,
       toggleMute,
       unmatch,
@@ -253,6 +285,12 @@ export function useProposals() {
   return { proposals, addProposal, canAdd: proposals.length < MAX_ACTIVE_PROPOSALS };
 }
 
+/** The session's demo companies (with any demo panel edits) and a lookup by id. */
+export function useCompanies() {
+  const { companies, setCompanies, getCompany } = usePreview();
+  return { companies, setCompanies, getCompany };
+}
+
 export function useLeads() {
   const { leads, sendMessage, toggleMute, unmatch } = usePreview();
   return { leads, sendMessage, toggleMute, unmatch };
@@ -260,8 +298,8 @@ export function useLeads() {
 
 /** The demo company the app is logged in as (defaults to c01; switchable in the demo panel). */
 export function useCurrentUser() {
-  const { currentUserId, setCurrentUserId } = usePreview();
-  return { user: buildDemoUser(currentUserId), currentUserId, setCurrentUserId };
+  const { currentUserId, setCurrentUserId, getCompany } = usePreview();
+  return { user: buildDemoUser(getCompany(currentUserId)), currentUserId, setCurrentUserId };
 }
 
 /** Discover progress for the logged-in account: passes, saves, blocks and likes sent. */

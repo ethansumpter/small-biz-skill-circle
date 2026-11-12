@@ -11,9 +11,8 @@ import { DiscoverCard } from '@/components/discover/discover-card';
 import { FilterBar } from '@/components/discover/filter-bar';
 import { LikeSheet } from '@/components/discover/like-sheet';
 import { Card, PrimaryButton } from '@/components/ui';
-import { getCompany } from '@/data/companies';
 import { DISCOVER_ORDER, type Filters, FREE_LIKES_PER_DAY, matchesFilters } from '@/data/discover';
-import { useCurrentUser, useDiscover } from '@/state/preview';
+import { useCompanies, useCurrentUser, useDiscover } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
@@ -29,6 +28,7 @@ export default function DiscoverScreen() {
   const colors = useBondColors();
   const insets = useSafeAreaInsets();
   const { currentUserId } = useCurrentUser();
+  const { getCompany } = useCompanies();
   const { passed, sent, saved, blocked, passCompany, toggleSaved, sendLike, blockCompany, restartDiscover } =
     useDiscover();
 
@@ -42,7 +42,7 @@ export default function DiscoverScreen() {
   const remaining = useMemo(() => {
     const done = new Set([...passed, ...blocked, ...sent.map((s) => s.companyId), currentUserId]);
     return DISCOVER_ORDER.filter((id) => !done.has(id)).map(getCompany);
-  }, [passed, blocked, sent, currentUserId]);
+  }, [passed, blocked, sent, currentUserId, getCompany]);
   const feed = useMemo(() => remaining.filter((c) => matchesFilters(c, filters)), [remaining, filters]);
   const company = feed[0];
   const likesLeft = Math.max(0, FREE_LIKES_PER_DAY - sent.length);

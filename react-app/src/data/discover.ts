@@ -28,9 +28,14 @@ export const FILTER_LABELS: Record<FilterKey, string> = {
   collaboration: 'Collaboration type',
 };
 
+/** Industry filter options: every industry in use, A–Z. */
+export function industriesOf(list: Pick<Company, 'industry'>[]): string[] {
+  return [...new Set(list.map((c) => c.industry))].sort();
+}
+
 export const FILTER_OPTIONS: Record<FilterKey, string[]> = {
   location: ['Leeds', 'Within 5 miles', 'Within 10 miles', 'Within 25 miles'],
-  industry: [...new Set(companies.map((c) => c.industry))].sort(),
+  industry: industriesOf(companies),
   size: ['Micro', 'SME'],
   identity: ['Verified only', 'Maker', 'Service provider'],
   collaboration: ['Bundle deal', 'Product collaboration', 'Service collaboration'],

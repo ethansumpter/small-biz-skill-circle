@@ -8,17 +8,23 @@ import { type CompanyRecord, CompanyEditor } from '@/components/demo-panel/compa
 import { CompanyPicker } from '@/components/demo-panel/company-picker';
 import { type CompanyChanges, ConfirmSaveModal } from '@/components/demo-panel/confirm-save-modal';
 import { StackHeader } from '@/components/stack-header';
-import { companies as bundledCompanies, DEMO_USER_ID, getCompany } from '@/data/companies';
-import { useCurrentUser } from '@/state/preview';
+import { type Company, DEMO_USER_ID, getCompany as getBundledCompany } from '@/data/companies';
+import { useCompanies, useCurrentUser } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { diffJson, type Json } from '@/utils/json-diff';
 
 /**
  * Demo panel: an admin view for the demo, separate from the Bond product.
- * Edits every demo company and writes them to src/data/companies.json (via the
- * dev-only /api/demo-companies route) after a confirmation listing each change.
+ * Edits every demo company after a confirmation listing each change. Applied
+ * edits always update the session's companies (preview provider). With the dev
+ * server, they're also written to src/data/companies.json via the dev-only
+ * /api/demo-companies route; hosted demos (web on EAS Hosting, EAS Update) have
+ * no dev server, so there edits last for the session only.
  * Also switches which company the app is logged in as (session only).
  */
+
+/** Only development builds have a dev server (and companies.json) to write to. */
+const HAS_DEV_SERVER = __DEV__;
 
 /**
  * Absolute URL of the dev-only API route. On a phone, a relative URL has no
@@ -36,17 +42,24 @@ function apiUrl() {
 
 type Banner = { tone: 'info' | 'success' | 'error'; text: string } | null;
 
+const SESSION_ONLY_BANNER: Banner = {
+  tone: 'info',
+  text: 'This hosted demo has no dev server, so edits apply to this session only and reset when you reload. Nobody else sees them.',
+};
+
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
 
 export default function DemoPanelScreen() {
   const colors = useBondColors();
   const insets = useSafeAreaInsets();
   const { currentUserId, setCurrentUserId } = useCurrentUser();
+  const { companies: sessionCompanies, setCompanies } = useCompanies();
 
-  const [original, setOriginal] = useState<CompanyRecord[]>(() => clone(bundledCompanies) as CompanyRecord[]);
+  const [original, setOriginal] = useState<CompanyRecord[]>(() => clone(sessionCompanies) as CompanyRecord[]);
   const [draft, setDraft] = useState<CompanyRecord[]>(original);
+  /** True once companies.json is reachable; otherwise applied edits last for the session only. */
   const [canSave, setCanSave] = useState(false);
-  const [banner, setBanner] = useState<Banner>({ tone: 'info', text: 'Loading companies.json from the dev server…' });
+  const [banner, setBanner] = useState<Banner>(HAS_DEV_SERVER ? { tone: 'info', text: 'Loading companies.json from the dev server…' } : SESSION_ONLY_BANNER);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -55,6 +68,7 @@ export default function DemoPanelScreen() {
   // Load the file as it is on disk now, not as it was when the app was bundled.
   // Unsaved edits are kept if this is a retry, so nothing typed is lost.
   const load = useCallback(async (isCancelled: () => boolean = () => false) => {
+    if (!HAS_DEV_SERVER) return;
     setBanner({ tone: 'info', text: 'Loading companies.json from the dev server…' });
     try {
       const res = await fetch(apiUrl());
@@ -63,6 +77,7 @@ export default function DemoPanelScreen() {
       if (isCancelled()) return;
       setOriginal(data.companies);
       setDraft((current) => (current === original ? data.companies : current));
+      setCompanies(data.companies as unknown as Company[]);
       setCanSave(true);
       setBanner(null);
     } catch (error) {
@@ -70,7 +85,7 @@ export default function DemoPanelScreen() {
       setCanSave(false);
       setBanner({
         tone: 'error',
-        text: `Couldn't reach the dev server at ${apiUrl()} (${(error as Error).message}). Showing the bundled data, and saving is off. Check \`npx expo start\` is running, then tap Retry.`,
+        text: `Couldn't reach the dev server at ${apiUrl()} (${(error as Error).message}). Showing this session's data. Changes apply to this session only and aren't saved to the file. Check \`npx expo start\` is running, then tap Retry.`,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -120,6 +135,16 @@ export default function DemoPanelScreen() {
   }, []);
 
   async function save() {
+    if (!canSave) {
+      setCompanies(draft as unknown as Company[]);
+      setOriginal(draft);
+      setConfirmOpen(false);
+      setBanner({
+        tone: 'success',
+        text: `Applied ${totalChanges} ${totalChanges === 1 ? 'change' : 'changes'} for this session. They reset when you reload.`,
+      });
+      return;
+    }
     setSaving(true);
     try {
       const res = await fetch(apiUrl(), {
@@ -129,6 +154,7 @@ export default function DemoPanelScreen() {
       });
       const result = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(result.error ?? `HTTP ${res.status}`);
+      setCompanies(draft as unknown as Company[]);
       setOriginal(draft);
       setConfirmOpen(false);
       setBanner({ tone: 'success', text: `Saved ${totalChanges} ${totalChanges === 1 ? 'change' : 'changes'} to companies.json.` });
@@ -157,8 +183,9 @@ export default function DemoPanelScreen() {
         <View style={[styles.notice, { backgroundColor: colors.accent }]}>
           <Ionicons name="construct-outline" size={20} color={colors.onAccent} />
           <Text style={[type.caption, styles.flex, { color: colors.onAccent }]}>
-            The demo panel is for setting up the demo. Changes here edit the fictional demo companies in
-            src/data/companies.json for everyone using this build. They aren't something a Bond member could do.
+            {canSave
+              ? 'The demo panel is for setting up the demo. Changes here edit the fictional demo companies in src/data/companies.json for everyone using this build. They aren\'t something a Bond member could do.'
+              : 'The demo panel is for setting up the demo. Changes here edit the fictional demo companies for this session only. They aren\'t something a Bond member could do.'}
           </Text>
         </View>
 
@@ -179,7 +206,7 @@ export default function DemoPanelScreen() {
               color={colors.ink}
             />
             <Text style={[type.caption, styles.flex, { color: colors.ink }]}>{banner.text}</Text>
-            {banner.tone === 'error' && !canSave ? (
+            {banner.tone === 'error' && HAS_DEV_SERVER && !canSave ? (
               <Pressable accessibilityRole="button" hitSlop={8} onPress={() => load()}>
                 <Text style={[type.label, { color: colors.link }]}>Retry</Text>
               </Pressable>
@@ -192,7 +219,7 @@ export default function DemoPanelScreen() {
             Logged in as
           </Text>
           <Text style={[type.caption, { color: colors.inkMuted }]}>
-            Switches the company the app acts as straight away. Resets to {getCompany(DEMO_USER_ID).name} on reload.
+            Switches the company the app acts as straight away. Resets to {getBundledCompany(DEMO_USER_ID).name} on reload.
           </Text>
           <CompanyPicker
             label="Log in as"
@@ -259,8 +286,8 @@ export default function DemoPanelScreen() {
               ? `${totalChanges} unsaved ${totalChanges === 1 ? 'change' : 'changes'} in ${changeGroups.length} ${changeGroups.length === 1 ? 'company' : 'companies'}`
               : 'No unsaved changes'}
           </Text>
-          {!canSave && banner?.tone === 'error' ? (
-            <Text style={[type.caption, { color: colors.inkMuted }]}>Saving is off: dev server not reachable.</Text>
+          {!canSave ? (
+            <Text style={[type.caption, { color: colors.inkMuted }]}>Changes apply to this session only.</Text>
           ) : null}
         </View>
         <Pressable
@@ -277,18 +304,18 @@ export default function DemoPanelScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityHint="Shows every change and asks you to confirm"
-          disabled={!totalChanges || !canSave}
+          disabled={!totalChanges}
           onPress={() => setConfirmOpen(true)}
           style={({ pressed }) => [
             styles.barButton,
             {
               backgroundColor: colors.ink,
               borderColor: colors.ink,
-              opacity: !totalChanges || !canSave ? 0.4 : pressed ? 0.85 : 1,
+              opacity: !totalChanges ? 0.4 : pressed ? 0.85 : 1,
             },
           ]}
         >
-          <Text style={[type.label, { color: colors.surface }]}>Save…</Text>
+          <Text style={[type.label, { color: colors.surface }]}>{canSave ? 'Save…' : 'Apply…'}</Text>
         </Pressable>
       </View>
 
@@ -296,6 +323,7 @@ export default function DemoPanelScreen() {
         visible={confirmOpen}
         groups={changeGroups}
         saving={saving}
+        target={canSave ? 'file' : 'session'}
         onCancel={() => setConfirmOpen(false)}
         onConfirm={save}
       />

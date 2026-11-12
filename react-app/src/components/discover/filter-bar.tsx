@@ -1,9 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { FILTER_LABELS, FILTER_OPTIONS, type FilterKey, type Filters } from '@/data/discover';
+import { FILTER_LABELS, FILTER_OPTIONS, type FilterKey, type Filters, industriesOf } from '@/data/discover';
+import { useCompanies } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 
 /**
@@ -108,6 +109,9 @@ function FilterSheet({
   onClose: () => void;
 }) {
   const colors = useBondColors();
+  // Industries follow the session's companies, so demo panel edits show up here.
+  const { companies } = useCompanies();
+  const options = useMemo(() => ({ ...FILTER_OPTIONS, industry: industriesOf(companies) }), [companies]);
   const insets = useSafeAreaInsets();
   const shown = keys ?? [];
   const title = shown.length === 1 ? FILTER_LABELS[shown[0]] : 'Filters';
@@ -143,7 +147,7 @@ function FilterSheet({
                 <Text style={[type.label, { color: colors.inkMuted }]}>{FILTER_LABELS[key]}</Text>
               ) : null}
               <View accessibilityRole="radiogroup" accessibilityLabel={FILTER_LABELS[key]} style={styles.options}>
-                {FILTER_OPTIONS[key].map((option) => {
+                {options[key].map((option) => {
                   const selected = filters[key] === option;
                   return (
                     <Pressable

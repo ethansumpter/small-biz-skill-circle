@@ -1,8 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image, View } from 'react-native';
 
-import { getCompany } from '@/data/companies';
 import { getCompanyImage } from '@/data/company-images';
+import { useCompanies } from '@/state/preview';
 import { radius, useBondColors } from '@/theme/tokens';
 
 /**
@@ -11,6 +11,7 @@ import { radius, useBondColors } from '@/theme/tokens';
  */
 export function CompanyAvatar({ companyId, size = 48 }: { companyId: string; size?: number }) {
   const colors = useBondColors();
+  const { getCompany } = useCompanies();
   const company = getCompany(companyId);
   const image = getCompanyImage(company);
 

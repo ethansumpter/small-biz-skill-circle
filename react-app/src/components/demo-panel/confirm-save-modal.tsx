@@ -6,17 +6,22 @@ import { type Change, formatPath, previewValue } from '@/utils/json-diff';
 
 export type CompanyChanges = { id: string; name: string; changes: Change[] };
 
-/** Lists every pending edit and asks for confirmation before companies.json is written. */
+/**
+ * Lists every pending edit and asks for confirmation before it's applied: written
+ * to companies.json (`file`) or, on hosted demos, kept for this session (`session`).
+ */
 export function ConfirmSaveModal({
   visible,
   groups,
   saving,
+  target,
   onCancel,
   onConfirm,
 }: {
   visible: boolean;
   groups: CompanyChanges[];
   saving: boolean;
+  target: 'file' | 'session';
   onCancel: () => void;
   onConfirm: () => void;
 }) {
@@ -35,10 +40,14 @@ export function ConfirmSaveModal({
         >
           <View style={styles.head}>
             <Text accessibilityRole="header" style={[type.subheading, { color: colors.ink }]}>
-              Save {total} {total === 1 ? 'change' : 'changes'} to companies.json?
+              {target === 'file'
+                ? `Save ${total} ${total === 1 ? 'change' : 'changes'} to companies.json?`
+                : `Apply ${total} ${total === 1 ? 'change' : 'changes'} for this session?`}
             </Text>
             <Text style={[type.caption, { color: colors.inkMuted }]}>
-              This overwrites src/data/companies.json on the computer running the dev server. Check the list below.
+              {target === 'file'
+                ? 'This overwrites src/data/companies.json on the computer running the dev server. Check the list below.'
+                : 'The app uses these changes until you reload. Nothing is saved, and nobody else sees them. Check the list below.'}
             </Text>
           </View>
 
@@ -85,7 +94,7 @@ export function ConfirmSaveModal({
                 { backgroundColor: colors.ink, borderColor: colors.ink, opacity: saving ? 0.6 : pressed ? 0.85 : 1 },
               ]}
             >
-              <Text style={[type.label, { color: colors.surface }]}>{saving ? 'Saving…' : 'Confirm and save'}</Text>
+              <Text style={[type.label, { color: colors.surface }]}>{saving ? 'Saving…' : target === 'file' ? 'Confirm and save' : 'Confirm and apply'}</Text>
             </Pressable>
           </View>
         </View>

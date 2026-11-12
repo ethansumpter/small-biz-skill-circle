@@ -8,9 +8,8 @@ import { CardMenu } from '@/components/discover/card-menu';
 import { DiscoverCard } from '@/components/discover/discover-card';
 import { LikeSheet } from '@/components/discover/like-sheet';
 import { StackHeader } from '@/components/stack-header';
-import { companies } from '@/data/companies';
 import { FREE_LIKES_PER_DAY } from '@/data/discover';
-import { useDiscover, useNetwork } from '@/state/preview';
+import { useCompanies, useDiscover, useNetwork } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
@@ -26,6 +25,7 @@ export default function NetworkProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { incoming, saved, acceptProposal, rejectProposal, toggleSaved } = useNetwork();
   const { sent, sendLike, blockCompany } = useDiscover();
+  const { companies } = useCompanies();
 
   // Snapshot on open, so the page doesn't flash "not found" while leaving after Accept/Reject.
   const [proposal] = useState(() => incoming.find((p) => p.companyId === id));
