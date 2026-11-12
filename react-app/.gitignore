@@ -39,3 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# local virtual environment (Python venv with Node via nodeenv)
+.venv/
