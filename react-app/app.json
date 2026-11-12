@@ -26,6 +26,14 @@
         "projectId": "5869b174-a414-43fb-928f-ceb64f54175c"
       }
     },
-    "owner": "ethansumpters-team"
+    "owner": "ethansumpters-team",
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "scheme": "bond",
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }
