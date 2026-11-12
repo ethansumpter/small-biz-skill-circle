@@ -36,6 +36,12 @@
     "scheme": "bond",
     "experiments": {
       "typedRoutes": true
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/5869b174-a414-43fb-928f-ceb64f54175c"
     }
   }
 }
