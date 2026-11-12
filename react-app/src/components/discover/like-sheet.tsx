@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CompanyAvatar } from '@/components/company-avatar';
 import type { Company } from '@/data/companies';
 import { proposalTypesFor } from '@/data/discover';
+import { useCurrentUser } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 
 /**
@@ -42,6 +43,10 @@ export function LikeSheet({
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
   const [focused, setFocused] = useState(false);
+  const { user } = useCurrentUser();
+  // Example from the mockup, in business voice (no owner names on Discover).
+  const industry = user.industry.toLowerCase();
+  const example = `e.g. Hi, we're ${user.name}, ${/^[aeiou]/.test(industry) ? 'an' : 'a'} ${industry} business. We'd love to work with you!`;
 
   // Fresh comment for each company.
   useEffect(() => {
@@ -115,7 +120,7 @@ export function LikeSheet({
                 setComment(text);
                 if (error && text.trim()) setError('');
               }}
-              placeholder="Say who you are and what you'd like to do together."
+              placeholder={example}
               placeholderTextColor={colors.inkMuted}
               multiline
               maxLength={280}

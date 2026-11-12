@@ -18,11 +18,12 @@ import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
 /** Room for the floating action rail and AI bubble below the last review. */
-const RAIL_CLEARANCE = AI_BUTTON_CLEARANCE + 52 * 3 + 60 + space[3] * 4;
+const RAIL_CLEARANCE = AI_BUTTON_CLEARANCE + 52 * 2 + space[3] * 3;
 
 /**
- * Discover: one company at a time (docs/bond-app-structure.md §1). Cross,
- * like and proposal move on to the next company; save doesn't.
+ * Discover: one company at a time (docs/bond-app-structure.md §1, laid out
+ * per docs/discover-section-mockup.png). Cross, like and proposal move on to
+ * the next company; save doesn't.
  */
 export default function DiscoverScreen() {
   const colors = useBondColors();
@@ -93,6 +94,8 @@ export default function DiscoverScreen() {
             proposalType={proposalType}
             onProposalType={setProposalType}
             onOpenMenu={() => setMenuOpen(true)}
+            onComment={() => setSheetOpen(true)}
+            onSendProposal={() => setSheetOpen(true)}
           />
         ) : remaining.length > 0 ? (
           <EmptyState
@@ -122,8 +125,6 @@ export default function DiscoverScreen() {
           <ActionRail
             companyName={company.name}
             saved={saved.includes(company.id)}
-            onComment={() => setSheetOpen(true)}
-            onLike={() => setSheetOpen(true)}
             onSave={() => {
               const wasSaved = saved.includes(company.id);
               toggleSaved(company.id);

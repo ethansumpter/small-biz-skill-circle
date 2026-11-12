@@ -10,27 +10,23 @@ type IconName = ComponentProps<typeof Ionicons>['name'];
 export const ACTION_RAIL_WIDTH = 52;
 
 /**
- * Floating Discover actions on the right, stacked above the AI bubble
- * (docs/bond-app-structure.md §1): comment · save · cross · like/proposal.
+ * Floating Discover actions on the right, stacked above the AI bubble, as in
+ * docs/discover-section-mockup.png: save for later · cross. Commenting lives on
+ * the offer box and sending (👍) in the proposal box.
  */
 export function ActionRail({
   companyName,
   saved,
-  onComment,
   onSave,
   onCross,
-  onLike,
 }: {
   companyName: string;
   saved: boolean;
-  onComment: () => void;
   onSave: () => void;
   onCross: () => void;
-  onLike: () => void;
 }) {
   return (
     <View style={styles.rail} pointerEvents="box-none">
-      <RailButton icon="chatbubble-ellipses-outline" label={`Write a comment to ${companyName}`} onPress={onComment} />
       <RailButton
         icon={saved ? 'bookmark' : 'bookmark-outline'}
         label={saved ? `Remove ${companyName} from saved` : `Save ${companyName} for later`}
@@ -38,7 +34,6 @@ export function ActionRail({
         onPress={onSave}
       />
       <RailButton icon="close" label={`Pass on ${companyName}`} onPress={onCross} />
-      <RailButton icon="heart" label={`Send a like or proposal to ${companyName}`} primary onPress={onLike} />
     </View>
   );
 }
@@ -47,17 +42,14 @@ function RailButton({
   icon,
   label,
   onPress,
-  primary,
   selected,
 }: {
   icon: IconName;
   label: string;
   onPress: () => void;
-  primary?: boolean;
   selected?: boolean;
 }) {
   const colors = useBondColors();
-  const filled = primary || selected;
   return (
     <Pressable
       accessibilityRole="button"
@@ -66,19 +58,14 @@ function RailButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        primary && styles.primary,
         {
-          backgroundColor: primary ? colors.ink : selected ? colors.accent : colors.surfaceRaised,
-          borderColor: filled ? 'transparent' : colors.line,
+          backgroundColor: selected ? colors.accent : colors.surfaceRaised,
+          borderColor: selected ? 'transparent' : colors.line,
           transform: [{ scale: pressed ? 0.94 : 1 }],
         },
       ]}
     >
-      <Ionicons
-        name={icon}
-        size={primary ? 28 : 22}
-        color={primary ? colors.surface : selected ? colors.onAccent : colors.ink}
-      />
+      <Ionicons name={icon} size={22} color={selected ? colors.onAccent : colors.ink} />
     </Pressable>
   );
 }
@@ -104,5 +91,4 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 4,
   },
-  primary: { width: 60, height: 60 },
 });

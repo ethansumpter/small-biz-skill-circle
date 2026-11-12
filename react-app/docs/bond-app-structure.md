@@ -33,7 +33,8 @@ Vertical scroll card showing **one profile at a time**. Top → bottom:
 
 **Demo build decisions (not in the spec):**
 - Filters are single-choice per category. The filter icon opens every category, **Location** and **Industry** open their own, and **More…** opens Firm size, Identity and Collaboration type.
-- Picking a type in the proposal block makes the send a **proposal**. With no type picked it's a **like**. The comment bubble and the like button both open the same sheet, and the comment is required.
+- Layout follows `docs/discover-section-mockup.png`. The **comment bubble** sits on the offer box next to ⋯. The **Proposal** box has a numbered list of types (trimmed to the firm's interests) and a 👍 button that sends. Only **save** and **cross** float on the right, above the AI bubble. Reviews sit side by side and scroll sideways.
+- Picking a type makes the send a **proposal**. With no type picked it's a **like**. The comment bubble and 👍 open the same sheet, and the comment is required. The placeholder follows the mockup's example in business voice ("Hi, we're Kiln & Clay Studio, a ceramics business…").
 - **Save** toggles and stays on the same company. **Cross**, **like**, **proposal** and **Block** (⋮) move on to the next company. When everyone has been seen, passed companies can be shown again.
 - Free plan: 10 likes a day. Likes, saves and blocks are preview state only. Nothing is delivered, and the confirmation says so.
 
