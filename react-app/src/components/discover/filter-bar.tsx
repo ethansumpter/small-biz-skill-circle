@@ -6,19 +6,27 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FILTER_LABELS, FILTER_OPTIONS, type FilterKey, type Filters } from '@/data/discover';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 
-const PRIMARY: FilterKey[] = ['location', 'industry'];
-const MORE: FilterKey[] = ['size', 'identity', 'collaboration'];
-const ALL: FilterKey[] = [...PRIMARY, ...MORE];
-
 /**
- * Discover filter row: filter icon (all filters), Location, Industry, More…
- * (docs/bond-app-structure.md §1). Each opens a sheet of single-choice options.
+ * Filter row: filter icon (all filters), a chip per `primary` filter, and
+ * More… for the rest. Each opens a sheet of single-choice options.
+ * Defaults are Discover's (docs/bond-app-structure.md §1).
  */
-export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (next: Filters) => void }) {
+export function FilterBar({
+  filters,
+  onChange,
+  primary = ['location', 'industry'],
+  more = ['size', 'identity', 'collaboration'],
+}: {
+  filters: Filters;
+  onChange: (next: Filters) => void;
+  primary?: FilterKey[];
+  more?: FilterKey[];
+}) {
   const colors = useBondColors();
   const [sheet, setSheet] = useState<FilterKey[] | null>(null);
+  const all = [...primary, ...more];
   const activeCount = Object.values(filters).filter(Boolean).length;
-  const moreCount = MORE.filter((k) => filters[k]).length;
+  const moreCount = more.filter((k) => filters[k]).length;
 
   return (
     <>
@@ -26,7 +34,7 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={activeCount ? `All filters, ${activeCount} on` : 'All filters'}
-          onPress={() => setSheet(ALL)}
+          onPress={() => setSheet(all)}
           style={({ pressed }) => [
             styles.iconChip,
             { borderColor: colors.line, backgroundColor: colors.surfaceRaised, opacity: pressed ? 0.7 : 1 },
@@ -39,7 +47,7 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
             </View>
           ) : null}
         </Pressable>
-        {PRIMARY.map((key) => (
+        {primary.map((key) => (
           <FilterChip
             key={key}
             label={filters[key] ?? FILTER_LABELS[key]}
@@ -47,11 +55,13 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
             onPress={() => setSheet([key])}
           />
         ))}
-        <FilterChip
-          label={moreCount ? `More (${moreCount})` : 'More…'}
-          active={moreCount > 0}
-          onPress={() => setSheet(MORE)}
-        />
+        {more.length ? (
+          <FilterChip
+            label={moreCount ? `More (${moreCount})` : 'More…'}
+            active={moreCount > 0}
+            onPress={() => setSheet(more)}
+          />
+        ) : null}
       </ScrollView>
 
       <FilterSheet

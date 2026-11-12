@@ -43,6 +43,12 @@ Vertical scroll card showing **one profile at a time**. Top → bottom:
 - Tap a tile → opens their profile (same layout as Discover) with their **proposal chat bubble** and **Accept / Reject**.
 - Filters: Location · Identity · Firm size.
 
+**Demo build decisions (layout per `docs/your-network-section-mockup.png`):**
+- Two-column grid in two sections: **Proposed to you** (tiles carry a chat-bubble badge and the proposal title) and **Saved** (bookmark badge). A company that proposed and is also saved shows once, as a proposal.
+- Tapping a tile opens `/network/[id]`: the Discover card, with their proposal as a chat bubble at the top and **✕ / Accept** at the bottom. There's no comment bubble or 👍, because you're answering their proposal.
+- **Accept** removes it from Your Network, adds a match to Leads with their comment pinned, and opens that chat. **✕** rejects it and goes back. **Block** (⋮) does both and removes the company.
+- On a saved company's page, the card keeps Discover's comment bubble and 👍 for sending a like or proposal. The bottom bar is **Remove from saved**.
+
 ## 3. ＋ New Proposal
 Form to post a collaboration opportunity. **Max 3 active proposals** per account. Fields:
 | Field | Examples |

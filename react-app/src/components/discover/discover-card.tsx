@@ -25,10 +25,10 @@ export function DiscoverCard({
   proposalType: string | undefined;
   onProposalType: (type: string | undefined) => void;
   onOpenMenu: () => void;
-  /** Comment bubble on the offer box. */
-  onComment: () => void;
-  /** 👍 in the proposal box. */
-  onSendProposal: () => void;
+  /** Comment bubble on the offer box. Omit to hide it (e.g. Your Network). */
+  onComment?: () => void;
+  /** 👍 in the proposal box. Omit to show only their open proposals. */
+  onSendProposal?: () => void;
 }) {
   const colors = useBondColors();
   const openProposals = companyProposals(company).filter((p) => p.status === 'Open');
@@ -53,17 +53,19 @@ export function DiscoverCard({
             >
               <Ionicons name="ellipsis-horizontal" size={20} color={colors.inkMuted} />
             </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Comment on ${company.name}'s offer`}
-              onPress={onComment}
-              style={({ pressed }) => [
-                styles.bubble,
-                { backgroundColor: colors.surfaceRaised, borderColor: colors.line, transform: [{ scale: pressed ? 0.94 : 1 }] },
-              ]}
-            >
-              <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.ink} />
-            </Pressable>
+            {onComment ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Comment on ${company.name}'s offer`}
+                onPress={onComment}
+                style={({ pressed }) => [
+                  styles.bubble,
+                  { backgroundColor: colors.surfaceRaised, borderColor: colors.line, transform: [{ scale: pressed ? 0.94 : 1 }] },
+                ]}
+              >
+                <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.ink} />
+              </Pressable>
+            ) : null}
           </View>
         </View>
       </Card>
@@ -129,73 +131,81 @@ export function DiscoverCard({
       </View>
 
       {/* 5. Proposal block — pick the kind of proposal, then 👍 to send (mockup) */}
-      <Card>
-        <View style={styles.proposalHead}>
-          <View style={styles.flex}>
-            <SectionTitle>Proposal</SectionTitle>
-            <Text style={[type.caption, { color: colors.inkMuted }]}>
-              Pick the kind of proposal, then send it with a comment. With none picked, it goes as a like.
-            </Text>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              proposalType ? `Send a ${proposalType} proposal to ${company.name}` : `Send a like to ${company.name}`
-            }
-            onPress={onSendProposal}
-            style={({ pressed }) => [
-              styles.send,
-              { backgroundColor: colors.ink, transform: [{ scale: pressed ? 0.94 : 1 }] },
-            ]}
-          >
-            <Ionicons name="thumbs-up" size={24} color={colors.surface} />
-          </Pressable>
-        </View>
-
-        <View accessibilityRole="radiogroup" accessibilityLabel="Kind of proposal" style={styles.typeList}>
-          {proposalTypesFor(company).map((option, i) => {
-            const selected = option === proposalType;
-            return (
-              <Pressable
-                key={option}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: selected }}
-                onPress={() => onProposalType(selected ? undefined : option)}
-                style={({ pressed }) => [
-                  styles.typeRow,
-                  selected
-                    ? { backgroundColor: colors.accent, borderColor: colors.accent }
-                    : { backgroundColor: colors.surfaceRaised, borderColor: colors.line },
-                  pressed && { opacity: 0.8 },
-                ]}
-              >
-                <View
-                  style={[
-                    styles.typeNumber,
-                    { backgroundColor: selected ? colors.onAccent : colors.surface },
+      {onSendProposal || openProposals.length ? (
+        <Card>
+          {onSendProposal ? (
+            <>
+              <View style={styles.proposalHead}>
+                <View style={styles.flex}>
+                  <SectionTitle>Proposal</SectionTitle>
+                  <Text style={[type.caption, { color: colors.inkMuted }]}>
+                    Pick the kind of proposal, then send it with a comment. With none picked, it goes as a like.
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    proposalType ? `Send a ${proposalType} proposal to ${company.name}` : `Send a like to ${company.name}`
+                  }
+                  onPress={onSendProposal}
+                  style={({ pressed }) => [
+                    styles.send,
+                    { backgroundColor: colors.ink, transform: [{ scale: pressed ? 0.94 : 1 }] },
                   ]}
                 >
-                  <Text style={[type.caption, { color: selected ? colors.accent : colors.ink }]}>{i + 1}</Text>
-                </View>
-                <Text style={[type.label, styles.flex, { color: selected ? colors.onAccent : colors.ink }]}>
-                  {option}
-                </Text>
-                {selected ? <Ionicons name="checkmark" size={18} color={colors.onAccent} /> : null}
-              </Pressable>
-            );
-          })}
-        </View>
+                  <Ionicons name="thumbs-up" size={24} color={colors.surface} />
+                </Pressable>
+              </View>
 
-        {openProposals.map((p) => (
-          <View key={p.id} style={[styles.proposal, { backgroundColor: colors.surface }]}>
-            <Text style={[type.caption, { color: colors.inkMuted }]}>
-              Their open proposal · {p.region} · {p.industries}
-            </Text>
-            <Text style={[type.label, { color: colors.ink }]}>{p.title}</Text>
-            <Text style={[type.body, { color: colors.ink }]}>{p.summary}</Text>
-          </View>
-        ))}
-      </Card>
+              <View accessibilityRole="radiogroup" accessibilityLabel="Kind of proposal" style={styles.typeList}>
+                {proposalTypesFor(company).map((option, i) => {
+                  const selected = option === proposalType;
+                  return (
+                    <Pressable
+                      key={option}
+                      accessibilityRole="radio"
+                      accessibilityState={{ checked: selected }}
+                      onPress={() => onProposalType(selected ? undefined : option)}
+                      style={({ pressed }) => [
+                        styles.typeRow,
+                        selected
+                          ? { backgroundColor: colors.accent, borderColor: colors.accent }
+                          : { backgroundColor: colors.surfaceRaised, borderColor: colors.line },
+                        pressed && { opacity: 0.8 },
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.typeNumber,
+                          { backgroundColor: selected ? colors.onAccent : colors.surface },
+                        ]}
+                      >
+                        <Text style={[type.caption, { color: selected ? colors.accent : colors.ink }]}>{i + 1}</Text>
+                      </View>
+                      <Text style={[type.label, styles.flex, { color: selected ? colors.onAccent : colors.ink }]}>
+                        {option}
+                      </Text>
+                      {selected ? <Ionicons name="checkmark" size={18} color={colors.onAccent} /> : null}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </>
+          ) : (
+            <SectionTitle>Their proposals</SectionTitle>
+          )}
+
+          {openProposals.map((p) => (
+            <View key={p.id} style={[styles.proposal, { backgroundColor: colors.surface }]}>
+              <Text style={[type.caption, { color: colors.inkMuted }]}>
+                Their open proposal · {p.region} · {p.industries}
+              </Text>
+              <Text style={[type.label, { color: colors.ink }]}>{p.title}</Text>
+              <Text style={[type.body, { color: colors.ink }]}>{p.summary}</Text>
+            </View>
+          ))}
+        </Card>
+      ) : null}
 
       {/* 6. Reviews — at the very bottom, platform-controlled */}
       <View style={styles.section}>

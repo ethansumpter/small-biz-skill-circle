@@ -1,7 +1,8 @@
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
-import { DEMO_USER_ID } from '@/data/companies';
+import { DEMO_USER_ID, getCompany } from '@/data/companies';
 import { DEMO_LEADS, type Lead } from '@/data/demo-leads';
+import { DEMO_INCOMING, type IncomingProposal } from '@/data/demo-network';
 import { buildDemoUser } from '@/data/demo-user';
 
 /**
@@ -83,6 +84,9 @@ type PreviewState = {
   sendLike: (like: SentLike) => void;
   blockCompany: (id: string) => void;
   restartDiscover: () => void;
+  incoming: IncomingProposal[];
+  acceptProposal: (companyId: string) => void;
+  rejectProposal: (companyId: string) => void;
 };
 
 const PreviewContext = createContext<PreviewState | null>(null);
@@ -90,11 +94,45 @@ const PreviewContext = createContext<PreviewState | null>(null);
 export function PreviewProvider({ children }: { children: ReactNode }) {
   const [currentUserId, setCurrentUserIdState] = useState<string>(DEMO_USER_ID);
   const [discover, setDiscover] = useState<DiscoverState>(() => seedDiscover(DEMO_USER_ID));
+  const [incoming, setIncoming] = useState<IncomingProposal[]>(DEMO_INCOMING);
+  const [leads, setLeads] = useState<Lead[]>(DEMO_LEADS);
 
   // A different account starts with its own fresh Discover feed.
   const setCurrentUserId = useCallback((id: string) => {
     setCurrentUserIdState(id);
     setDiscover(seedDiscover(id));
+    setIncoming(id === DEMO_USER_ID ? DEMO_INCOMING : []);
+  }, []);
+
+  // Accepting makes a match: the proposal leaves Your Network and opens a chat in Leads.
+  const acceptProposal = useCallback(
+    (companyId: string) => {
+      const proposal = incoming.find((p) => p.companyId === companyId);
+      if (!proposal) return;
+      const { name, industry, location } = getCompany(companyId);
+      setIncoming((current) => current.filter((p) => p.companyId !== companyId));
+      setLeads((current) =>
+        current.some((l) => l.id === companyId)
+          ? current
+          : [
+              {
+                id: companyId,
+                company: name,
+                industry,
+                location,
+                pinnedComment: proposal.comment,
+                messages: [],
+                muted: false,
+              },
+              ...current,
+            ],
+      );
+    },
+    [incoming],
+  );
+
+  const rejectProposal = useCallback((companyId: string) => {
+    setIncoming((current) => current.filter((p) => p.companyId !== companyId));
   }, []);
 
   const passCompany = useCallback((id: string) => {
@@ -122,7 +160,6 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
     setDiscover((d) => ({ ...d, passed: [] }));
   }, []);
   const [proposals, setProposals] = useState<Proposal[]>(SEED_PROPOSALS);
-  const [leads, setLeads] = useState<Lead[]>(DEMO_LEADS);
 
   const addProposal = useCallback((input: ProposalInput) => {
     setProposals((current) => {
@@ -177,6 +214,9 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
       sendLike,
       blockCompany,
       restartDiscover,
+      incoming,
+      acceptProposal,
+      rejectProposal,
     }),
     [
       currentUserId,
@@ -193,6 +233,9 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
       sendLike,
       blockCompany,
       restartDiscover,
+      incoming,
+      acceptProposal,
+      rejectProposal,
     ],
   );
 
@@ -225,4 +268,10 @@ export function useCurrentUser() {
 export function useDiscover() {
   const { discover, passCompany, toggleSaved, sendLike, blockCompany, restartDiscover } = usePreview();
   return { ...discover, passCompany, toggleSaved, sendLike, blockCompany, restartDiscover };
+}
+
+/** Your Network: proposals sent to the logged-in account, plus companies it saved. */
+export function useNetwork() {
+  const { incoming, acceptProposal, rejectProposal, discover, toggleSaved } = usePreview();
+  return { incoming, saved: discover.saved, acceptProposal, rejectProposal, toggleSaved };
 }
