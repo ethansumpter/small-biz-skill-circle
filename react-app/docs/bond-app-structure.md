@@ -31,6 +31,12 @@ Vertical scroll card showing **one profile at a time**. Top → bottom:
 - After cross / like / proposal, **auto-advance** to the next profile.
 - Data rule: **never show owner names** — company identity only.
 
+**Demo build decisions (not in the spec):**
+- Filters are single-choice per category. The filter icon opens every category, **Location** and **Industry** open their own, and **More…** opens Firm size, Identity and Collaboration type.
+- Picking a type in the proposal block makes the send a **proposal**. With no type picked it's a **like**. The comment bubble and the like button both open the same sheet, and the comment is required.
+- **Save** toggles and stays on the same company. **Cross**, **like**, **proposal** and **Block** (⋮) move on to the next company. When everyone has been seen, passed companies can be shown again.
+- Free plan: 10 likes a day. Likes, saves and blocks are preview state only. Nothing is delivered, and the confirmation says so.
+
 ## 2. Your Network
 - Grid of tiles = companies who have **proposed to you** (and items you saved).
 - Tap a tile → opens their profile (same layout as Discover) with their **proposal chat bubble** and **Accept / Reject**.

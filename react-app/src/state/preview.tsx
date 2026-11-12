@@ -44,6 +44,27 @@ const SEED_PROPOSALS: Proposal[] = [
   },
 ];
 
+// ── Discover ─────────────────────────────────────────────────────────────────
+
+/** A like (or proposal, when a type is picked) sent from Discover. Never delivered anywhere. */
+export type SentLike = { companyId: string; comment: string; proposalType?: string };
+
+type DiscoverState = {
+  /** Crossed (skipped) companies; "Start again" brings them back. */
+  passed: string[];
+  sent: SentLike[];
+  saved: string[];
+  blocked: string[];
+};
+
+/** Demo account starts with Brightframe saved (docs/bond-demo-data.md, Your Network). */
+const seedDiscover = (userId: string): DiscoverState => ({
+  passed: [],
+  sent: [],
+  saved: userId === DEMO_USER_ID ? ['c09'] : [],
+  blocked: [],
+});
+
 // ── Context ──────────────────────────────────────────────────────────────────
 
 type PreviewState = {
@@ -56,12 +77,50 @@ type PreviewState = {
   sendMessage: (leadId: string, text: string) => void;
   toggleMute: (leadId: string) => void;
   unmatch: (leadId: string) => void;
+  discover: DiscoverState;
+  passCompany: (id: string) => void;
+  toggleSaved: (id: string) => void;
+  sendLike: (like: SentLike) => void;
+  blockCompany: (id: string) => void;
+  restartDiscover: () => void;
 };
 
 const PreviewContext = createContext<PreviewState | null>(null);
 
 export function PreviewProvider({ children }: { children: ReactNode }) {
-  const [currentUserId, setCurrentUserId] = useState<string>(DEMO_USER_ID);
+  const [currentUserId, setCurrentUserIdState] = useState<string>(DEMO_USER_ID);
+  const [discover, setDiscover] = useState<DiscoverState>(() => seedDiscover(DEMO_USER_ID));
+
+  // A different account starts with its own fresh Discover feed.
+  const setCurrentUserId = useCallback((id: string) => {
+    setCurrentUserIdState(id);
+    setDiscover(seedDiscover(id));
+  }, []);
+
+  const passCompany = useCallback((id: string) => {
+    setDiscover((d) => ({ ...d, passed: [...d.passed, id] }));
+  }, []);
+
+  const toggleSaved = useCallback((id: string) => {
+    setDiscover((d) => ({
+      ...d,
+      saved: d.saved.includes(id) ? d.saved.filter((s) => s !== id) : [...d.saved, id],
+    }));
+  }, []);
+
+  const sendLike = useCallback((like: SentLike) => {
+    const comment = like.comment.trim();
+    if (!comment) return;
+    setDiscover((d) => ({ ...d, sent: [...d.sent, { ...like, comment }] }));
+  }, []);
+
+  const blockCompany = useCallback((id: string) => {
+    setDiscover((d) => ({ ...d, blocked: [...d.blocked, id], saved: d.saved.filter((s) => s !== id) }));
+  }, []);
+
+  const restartDiscover = useCallback(() => {
+    setDiscover((d) => ({ ...d, passed: [] }));
+  }, []);
   const [proposals, setProposals] = useState<Proposal[]>(SEED_PROPOSALS);
   const [leads, setLeads] = useState<Lead[]>(DEMO_LEADS);
 
@@ -103,8 +162,38 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ currentUserId, setCurrentUserId, proposals, addProposal, leads, sendMessage, toggleMute, unmatch }),
-    [currentUserId, proposals, addProposal, leads, sendMessage, toggleMute, unmatch],
+    () => ({
+      currentUserId,
+      setCurrentUserId,
+      proposals,
+      addProposal,
+      leads,
+      sendMessage,
+      toggleMute,
+      unmatch,
+      discover,
+      passCompany,
+      toggleSaved,
+      sendLike,
+      blockCompany,
+      restartDiscover,
+    }),
+    [
+      currentUserId,
+      setCurrentUserId,
+      proposals,
+      addProposal,
+      leads,
+      sendMessage,
+      toggleMute,
+      unmatch,
+      discover,
+      passCompany,
+      toggleSaved,
+      sendLike,
+      blockCompany,
+      restartDiscover,
+    ],
   );
 
   return <PreviewContext.Provider value={value}>{children}</PreviewContext.Provider>;
@@ -130,4 +219,10 @@ export function useLeads() {
 export function useCurrentUser() {
   const { currentUserId, setCurrentUserId } = usePreview();
   return { user: buildDemoUser(currentUserId), currentUserId, setCurrentUserId };
+}
+
+/** Discover progress for the logged-in account: passes, saves, blocks and likes sent. */
+export function useDiscover() {
+  const { discover, passCompany, toggleSaved, sendLike, blockCompany, restartDiscover } = usePreview();
+  return { ...discover, passCompany, toggleSaved, sendLike, blockCompany, restartDiscover };
 }

@@ -267,6 +267,8 @@ Each review shows a small **Report review** link.
 | Bond Plus | £14.99 / month | Unlimited likes, see who saved you, "Why this match" detail, priority verification |
 
 ## Filter options (Discover / Network)
+*How the demo matches them:* a company with no `distanceMiles` is in Leeds and counts as within 5 miles. **Maker** = interests include Product collaborations; **Service provider** = interests include Service collaborations. **Collaboration type** uses the company's proposals. Logged in as another company, Discover shows everyone else in the order above, with c01 last.
+
 - Location: Leeds · Within 5 / 10 / 25 miles
 - Industry: all industries above
 - Firm size: Micro · SME
