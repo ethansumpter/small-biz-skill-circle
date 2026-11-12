@@ -4,6 +4,7 @@ import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { RingsMark } from '@/components/bond-logo';
 import { fonts, radius, space, useBondColors } from '@/theme/tokens';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -12,8 +13,9 @@ type BondTab = {
   name: string;
   href: '/' | '/network' | '/new-proposal' | '/leads' | '/profile';
   label: string;
-  icon: IconName;
-  iconFocused: IconName;
+  /** 'rings' draws Bond's two-overlapping-circles "match" motif. */
+  icon: IconName | 'rings';
+  iconFocused: IconName | 'rings';
   /** The Instagram-style centre "create" button. */
   centre?: boolean;
 };
@@ -21,9 +23,9 @@ type BondTab = {
 /** Footer tabs, in the order set by docs/bond-app-structure.md. */
 export const BOND_TABS: BondTab[] = [
   { name: 'discover', href: '/', label: 'Discover', icon: 'compass-outline', iconFocused: 'compass' },
-  { name: 'network', href: '/network', label: 'Your Network', icon: 'people-outline', iconFocused: 'people' },
+  { name: 'network', href: '/network', label: 'Your Network', icon: 'rings', iconFocused: 'rings' },
   { name: 'new-proposal', href: '/new-proposal', label: 'New proposal', icon: 'add', iconFocused: 'add', centre: true },
-  { name: 'leads', href: '/leads', label: 'Leads', icon: 'chatbubbles-outline', iconFocused: 'chatbubbles' },
+  { name: 'leads', href: '/leads', label: 'Leads', icon: 'chatbubble-outline', iconFocused: 'chatbubble' },
   { name: 'profile', href: '/profile', label: 'Profile', icon: 'person-circle-outline', iconFocused: 'person-circle' },
 ];
 
@@ -58,7 +60,13 @@ export function BondTabBar() {
   );
 }
 
-type ButtonProps = TabTriggerSlotProps & { tab: BondTab; ref?: ComponentProps<typeof Pressable>['ref'] };
+function TabIcon({ name, color }: { name: BondTab['icon']; color: string }) {
+  if (name === 'rings') return <RingsMark color={color} size={16} />;
+  if (name === 'add') return null;
+  return <Ionicons name={name} size={22} color={color} />;
+}
+
+type ButtonProps =TabTriggerSlotProps & { tab: BondTab; ref?: ComponentProps<typeof Pressable>['ref'] };
 
 function TabButton({ tab, isFocused, ...props }: ButtonProps) {
   const colors = useBondColors();
@@ -72,9 +80,8 @@ function TabButton({ tab, isFocused, ...props }: ButtonProps) {
       style={styles.tab}
     >
       <View style={[styles.indicator, isFocused && { backgroundColor: colors.accent }]}>
-        <Ionicons
+        <TabIcon
           name={isFocused ? tab.iconFocused : tab.icon}
-          size={22}
           color={isFocused ? colors.onAccent : colors.inkMuted}
         />
       </View>
@@ -110,7 +117,7 @@ function CentreButton({ tab, isFocused, ...props }: ButtonProps) {
           { backgroundColor: colors.ink, borderColor: isFocused ? colors.accent : 'transparent' },
         ]}
       >
-        <Ionicons name={tab.icon} size={28} color={colors.surface} />
+        <Ionicons name="add" size={28} color={colors.surface} />
       </View>
     </Pressable>
   );

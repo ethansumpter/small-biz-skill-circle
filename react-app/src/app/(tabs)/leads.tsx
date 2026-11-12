@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AI_BUTTON_CLEARANCE } from '@/components/ai-assistant-button';
 import { LeadRow } from '@/components/leads/lead-row';
 import { Card } from '@/components/ui';
 import { useLeads } from '@/state/preview';
@@ -44,7 +45,7 @@ export default function LeadsScreen() {
 const styles = StyleSheet.create({
   content: {
     paddingHorizontal: space[4],
-    paddingBottom: space[12],
+    paddingBottom: AI_BUTTON_CLEARANCE,
     gap: space[6],
   },
   intro: { gap: space[2] },

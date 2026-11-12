@@ -1,6 +1,7 @@
 import { TabList, TabSlot, TabTrigger, Tabs } from 'expo-router/ui';
 import { StyleSheet, View } from 'react-native';
 
+import { AiAssistantButton } from '@/components/ai-assistant-button';
 import { BOND_TABS, BondTabBar } from '@/components/bond-tab-bar';
 import { useBondColors } from '@/theme/tokens';
 
@@ -11,6 +12,7 @@ export default function TabsLayout() {
     <Tabs style={styles.root}>
       <View style={[styles.root, { backgroundColor: colors.surface }]}>
         <TabSlot />
+        <AiAssistantButton />
       </View>
       <BondTabBar />
       {/* Declares the tab routes; the visible footer is BondTabBar. */}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AI_BUTTON_CLEARANCE } from '@/components/ai-assistant-button';
 import { GetMoreSection } from '@/components/profile/get-more-section';
 import { OverviewSection } from '@/components/profile/overview-section';
 import { ProfileHeader } from '@/components/profile/profile-header';
@@ -12,7 +13,7 @@ import { space, useBondColors } from '@/theme/tokens';
 export default function ProfileScreen() {
   const colors = useBondColors();
   const insets = useSafeAreaInsets();
-  const [tab, setTab] = useState<ProfileTab>('Get More');
+  const [tab, setTab] = useState<ProfileTab>('Get more');
 
   return (
     <ScrollView
@@ -21,7 +22,7 @@ export default function ProfileScreen() {
     >
       <ProfileHeader />
       <ProfileTabs value={tab} onChange={setTab} />
-      {tab === 'Get More' && <GetMoreSection />}
+      {tab === 'Get more' && <GetMoreSection />}
       {tab === 'Safety' && <SafetySection />}
       {tab === 'Overview' && <OverviewSection />}
     </ScrollView>
@@ -31,7 +32,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   content: {
     paddingHorizontal: space[4],
-    paddingBottom: space[12],
+    paddingBottom: AI_BUTTON_CLEARANCE,
     gap: space[6],
   },
 });

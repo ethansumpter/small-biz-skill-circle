@@ -1,19 +1,16 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { radius, space, type, useBondColors } from '@/theme/tokens';
+import { fonts, space, type, useBondColors } from '@/theme/tokens';
 
-export const PROFILE_TABS = ['Get More', 'Safety', 'Overview'] as const;
+export const PROFILE_TABS = ['Get more', 'Safety', 'Overview'] as const;
 export type ProfileTab = (typeof PROFILE_TABS)[number];
 
-/** Segmented control under the avatar. */
+/** Underlined text tabs under the firm's logo. */
 export function ProfileTabs({ value, onChange }: { value: ProfileTab; onChange: (tab: ProfileTab) => void }) {
   const colors = useBondColors();
 
   return (
-    <View
-      accessibilityRole="tablist"
-      style={[styles.track, { backgroundColor: colors.surfaceRaised, borderColor: colors.line }]}
-    >
+    <View accessibilityRole="tablist" style={[styles.row, { borderBottomColor: colors.ink }]}>
       {PROFILE_TABS.map((tab) => {
         const selected = tab === value;
         return (
@@ -22,9 +19,17 @@ export function ProfileTabs({ value, onChange }: { value: ProfileTab; onChange: 
             accessibilityRole="tab"
             accessibilityState={{ selected }}
             onPress={() => onChange(tab)}
-            style={[styles.segment, selected && { backgroundColor: colors.accent }]}
+            style={styles.tab}
           >
-            <Text style={[type.label, { color: selected ? colors.onAccent : colors.inkMuted }]}>{tab}</Text>
+            <Text
+              style={[
+                type.body,
+                { color: selected ? colors.ink : colors.inkMuted, fontFamily: selected ? fonts.semibold : fonts.regular },
+              ]}
+            >
+              {tab}
+            </Text>
+            <View style={[styles.indicator, selected && { backgroundColor: colors.ink }]} />
           </Pressable>
         );
       })}
@@ -33,17 +38,22 @@ export function ProfileTabs({ value, onChange }: { value: ProfileTab; onChange: 
 }
 
 const styles = StyleSheet.create({
-  track: {
+  row: {
     flexDirection: 'row',
-    borderRadius: radius.full,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: space[1],
+    borderBottomWidth: 1,
   },
-  segment: {
+  tab: {
     flex: 1,
-    minHeight: 40,
-    borderRadius: radius.full,
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: space[2],
+    gap: space[2],
+    minHeight: 44,
+  },
+  indicator: {
+    alignSelf: 'stretch',
+    height: 3,
+    marginBottom: -1,
+    borderTopLeftRadius: 2,
+    borderTopRightRadius: 2,
   },
 });

@@ -3,6 +3,7 @@ import { type ComponentRef, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AI_BUTTON_CLEARANCE } from '@/components/ai-assistant-button';
 import { NewProposalForm } from '@/components/proposals/new-proposal-form';
 import { ProposalCard } from '@/components/proposals/proposal-card';
 import { Card, SectionTitle } from '@/components/ui';
@@ -75,7 +76,7 @@ export default function NewProposalScreen() {
 const styles = StyleSheet.create({
   content: {
     paddingHorizontal: space[4],
-    paddingBottom: space[12],
+    paddingBottom: AI_BUTTON_CLEARANCE,
     gap: space[6],
   },
   intro: { gap: space[2] },
