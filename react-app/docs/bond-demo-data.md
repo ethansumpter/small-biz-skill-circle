@@ -12,7 +12,7 @@
 ---
 
 ## Demo user (logged-in account)
-> The demo panel (Profile → Settings → Demo panel) can switch the logged-in company for the session and edit the demo companies, proposals and Leads chats: in the dev server it saves them to `src/data/companies.json` and `src/data/leads.json`; on hosted demos the edits last for the session only. Edits saved there are not copied back into this doc.
+> The demo panel (Profile → Settings → Demo panel) can switch the logged-in company for the session and edit the demo companies, proposals, Leads chats and plans: in the dev server it saves them to `src/data/companies.json`, `src/data/leads.json` and `src/data/plans.json`; on hosted demos the edits last for the session only. Edits saved there are not copied back into this doc.
 
 **Kiln & Clay Studio** (`c01`): Independent ceramicist. Plan: **Free**, with a Boost available. Verified: yes.
 
@@ -262,7 +262,7 @@ Each review shows a small **Report review** link.
 - Suggested chips: Draft a proposal · Explain my matches · Improve my profile · Safety help
 
 ## Monetisation (demo values)
-Stored in `src/data/plans.json` (prices in pence, formatted by the app; the Free plan's `limits` set the 3 active proposals and 10 likes a day used across the demo). Change values there and keep this table in step.
+Stored in `src/data/plans.json` (prices in pence, formatted by the app; the Free plan's `limits` set the 3 active proposals and 10 likes a day used across the demo). Change values there (or in the demo panel's Plans tab) and keep this table in step.
 
 | Product | Price | Benefit |
 |---|---|---|
