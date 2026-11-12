@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import Constants from 'expo-constants';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -25,7 +25,7 @@ import { partnerIds, ProposalDetail, proposalTitle, usePartnerNames } from '@/co
 import { StackHeader } from '@/components/stack-header';
 import { type Company, type CompanyProposal, DEMO_USER_ID, getCompany as getBundledCompany } from '@/data/companies';
 import { type LeadSeed, toLeadSeed } from '@/data/demo-leads';
-import { formatPrice, type Plan, type Plans } from '@/data/plans';
+import { blankPlan, formatPrice, isCorePlan, newPlanId, type Plan, type Plans } from '@/data/plans';
 import { useCompanies, useCurrentUser, useDemoProposals, useLeads, usePlans } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { diffJson, type Json } from '@/utils/json-diff';
@@ -47,6 +47,22 @@ import { diffJson, type Json } from '@/utils/json-diff';
 
 /** Only development builds have a dev server (and the data files) to write to. */
 const HAS_DEV_SERVER = __DEV__;
+
+/** "development" (served by `npx expo start`) or "production" (an exported or published build). */
+const BUILD_MODE = __DEV__ ? 'development' : 'production';
+
+/** Where this copy of the app is running. */
+function runtimeLabel() {
+  if (Platform.OS === 'web') return 'web browser';
+  switch (Constants.executionEnvironment) {
+    case ExecutionEnvironment.StoreClient:
+      return 'Expo Go';
+    case ExecutionEnvironment.Standalone:
+      return 'installed app';
+    default:
+      return 'development build';
+  }
+}
 
 /** Window width at which the list and editor sit side by side. */
 const WIDE_LAYOUT = 900;
@@ -73,19 +89,19 @@ type Versions = Record<'companies' | 'leads' | 'plans', string>;
 
 const sameJson = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
-/** The latest file data, with the records this person edited (draft ≠ saved) kept as they edited them. */
+/**
+ * The latest file data, with the records this person edited (draft ≠ saved) kept as they
+ * edited them, plus any they added that the file doesn't have yet.
+ */
 function keepEdits(fresh: EditRecord[], saved: EditRecord[], draft: EditRecord[]): EditRecord[] {
-  return fresh.map((record) => {
+  const merged = fresh.map((record) => {
     const before = saved.find((r) => r.id === record.id);
     const mine = draft.find((r) => r.id === record.id);
     return before && mine && !sameJson(before, mine) ? mine : record;
   });
+  const added = draft.filter((r) => !saved.some((s) => s.id === r.id) && !fresh.some((f) => f.id === r.id));
+  return [...merged, ...added];
 }
-
-const SESSION_ONLY_BANNER: Banner = {
-  tone: 'info',
-  text: 'This hosted demo has no dev server, so edits apply to this session only and reset when you reload. Nobody else sees them.',
-};
 
 type Tab = 'companies' | 'proposals' | 'chats' | 'plans';
 const TAB_TITLES: Record<Tab, string> = { companies: 'Companies', proposals: 'Proposals', chats: 'Chats', plans: 'Plans' };
@@ -140,7 +156,7 @@ export default function DemoPanelScreen() {
   /** True once the data files are reachable; otherwise applied edits last for the session only. */
   const [canSave, setCanSave] = useState(false);
   const [banner, setBanner] = useState<Banner>(
-    HAS_DEV_SERVER ? { tone: 'info', text: 'Loading the demo data from the dev server…' } : SESSION_ONLY_BANNER,
+    HAS_DEV_SERVER ? { tone: 'info', text: 'Loading the demo data from the dev server…' } : null,
   );
   const [tab, setTab] = useState<Tab>('companies');
   /** The item open in each tab; null shows the list (narrow) or a default item (wide). */
@@ -220,6 +236,19 @@ export default function DemoPanelScreen() {
         name: name(saved[i] ?? item),
         changes: diffJson(saved[i] as Json, item as Json),
       }));
+    // Plans can be added and removed, so they're matched by id.
+    const byId = (tab: Tab, draft: EditRecord[], saved: EditRecord[], name: (r: EditRecord) => string) =>
+      [...new Set([...saved.map((r) => r.id), ...draft.map((r) => r.id)])].map((id) => {
+        const before = saved.find((r) => r.id === id);
+        const after = draft.find((r) => r.id === id);
+        return {
+          tab,
+          itemId: id,
+          id,
+          name: name((after ?? before) as EditRecord),
+          changes: diffJson(before as Json | undefined, after as Json | undefined),
+        };
+      });
     // Chats can be added and removed, so they're matched by id.
     const leadIds = [...new Set([...origLeads.map((l) => l.id), ...leads.map((l) => l.id)])];
     const chatGroups = leadIds.map((id) => ({
@@ -236,7 +265,7 @@ export default function DemoPanelScreen() {
       ...byIndex('companies', companies, origCompanies, companyName),
       ...byIndex('proposals', proposals, origProposals, (p) => `Proposal: ${proposalTitle(p)}`),
       ...chatGroups,
-      ...byIndex('plans', draftPlans, origPlans, (p) => `Plan: ${String(p.name || p.id)}`),
+      ...byId('plans', draftPlans, origPlans, (p) => `Plan: ${String(p.name || p.id)}`),
     ].filter((g) => g.changes.length > 0);
   }, [companies, origCompanies, proposals, origProposals, leads, origLeads, draftPlans, origPlans, nameOf]);
 
@@ -376,7 +405,7 @@ export default function DemoPanelScreen() {
         avatarIds: [],
         title: String(p.name || p.id),
         subtitle: `${p.id} · ${formatPrice(p as unknown as Plan)}`,
-        tag: typeof p.type === 'string' ? p.type : undefined,
+        tag: origPlans.some((o) => o.id === p.id) ? (typeof p.type === 'string' ? p.type : undefined) : 'New',
       }));
     }
     return leads.map((l) => ({
@@ -386,7 +415,7 @@ export default function DemoPanelScreen() {
       subtitle: `${plural(l.messages.length, ['message', 'messages'])}${l.pinnedComment ? ' · pinned comment' : ''}${l.muted ? ' · muted' : ''}`,
       tag: origLeads.some((o) => o.id === l.id) ? undefined : 'New',
     }));
-  }, [tab, companies, proposals, leads, origLeads, draftPlans, currentUserId, partnerNames, nameOf]);
+  }, [tab, companies, proposals, leads, origLeads, draftPlans, origPlans, currentUserId, partnerNames, nameOf]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -456,13 +485,18 @@ export default function DemoPanelScreen() {
   } else if (tab === 'plans') {
     const plan = draftPlans.find((p) => p.id === shownId);
     if (plan) {
-      const saved = origPlans.find((p) => p.id === plan.id) ?? plan;
+      const saved = origPlans.find((p) => p.id === plan.id);
+      const remove = () => {
+        setDraftPlans((list) => list.filter((p) => p.id !== plan.id));
+        select(null);
+      };
       detail = (
         <PlanDetail
           plan={plan}
           original={saved}
           onChange={(next) => setDraftPlans((list) => replaceById(list, next))}
-          onDiscard={() => setDraftPlans((list) => replaceById(list, saved))}
+          onDiscard={saved ? () => setDraftPlans((list) => replaceById(list, saved)) : remove}
+          onDelete={isCorePlan(plan.id) ? undefined : remove}
           {...nav}
         />
       );
@@ -523,14 +557,6 @@ export default function DemoPanelScreen() {
 
   const listPane = (
     <>
-      <View style={[styles.notice, { backgroundColor: colors.accent }]}>
-        <Ionicons name="construct-outline" size={20} color={colors.onAccent} />
-        <Text style={[type.caption, styles.flex, { color: colors.onAccent }]}>
-          {canSave
-            ? 'For setting up the demo, not part of Bond. Saved changes edit the fictional demo data in src/data/ for everyone using this build.'
-            : 'For setting up the demo, not part of Bond. Changes edit the fictional demo data for this session only.'}
-        </Text>
-      </View>
 
       {bannerView(['info', 'success', 'error'])}
 
@@ -589,6 +615,16 @@ export default function DemoPanelScreen() {
             {query ? `No ${NOUN[tab][1]} match “${query}”.` : `No ${NOUN[tab][1]} yet.`}
           </Text>
         ) : null}
+        {tab === 'plans' ? (
+          <AddPlan
+            taken={draftPlans.map((p) => p.id)}
+            onAdd={(id, name) => {
+              setDraftPlans((list) => [...list, { id, ...blankPlan(name) } as unknown as EditRecord]);
+              setQuery('');
+              select(id);
+            }}
+          />
+        ) : null}
         {tab === 'chats' && chatOptions.length ? (
           <CompanyPicker
             label="Start a chat with"
@@ -614,6 +650,11 @@ export default function DemoPanelScreen() {
   );
 
   const bottomPad = { paddingBottom: space[12] + insets.bottom };
+  const saveTarget = canSave
+    ? 'saves to src/data/'
+    : HAS_DEV_SERVER
+      ? "dev server not reachable, so changes last this session"
+      : 'changes last this session';
 
   return (
     <KeyboardAvoidingView
@@ -621,6 +662,44 @@ export default function DemoPanelScreen() {
       behavior="padding"
     >
       <StackHeader title="Demo panel" subtitle="Admin tool for the demo, not part of Bond" />
+
+      {/* Build mode: which build this is, where it's running and where saves go. */}
+      <View
+        accessible
+        accessibilityLabel={`Build mode: ${BUILD_MODE}. ${runtimeLabel()}. ${saveTarget}.`}
+        style={[styles.buildBar, { backgroundColor: colors.surface, borderBottomColor: colors.line }]}
+      >
+        <View style={[styles.buildPill, { backgroundColor: __DEV__ ? colors.accent : colors.ink }]}>
+          <Ionicons
+            name={__DEV__ ? 'code-slash-outline' : 'cloud-done-outline'}
+            size={14}
+            color={__DEV__ ? colors.onAccent : colors.surface}
+          />
+          <Text style={[type.label, { color: __DEV__ ? colors.onAccent : colors.surface }]}>
+            Build mode: {BUILD_MODE}
+          </Text>
+        </View>
+        <Text numberOfLines={2} style={[type.caption, styles.flex, { color: colors.inkMuted }]}>
+          {runtimeLabel()} · {saveTarget}
+        </Text>
+      </View>
+
+      {/* Production builds have no dev server to save to, so say plainly that edits don't last. */}
+      {!HAS_DEV_SERVER ? (
+        <View
+          accessibilityRole="alert"
+          style={[styles.warning, { backgroundColor: colors.surfaceRaised, borderColor: colors.ink }]}
+        >
+          <Ionicons name="warning-outline" size={22} color={colors.ink} />
+          <View style={styles.flex}>
+            <Text style={[type.label, { color: colors.ink }]}>Demo panel changes aren&apos;t permanent</Text>
+            <Text style={[type.caption, { color: colors.ink }]}>
+              This production build can&apos;t save to the demo data. Your edits only last until the app reloads, and
+              nobody else sees them. To change the data for everyone, use the dev server (see SHARING.md).
+            </Text>
+          </View>
+        </View>
+      ) : null}
 
       {wide ? (
         <View style={styles.split}>
@@ -705,7 +784,98 @@ export default function DemoPanelScreen() {
   );
 }
 
+/** "Add a plan": name it, and it's added as a £0 monthly subscription to fill in. */
+function AddPlan({ taken, onAdd }: { taken: string[]; onAdd: (id: string, name: string) => void }) {
+  const colors = useBondColors();
+  const [name, setName] = useState('');
+  const trimmed = name.trim();
+  const id = trimmed ? newPlanId(trimmed, taken) : '';
+  const add = () => {
+    if (!trimmed) return;
+    onAdd(id, trimmed);
+    setName('');
+  };
+
+  return (
+    <View style={[styles.addPlan, { borderColor: colors.line }]}>
+      <Text style={[type.label, { color: colors.ink }]}>Add a plan</Text>
+      <View style={styles.addPlanRow}>
+        <TextInput
+          accessibilityLabel="New plan name"
+          placeholder="Plan name, e.g. Team Pack"
+          placeholderTextColor={colors.inkMuted}
+          value={name}
+          onChangeText={setName}
+          onSubmitEditing={add}
+          returnKeyType="done"
+          style={[
+            type.body,
+            styles.flex,
+            styles.addPlanInput,
+            { color: colors.ink, backgroundColor: colors.surfaceRaised, borderColor: colors.line },
+          ]}
+        />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={trimmed ? `Add plan ${trimmed}` : 'Add plan'}
+          disabled={!trimmed}
+          onPress={add}
+          style={({ pressed }) => [
+            styles.addPlanButton,
+            { backgroundColor: colors.ink, opacity: !trimmed ? 0.4 : pressed ? 0.85 : 1 },
+          ]}
+        >
+          <Ionicons name="add" size={18} color={colors.surface} />
+          <Text style={[type.label, { color: colors.surface }]}>Add</Text>
+        </Pressable>
+      </View>
+      <Text style={[type.caption, { color: colors.inkMuted }]}>
+        {trimmed
+          ? `Id: ${id}. Added plans show on Profile → Get more once saved or applied.`
+          : 'Starts as a £0 monthly subscription for you to fill in. Shows on Profile → Get more.'}
+      </Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  warning: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: space[3],
+    marginHorizontal: space[4],
+    marginTop: space[3],
+    padding: space[3],
+    borderRadius: radius.md,
+    borderWidth: 2,
+  },
+  buildBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[3],
+    paddingHorizontal: space[4],
+    paddingVertical: space[2],
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  buildPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[1],
+    paddingHorizontal: space[3],
+    paddingVertical: space[1],
+    borderRadius: radius.full,
+  },
+  addPlan: { gap: space[2], padding: space[3], borderRadius: radius.md, borderWidth: 1, borderStyle: 'dashed' },
+  addPlanRow: { flexDirection: 'row', gap: space[2], alignItems: 'center' },
+  addPlanInput: { minHeight: 44, paddingHorizontal: space[3], borderRadius: radius.sm, borderWidth: 1 },
+  addPlanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[1],
+    minHeight: 44,
+    paddingHorizontal: space[3],
+    borderRadius: radius.md,
+  },
   root: { flex: 1 },
   flex: { flex: 1 },
   content: { padding: space[4], gap: space[6] },
@@ -714,7 +884,6 @@ const styles = StyleSheet.create({
   split: { flex: 1, flexDirection: 'row' },
   listColumn: { width: 360, flexGrow: 0, borderRightWidth: StyleSheet.hairlineWidth },
   rows: { gap: space[2] },
-  notice: { flexDirection: 'row', gap: space[3], padding: space[3], borderRadius: radius.md, alignItems: 'flex-start' },
   banner: {
     flexDirection: 'row',
     gap: space[2],

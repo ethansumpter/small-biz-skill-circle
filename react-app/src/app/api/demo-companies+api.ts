@@ -4,12 +4,15 @@ import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { CORE_PLAN_IDS, PLAN_ID_PATTERN } from '@/data/plans';
+
 /**
  * Demo panel backend (development only). Reads and writes the demo data on the
  * machine running `npx expo start`:
  *   - src/data/companies.json: `companies` and `proposals` (other keys kept as-is)
  *   - src/data/leads.json: `leads`, the Leads chats (other keys kept as-is)
- *   - src/data/plans.json: `plans`, keyed by plan id (other keys kept as-is)
+ *   - src/data/plans.json: `plans`, keyed by plan id (other keys kept as-is). Plans can
+ *     be added; Free, Boost and Bond Plus can't be removed.
  * A POST only writes the datasets it includes. Not part of the Bond product: it
  * exists so the demo data can be edited.
  *
@@ -182,16 +185,43 @@ async function saveData(body: {
         throw new BadRequest('`plans` must be an object of plan objects, keyed by plan id.');
       }
       const current = await readJson<PlansFile>(PLANS_FILE);
-      // The panel edits plans but never adds, removes or renames them (the app looks them up by id).
-      if (Object.keys(current.plans).sort().join(',') !== Object.keys(plans).sort().join(',')) {
-        throw new BadRequest('Plan ids changed. Reload the demo panel and try again.', 409);
+      // Plans can be added (and added ones removed), but the app looks up Free, Boost and
+      // Bond Plus by id, so those must stay.
+      const missing = CORE_PLAN_IDS.filter((id) => !(id in plans));
+      if (missing.length) {
+        throw new BadRequest(`The ${missing.join(', ')} plan can't be removed: the app uses it.`, 409);
       }
-      if (
-        Object.values(plans).some(
-          (p) => !isObject(p) || typeof p.pricePence !== 'number' || p.pricePence < 0,
-        )
-      ) {
-        throw new BadRequest('Every plan needs a price in pence of 0 or more.');
+      const badId = Object.keys(plans).find((id) => !PLAN_ID_PATTERN.test(id));
+      if (badId !== undefined) {
+        throw new BadRequest(`Plan id "${badId}" must be lowercase letters, numbers and dashes.`);
+      }
+      const PLAN_TYPES = ['plan', 'one-off', 'subscription'];
+      const UNITS = ['day', 'week', 'month', 'year'];
+      for (const [id, p] of Object.entries(plans)) {
+        if (!isObject(p) || typeof p.name !== 'string' || !p.name.trim()) {
+          throw new BadRequest(`Plan "${id}" needs a name.`);
+        }
+        if (!PLAN_TYPES.includes(p.type as string)) {
+          throw new BadRequest(`Plan "${p.name}" needs a type: ${PLAN_TYPES.join(', ')}.`);
+        }
+        if (typeof p.pricePence !== 'number' || !Number.isInteger(p.pricePence) || p.pricePence < 0) {
+          throw new BadRequest(`Plan "${p.name}" needs a price in pence of 0 or more.`);
+        }
+        const period = p.period;
+        if (
+          period !== null &&
+          !(
+            isObject(period) &&
+            Number.isInteger(period.count) &&
+            (period.count as number) >= 1 &&
+            UNITS.includes(period.unit as string)
+          )
+        ) {
+          throw new BadRequest(`Plan "${p.name}" has an invalid period (a count of 1 or more and a unit).`);
+        }
+        if (!Array.isArray(p.benefits) || p.benefits.some((b) => typeof b !== 'string')) {
+          throw new BadRequest(`Plan "${p.name}" needs a list of benefits (it can be empty).`);
+        }
       }
       plansFile = { ...current, plans: plans as PlansFile['plans'] };
     }

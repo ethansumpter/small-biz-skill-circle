@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { type EditRecord } from '@/components/demo-panel/company-editor';
@@ -8,9 +9,10 @@ import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { diffJson, type Json } from '@/utils/json-diff';
 
 /**
- * The demo panel's editor for one plan in plans.json (Free, Boost, Bond Plus):
- * name, type, price (entered in pounds, stored in pence), billing period,
- * benefits and limits. The plan id is fixed because the app looks plans up by it.
+ * The demo panel's editor for one plan in plans.json: name, type, price (entered
+ * in pounds, stored in pence), billing period, benefits and limits. The plan id
+ * is fixed because the app looks plans up by it. Free, Boost and Bond Plus can't
+ * be deleted; added plans can.
  */
 
 const TYPES = ['plan', 'one-off', 'subscription'];
@@ -29,22 +31,26 @@ export function PlanDetail({
   position,
   onChange,
   onDiscard,
+  onDelete,
   onBack,
   onPrev,
   onNext,
 }: {
   plan: EditRecord;
-  original: EditRecord;
+  /** The saved plan; undefined for a plan added in this session. */
+  original: EditRecord | undefined;
   position: string;
   onChange: (next: EditRecord) => void;
   onDiscard: () => void;
+  /** Shown for added plans only; the app needs Free, Boost and Bond Plus. */
+  onDelete?: () => void;
   onBack?: () => void;
   onPrev?: () => void;
   onNext?: () => void;
 }) {
   const colors = useBondColors();
   const p = asPlan(plan);
-  const saved = asPlan(original);
+  const saved = original ? asPlan(original) : ({} as Partial<ReturnType<typeof asPlan>>);
   const set = (patch: Partial<Plan>) => onChange({ ...plan, ...(patch as Record<string, Json>) });
   const limits = p.limits ?? {};
   const other = Object.keys(plan).filter((key) => !KNOWN.has(key));
@@ -55,7 +61,7 @@ export function PlanDetail({
       title={p.name || p.id}
       subtitle={`${p.id} · ${formatPrice(p)}`}
       tag={p.type}
-      changeCount={diffJson(original as Json, plan as Json).length}
+      changeCount={diffJson(original as Json | undefined, plan as Json).length}
       position={position}
       backLabel="All plans"
       onDiscard={onDiscard}
@@ -151,6 +157,17 @@ export function PlanDetail({
           <ObjectFields keys={other} value={plan} original={original} onChange={(next) => onChange(next as EditRecord)} />
         </FieldsCard>
       ) : null}
+
+      {onDelete ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onDelete}
+          style={({ pressed }) => [styles.delete, { borderColor: colors.line, opacity: pressed ? 0.7 : 1 }]}
+        >
+          <Ionicons name="trash-outline" size={18} color={colors.ink} />
+          <Text style={[type.label, { color: colors.ink }]}>Delete this plan</Text>
+        </Pressable>
+      ) : null}
     </DetailShell>
   );
 }
@@ -216,5 +233,15 @@ const styles = StyleSheet.create({
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   preview: { gap: 2, padding: space[3], borderRadius: radius.sm },
   choices: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
+  delete: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space[2],
+    minHeight: 44,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+  },
   choice: { minHeight: 36, paddingHorizontal: space[3], borderRadius: radius.full, borderWidth: 1, justifyContent: 'center' },
 });

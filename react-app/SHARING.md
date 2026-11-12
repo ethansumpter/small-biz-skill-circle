@@ -82,10 +82,15 @@ It's a demo: every company, chat and review is fictional. Likes, matches and mes
 
 The demo panel is an admin tool for running the demo. It isn't part of Bond itself.
 
+The bar at the top shows the **build mode**:
+- **Build mode: development** means you're on the host's dev server, and saves go to the shared files (`saves to src/data/`).
+- **Build mode: production** means the hosted site or a published update. There's no dev server, so changes only last until the app reloads.
+
 ### What you can do there
 
 - **Log in as:** pick any demo company from the dropdown, and the app acts as that company straight away. This only affects your phone and resets on reload.
 - **What to edit:** switch between **Companies**, **Proposals**, **Chats** and **Plans**, then pick an item to edit its fields.
+  - **Plans:** type a name under **Add a plan** to create one. It starts as a £0 monthly subscription and shows on **Profile → Get more** once saved. Free, Boost and Bond Plus can be edited but not deleted; plans you add can be.
   - A dot marks each field you've changed.
   - **Discard** undoes your changes to one item, and **Discard all** undoes everything.
 
