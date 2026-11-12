@@ -8,13 +8,14 @@ export type CompanyChanges = { id: string; name: string; changes: Change[] };
 
 /**
  * Lists every pending edit and asks for confirmation before it's applied: written
- * to companies.json (`file`) or, on hosted demos, kept for this session (`session`).
+ * to the demo data files (`file`) or, on hosted demos, kept for this session (`session`).
  */
 export function ConfirmSaveModal({
   visible,
   groups,
   saving,
   target,
+  files,
   onCancel,
   onConfirm,
 }: {
@@ -22,6 +23,8 @@ export function ConfirmSaveModal({
   groups: CompanyChanges[];
   saving: boolean;
   target: 'file' | 'session';
+  /** The files a save writes, e.g. ['src/data/companies.json']. */
+  files: string[];
   onCancel: () => void;
   onConfirm: () => void;
 }) {
@@ -41,12 +44,12 @@ export function ConfirmSaveModal({
           <View style={styles.head}>
             <Text accessibilityRole="header" style={[type.subheading, { color: colors.ink }]}>
               {target === 'file'
-                ? `Save ${total} ${total === 1 ? 'change' : 'changes'} to companies.json?`
+                ? `Save ${total} ${total === 1 ? 'change' : 'changes'}?`
                 : `Apply ${total} ${total === 1 ? 'change' : 'changes'} for this session?`}
             </Text>
             <Text style={[type.caption, { color: colors.inkMuted }]}>
               {target === 'file'
-                ? 'This overwrites src/data/companies.json on the computer running the dev server. Check the list below.'
+                ? `This overwrites ${files.join(' and ')} on the computer running the dev server. Check the list below.`
                 : 'The app uses these changes until you reload. Nothing is saved, and nobody else sees them. Check the list below.'}
             </Text>
           </View>

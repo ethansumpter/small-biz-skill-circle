@@ -12,7 +12,7 @@
 ---
 
 ## Demo user (logged-in account)
-> The demo panel (Profile → Settings → Demo panel) can switch the logged-in company for the session and edit the demo companies: in the dev server it saves them to `src/data/companies.json`; on hosted demos the edits last for the session only. Edits saved there are not copied back into this doc.
+> The demo panel (Profile → Settings → Demo panel) can switch the logged-in company for the session and edit the demo companies, proposals and Leads chats: in the dev server it saves them to `src/data/companies.json` and `src/data/leads.json`; on hosted demos the edits last for the session only. Edits saved there are not copied back into this doc.
 
 **Kiln & Clay Studio** (`c01`): Independent ceramicist. Plan: **Free**, with a Boost available. Verified: yes.
 
@@ -225,6 +225,8 @@ Use 78–94% for the other pairs.
 | Saved: c09 Brightframe | – | – | Open profile |
 
 ## Leads: demo chat (c01 ↔ c02)
+Stored in `src/data/leads.json` (company name, industry and location come from `companies.json`).
+
 Pinned comment from c02: "We love your speckled mugs. Could they hold a 200g pour? We'd love to talk refills."
 
 | From | Message |

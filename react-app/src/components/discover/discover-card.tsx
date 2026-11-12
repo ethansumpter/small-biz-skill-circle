@@ -5,6 +5,7 @@ import { CompanyAvatar } from '@/components/company-avatar';
 import { Card, Chip, SectionTitle } from '@/components/ui';
 import type { Company } from '@/data/companies';
 import { companyProposals, proposalTypesFor } from '@/data/discover';
+import { useDemoProposals } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
@@ -31,7 +32,8 @@ export function DiscoverCard({
   onSendProposal?: () => void;
 }) {
   const colors = useBondColors();
-  const openProposals = companyProposals(company).filter((p) => p.status === 'Open');
+  const { demoProposals } = useDemoProposals();
+  const openProposals = companyProposals(company, demoProposals).filter((p) => p.status === 'Open');
 
   return (
     <View style={styles.card}>

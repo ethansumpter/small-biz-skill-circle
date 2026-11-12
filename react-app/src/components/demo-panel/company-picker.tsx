@@ -8,17 +8,22 @@ import { radius, space, type, useBondColors } from '@/theme/tokens';
 
 type Option = { id: string; name: string; industry: string };
 
-/** Dropdown for choosing which demo company the app is logged in as. */
+/**
+ * Dropdown for choosing a demo company (who the app is logged in as, or who a new
+ * chat is with). With no `value`, the trigger shows `placeholder`.
+ */
 export function CompanyPicker({
   label,
   options,
   value,
   onChange,
+  placeholder,
 }: {
   label: string;
   options: Option[];
-  value: string;
+  value?: string;
   onChange: (id: string) => void;
+  placeholder?: string;
 }) {
   const colors = useBondColors();
   const insets = useSafeAreaInsets();
@@ -29,7 +34,7 @@ export function CompanyPicker({
     <>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${label}: ${selected?.name ?? value}`}
+        accessibilityLabel={selected ? `${label}: ${selected.name}` : label}
         accessibilityHint="Opens the list of demo companies"
         onPress={() => setOpen(true)}
         style={({ pressed }) => [
@@ -37,15 +42,26 @@ export function CompanyPicker({
           { backgroundColor: colors.surfaceRaised, borderColor: colors.line, opacity: pressed ? 0.8 : 1 },
         ]}
       >
-        <CompanyAvatar companyId={value} size={36} />
-        <View style={styles.flex}>
-          <Text numberOfLines={1} style={[type.label, { color: colors.ink }]}>
-            {selected?.name ?? value}
-          </Text>
-          <Text numberOfLines={1} style={[type.caption, { color: colors.inkMuted }]}>
-            {value} · {selected?.industry}
-          </Text>
-        </View>
+        {selected ? (
+          <>
+            <CompanyAvatar companyId={selected.id} size={36} />
+            <View style={styles.flex}>
+              <Text numberOfLines={1} style={[type.label, { color: colors.ink }]}>
+                {selected.name}
+              </Text>
+              <Text numberOfLines={1} style={[type.caption, { color: colors.inkMuted }]}>
+                {selected.id} · {selected.industry}
+              </Text>
+            </View>
+          </>
+        ) : (
+          <>
+            <Ionicons name="add-circle-outline" size={24} color={colors.link} />
+            <Text numberOfLines={1} style={[type.label, styles.flex, { color: colors.link }]}>
+              {placeholder ?? label}
+            </Text>
+          </>
+        )}
         <Ionicons name="chevron-down" size={20} color={colors.inkMuted} />
       </Pressable>
 

@@ -1,8 +1,11 @@
-import { getCompany } from '@/data/companies';
+import { type Company, getCompany } from '@/data/companies';
+
+import data from './leads.json';
 
 /**
  * Demo matches and chat for the logged-in account (c01) — see docs/bond-demo-data.md
- * ("Leads: demo chat"). Fictional. No owner or personal names.
+ * ("Leads: demo chat"). Stored in leads.json so the demo panel can edit them.
+ * Fictional. No owner or personal names.
  */
 export type Message = {
   id: string;
@@ -23,36 +26,23 @@ export type Lead = {
   muted: boolean;
 };
 
-function companyFields(id: string) {
-  const { name, industry, location } = getCompany(id);
-  return { id, company: name, industry, location };
+/** A chat as stored in leads.json: company details are looked up from companies.json. */
+export type LeadSeed = Omit<Lead, 'company' | 'industry' | 'location'>;
+
+/** Fills in a chat's company name, industry and location from a company lookup. */
+export function withCompanyFields(
+  seed: LeadSeed,
+  lookup: (id: string) => Pick<Company, 'name' | 'industry' | 'location'>,
+): Lead {
+  const { name, industry, location } = lookup(seed.id);
+  return { ...seed, company: name, industry, location };
 }
 
-export const DEMO_LEADS: Lead[] = [
-  {
-    ...companyFields('c02'),
-    pinnedComment: "We love your speckled mugs. Could they hold a 200g pour? We'd love to talk refills.",
-    muted: false,
-    messages: [
-      {
-        id: 'm1',
-        from: 'them',
-        text: "Hi! We'd love to test a pour in three of your mug sizes. Do you have seconds we could experiment with?",
-      },
-      { id: 'm2', from: 'me', text: "Yes, we've got about 20 seconds from the last firing. Collect from the studio Thursday?" },
-      { id: 'm3', from: 'them', text: "Perfect. We're thinking a rhubarb and fig scent for the first run, about 60 units." },
-      { id: 'm4', from: 'me', text: 'Great. Shall we split 50/50 and sell through both shops?' },
-      {
-        id: 'm5',
-        from: 'them',
-        text: "Works for us. I'll draft a refill card customers can bring back.",
-        attachment: 'refill-card-draft.pdf',
-      },
-    ],
-  },
-  {
-    ...companyFields('c10'),
-    muted: false,
-    messages: [],
-  },
-];
+/** Back to the stored shape (drops the looked-up company fields). */
+export function toLeadSeed({ company: _c, industry: _i, location: _l, ...seed }: Lead): LeadSeed {
+  return seed;
+}
+
+const LEAD_SEEDS = data.leads as LeadSeed[];
+
+export const DEMO_LEADS: Lead[] = LEAD_SEEDS.map((seed) => withCompanyFields(seed, getCompany));

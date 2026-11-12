@@ -1,4 +1,4 @@
-import { type Company, companies, proposals } from '@/data/companies';
+import { type Company, companies, type CompanyProposal } from '@/data/companies';
 
 /**
  * Discover feed data and filters — see docs/bond-demo-data.md ("Discover order",
@@ -45,7 +45,7 @@ export const FILTER_OPTIONS: Record<FilterKey, string[]> = {
  * Companies without a distance are in Leeds itself; counted as within 5 miles.
  * "Maker" and "Service provider" follow the firm's product/service interests.
  */
-function matchesFilter(company: Company, key: FilterKey, value: string): boolean {
+function matchesFilter(company: Company, key: FilterKey, value: string, proposals: CompanyProposal[]): boolean {
   switch (key) {
     case 'location': {
       if (value === 'Leeds') return company.location.includes('Leeds');
@@ -61,19 +61,20 @@ function matchesFilter(company: Company, key: FilterKey, value: string): boolean
       if (value === 'Maker') return company.interests.includes('Product collaborations');
       return company.interests.includes('Service collaborations');
     case 'collaboration':
-      return companyProposals(company).some((p) => p.collaborationType.includes(value));
+      return companyProposals(company, proposals).some((p) => p.collaborationType.includes(value));
   }
 }
 
-export function matchesFilters(company: Company, filters: Filters): boolean {
+/** `proposals` is the session's demo proposals (useDemoProposals), for the collaboration type filter. */
+export function matchesFilters(company: Company, filters: Filters, proposals: CompanyProposal[]): boolean {
   return (Object.entries(filters) as [FilterKey, string | undefined][]).every(
-    ([key, value]) => !value || matchesFilter(company, key, value),
+    ([key, value]) => !value || matchesFilter(company, key, value, proposals),
   );
 }
 
 // ── Proposals ────────────────────────────────────────────────────────────────
 
-export function companyProposals(company: Pick<Company, 'proposalIds'>) {
+export function companyProposals(company: Pick<Company, 'proposalIds'>, proposals: CompanyProposal[]) {
   return proposals.filter((p) => company.proposalIds.includes(p.id));
 }
 

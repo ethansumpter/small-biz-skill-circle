@@ -1,96 +1,104 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
 
-import { CompanyAvatar } from '@/components/company-avatar';
+import { DetailShell, FieldsCard, Tabs } from '@/components/demo-panel/editor-shell';
 import { ObjectFields } from '@/components/demo-panel/json-field';
-import { radius, space, type, useBondColors } from '@/theme/tokens';
-import type { Json } from '@/utils/json-diff';
+import { diffJson, type Json } from '@/utils/json-diff';
 
-export type CompanyRecord = { id: string; [key: string]: Json };
+/** A record edited in the demo panel: any JSON object with an id. */
+export type EditRecord = { id: string; [key: string]: Json };
+export type CompanyRecord = EditRecord;
 
-/** One demo company as a collapsible card. Every field is editable except its id. */
-export const CompanyEditor = memo(function CompanyEditor({
+/**
+ * The demo panel's company editor. A company's fields are split into sections
+ * (one shown at a time) so nobody has to scroll through every field at once.
+ */
+
+const SECTIONS: { key: string; title: string; fields: string[] }[] = [
+  {
+    key: 'basics',
+    title: 'Basics',
+    fields: ['id', 'name', 'initials', 'industry', 'location', 'distanceMiles', 'size', 'verified', 'rating'],
+  },
+  { key: 'profile', title: 'Profile', fields: ['offer', 'lookingFor', 'interests', 'prompts'] },
+  { key: 'media', title: 'Images & links', fields: ['profileImage', 'gallery', 'links'] },
+  { key: 'reviews', title: 'Reviews', fields: ['reviews'] },
+  { key: 'proposals', title: 'Proposals', fields: ['proposalIds'] },
+];
+const LISTED = new Set(SECTIONS.flatMap((s) => s.fields));
+
+const CHOICES = { size: ['Micro', 'SME'] };
+
+/** Sections for this company, plus "Other" for any field not listed above (e.g. one added to the JSON later). */
+function sectionsFor(company: CompanyRecord) {
+  const other = Object.keys(company).filter((key) => !LISTED.has(key));
+  return other.length ? [...SECTIONS, { key: 'other', title: 'Other', fields: other }] : SECTIONS;
+}
+
+export const companyName = (company: CompanyRecord) =>
+  typeof company.name === 'string' && company.name ? company.name : company.id;
+
+export function CompanyDetail({
   company,
   original,
-  changeCount,
-  expanded,
   isCurrentUser,
-  onToggle,
+  position,
   onChange,
+  onDiscard,
+  onBack,
+  onPrev,
+  onNext,
 }: {
   company: CompanyRecord;
   original: CompanyRecord;
-  changeCount: number;
-  expanded: boolean;
   isCurrentUser: boolean;
-  onToggle: (id: string) => void;
+  position: string;
   onChange: (next: CompanyRecord) => void;
+  onDiscard: () => void;
+  onBack?: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
 }) {
-  const colors = useBondColors();
-  const name = typeof company.name === 'string' && company.name ? company.name : company.id;
-  const subtitle = [company.id, company.industry, company.location].filter(Boolean).join(' · ');
+  const sections = useMemo(() => sectionsFor(company), [company]);
+  // Kept when moving between companies, so the same section can be edited across several.
+  const [sectionKey, setSectionKey] = useState('basics');
+  const section = sections.find((s) => s.key === sectionKey) ?? sections[0];
+
+  const counts = useMemo(() => {
+    const pick = (record: CompanyRecord, fields: string[]) =>
+      Object.fromEntries(fields.filter((f) => f in record).map((f) => [f, record[f]])) as Json;
+    return new Map(sections.map((s) => [s.key, diffJson(pick(original, s.fields), pick(company, s.fields)).length]));
+  }, [company, original, sections]);
+  const total = [...counts.values()].reduce((n, c) => n + c, 0);
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.surfaceRaised, borderColor: colors.line }]}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ expanded }}
-        accessibilityLabel={`${name}${changeCount ? `, ${changeCount} unsaved changes` : ''}`}
-        onPress={() => onToggle(company.id)}
-        style={({ pressed }) => [styles.header, pressed && { opacity: 0.7 }]}
-      >
-        <CompanyAvatar companyId={company.id} size={44} />
-        <View style={styles.titles}>
-          <View style={styles.nameRow}>
-            <Text numberOfLines={1} style={[type.label, styles.name, { color: colors.ink }]}>
-              {name}
-            </Text>
-            {isCurrentUser ? (
-              <View style={[styles.tag, { backgroundColor: colors.accent }]}>
-                <Text style={[type.caption, { color: colors.onAccent }]}>Logged in</Text>
-              </View>
-            ) : null}
-          </View>
-          <Text numberOfLines={1} style={[type.caption, { color: colors.inkMuted }]}>
-            {subtitle}
-          </Text>
-        </View>
-        {changeCount ? (
-          <View style={[styles.badge, { backgroundColor: colors.focusRing }]}>
-            <Text style={[type.caption, { color: colors.surfaceRaised }]}>{changeCount}</Text>
-          </View>
-        ) : null}
-        <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color={colors.inkMuted} />
-      </Pressable>
-
-      {expanded ? (
-        <View style={[styles.body, { borderTopColor: colors.line }]}>
-          <ObjectFields
-            value={company}
-            original={original}
-            onChange={(next) => onChange(next as CompanyRecord)}
-          />
-        </View>
-      ) : null}
-    </View>
+    <DetailShell
+      avatarIds={[company.id]}
+      title={companyName(company)}
+      subtitle={[company.id, company.industry, company.location].filter(Boolean).join(' · ')}
+      tag={isCurrentUser ? 'Logged in' : undefined}
+      changeCount={total}
+      position={position}
+      backLabel="All companies"
+      onDiscard={onDiscard}
+      onBack={onBack}
+      onPrev={onPrev}
+      onNext={onNext}
+    >
+      <Tabs
+        label="Company sections"
+        tabs={sections.map((s) => ({ key: s.key, title: s.title, count: counts.get(s.key) }))}
+        value={section.key}
+        onChange={setSectionKey}
+      />
+      <FieldsCard>
+        <ObjectFields
+          keys={section.fields}
+          value={company}
+          original={original}
+          choices={CHOICES}
+          onChange={(next) => onChange(next as CompanyRecord)}
+        />
+      </FieldsCard>
+    </DetailShell>
   );
-});
-
-const styles = StyleSheet.create({
-  card: { borderRadius: radius.md, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
-  header: { flexDirection: 'row', alignItems: 'center', gap: space[3], padding: space[3] },
-  titles: { flex: 1, gap: 2 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
-  name: { flexShrink: 1 },
-  tag: { borderRadius: radius.full, paddingHorizontal: space[2], paddingVertical: 1 },
-  badge: {
-    minWidth: 22,
-    height: 22,
-    borderRadius: radius.full,
-    paddingHorizontal: space[1],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  body: { padding: space[4], borderTopWidth: StyleSheet.hairlineWidth },
-});
+}

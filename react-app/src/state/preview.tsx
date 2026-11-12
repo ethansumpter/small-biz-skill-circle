@@ -1,7 +1,13 @@
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
-import { companies as BUNDLED_COMPANIES, type Company, DEMO_USER_ID } from '@/data/companies';
-import { DEMO_LEADS, type Lead } from '@/data/demo-leads';
+import {
+  companies as BUNDLED_COMPANIES,
+  proposals as BUNDLED_PROPOSALS,
+  type Company,
+  type CompanyProposal,
+  DEMO_USER_ID,
+} from '@/data/companies';
+import { DEMO_LEADS, type Lead, type LeadSeed, withCompanyFields } from '@/data/demo-leads';
 import { DEMO_INCOMING, type IncomingProposal } from '@/data/demo-network';
 import { buildDemoUser } from '@/data/demo-user';
 
@@ -75,6 +81,11 @@ type PreviewState = {
   companies: Company[];
   setCompanies: (companies: Company[]) => void;
   getCompany: (id: string) => Company;
+  /** The demo collaboration proposals (companies.json `proposals`), editable in the demo panel. */
+  demoProposals: CompanyProposal[];
+  setDemoProposals: (proposals: CompanyProposal[]) => void;
+  /** Replaces every Leads chat (demo panel). */
+  replaceLeads: (seeds: LeadSeed[]) => void;
   /** Which demo company the app is "logged in" as. Switched from the demo panel. */
   currentUserId: string;
   setCurrentUserId: (id: string) => void;
@@ -108,6 +119,8 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
     },
     [companyById],
   );
+
+  const [demoProposals, setDemoProposals] = useState<CompanyProposal[]>(BUNDLED_PROPOSALS);
 
   const [currentUserId, setCurrentUserIdState] = useState<string>(DEMO_USER_ID);
   const [discover, setDiscover] = useState<DiscoverState>(() => seedDiscover(DEMO_USER_ID));
@@ -211,6 +224,11 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
     setLeads((current) => current.map((lead) => (lead.id === leadId ? { ...lead, muted: !lead.muted } : lead)));
   }, []);
 
+  const replaceLeads = useCallback(
+    (seeds: LeadSeed[]) => setLeads(seeds.map((seed) => withCompanyFields(seed, getCompany))),
+    [getCompany],
+  );
+
   const unmatch = useCallback((leadId: string) => {
     setLeads((current) => current.filter((lead) => lead.id !== leadId));
   }, []);
@@ -230,6 +248,9 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
       companies,
       setCompanies,
       getCompany,
+      demoProposals,
+      setDemoProposals,
+      replaceLeads,
       currentUserId,
       setCurrentUserId,
       proposals,
@@ -251,6 +272,8 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
     [
       companies,
       getCompany,
+      demoProposals,
+      replaceLeads,
       currentUserId,
       setCurrentUserId,
       proposals,
@@ -291,9 +314,15 @@ export function useCompanies() {
   return { companies, setCompanies, getCompany };
 }
 
+/** The demo collaboration proposals for this session (with any demo panel edits). */
+export function useDemoProposals() {
+  const { demoProposals, setDemoProposals } = usePreview();
+  return { demoProposals, setDemoProposals };
+}
+
 export function useLeads() {
-  const { leads, sendMessage, toggleMute, unmatch } = usePreview();
-  return { leads, sendMessage, toggleMute, unmatch };
+  const { leads, sendMessage, toggleMute, unmatch, replaceLeads } = usePreview();
+  return { leads, sendMessage, toggleMute, unmatch, replaceLeads };
 }
 
 /** The demo company the app is logged in as (defaults to c01; switchable in the demo panel). */
