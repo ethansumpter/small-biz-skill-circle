@@ -51,6 +51,8 @@ Scan the QR code with your phone's camera (iOS) or the Expo Go app (Android). Yo
 
 Run `deactivate` to leave the venv.
 
+To let teammates try the app in Expo Go and edit the demo data from their phones, see [SHARING.md](SHARING.md).
+
 ## Packages
 
 Installed by `npm ci` from `package-lock.json`:

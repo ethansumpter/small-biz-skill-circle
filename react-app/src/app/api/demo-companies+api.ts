@@ -1,5 +1,6 @@
 /// <reference types="node" />
 
+import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -11,6 +12,11 @@ import path from 'node:path';
  *   - src/data/plans.json: `plans`, keyed by plan id (other keys kept as-is)
  * A POST only writes the datasets it includes. Not part of the Bond product: it
  * exists so the demo data can be edited.
+ *
+ * Several people can use the panel at once (everyone on the same dev server), so
+ * each file has a version (a hash of its contents). GET returns them, and a POST
+ * that includes `versions` is refused with 409 if a file it would write changed
+ * since then, so one person's save never silently undoes another's.
  */
 
 const DATA_DIR = path.join(process.cwd(), 'src', 'data');
@@ -29,6 +35,30 @@ const devOnly = () =>
     : null;
 
 const readJson = async <T,>(file: string): Promise<T> => JSON.parse(await readFile(file, 'utf8'));
+
+type DataFile = 'companies' | 'leads' | 'plans';
+type Versions = Partial<Record<DataFile, string>>;
+
+const FILES: Record<DataFile, string> = { companies: COMPANIES_FILE, leads: LEADS_FILE, plans: PLANS_FILE };
+const FILE_NAMES: Record<DataFile, string> = { companies: 'companies.json', leads: 'leads.json', plans: 'plans.json' };
+
+async function currentVersions(): Promise<Record<DataFile, string>> {
+  const entries = await Promise.all(
+    (Object.keys(FILES) as DataFile[]).map(async (key) => {
+      const text = await readFile(FILES[key], 'utf8');
+      return [key, createHash('sha1').update(text).digest('hex')] as const;
+    }),
+  );
+  return Object.fromEntries(entries) as Record<DataFile, string>;
+}
+
+// One save at a time, so two people saving together can't interleave read-check-write.
+let queue: Promise<unknown> = Promise.resolve();
+function exclusive<T>(task: () => Promise<T>): Promise<T> {
+  const run = queue.then(task, task);
+  queue = run.catch(() => undefined);
+  return run;
+}
 const writeJson = (file: string, data: unknown) => writeFile(file, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
 
 class BadRequest extends Error {
@@ -71,6 +101,7 @@ export async function GET() {
     proposals: companiesFile.proposals,
     leads: leadsFile.leads,
     plans: plansFile.plans,
+    versions: await currentVersions(),
   });
 }
 
@@ -78,14 +109,44 @@ export async function POST(request: Request) {
   const blocked = devOnly();
   if (blocked) return blocked;
 
-  let body: { companies?: unknown; proposals?: unknown; leads?: unknown; plans?: unknown };
+  let body: { companies?: unknown; proposals?: unknown; leads?: unknown; plans?: unknown; versions?: Versions };
   try {
     body = await request.json();
   } catch {
     return Response.json({ error: 'Request body must be JSON.' }, { status: 400 });
   }
 
+  return exclusive(() => saveData(body));
+}
+
+async function saveData(body: {
+  companies?: unknown;
+  proposals?: unknown;
+  leads?: unknown;
+  plans?: unknown;
+  versions?: Versions;
+}) {
   try {
+    // Refuse if a file this save would write changed since the panel loaded it.
+    if (body.versions) {
+      const writing: DataFile[] = [
+        ...(body.companies !== undefined || body.proposals !== undefined ? (['companies'] as const) : []),
+        ...(body.leads !== undefined ? (['leads'] as const) : []),
+        ...(body.plans !== undefined ? (['plans'] as const) : []),
+      ];
+      const now = await currentVersions();
+      const stale = writing.filter((key) => body.versions?.[key] && body.versions[key] !== now[key]);
+      if (stale.length) {
+        return Response.json(
+          {
+            error: `Someone else saved ${stale.map((k) => FILE_NAMES[k]).join(' and ')} after you opened the demo panel, so nothing was saved.`,
+            conflict: stale,
+          },
+          { status: 409 },
+        );
+      }
+    }
+
     const companiesFile = await readJson<CompaniesFile>(COMPANIES_FILE);
     let companiesChanged = false;
 
@@ -139,7 +200,7 @@ export async function POST(request: Request) {
     if (companiesChanged) await writeJson(COMPANIES_FILE, companiesFile);
     if (leadsFile) await writeJson(LEADS_FILE, leadsFile);
     if (plansFile) await writeJson(PLANS_FILE, plansFile);
-    return Response.json({ ok: true });
+    return Response.json({ ok: true, versions: await currentVersions() });
   } catch (error) {
     if (error instanceof BadRequest) return Response.json({ error: error.message }, { status: error.status });
     throw error;

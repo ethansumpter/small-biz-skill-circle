@@ -65,7 +65,22 @@ function apiUrl() {
   return `${protocol}://${host}${path}`;
 }
 
-type Banner = { tone: 'info' | 'success' | 'error'; text: string } | null;
+/** `action: 'reload'` shows a Reload button (after someone else saved first). */
+type Banner = { tone: 'info' | 'success' | 'error'; text: string; action?: 'reload' } | null;
+
+/** Hash of each data file when it was loaded; sent with a save so it can't overwrite someone else's. */
+type Versions = Record<'companies' | 'leads' | 'plans', string>;
+
+const sameJson = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+
+/** The latest file data, with the records this person edited (draft ≠ saved) kept as they edited them. */
+function keepEdits(fresh: EditRecord[], saved: EditRecord[], draft: EditRecord[]): EditRecord[] {
+  return fresh.map((record) => {
+    const before = saved.find((r) => r.id === record.id);
+    const mine = draft.find((r) => r.id === record.id);
+    return before && mine && !sameJson(before, mine) ? mine : record;
+  });
+}
 
 const SESSION_ONLY_BANNER: Banner = {
   tone: 'info',
@@ -139,6 +154,7 @@ export default function DemoPanelScreen() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const detailRef = useRef<ScrollViewInstance>(null);
+  const versionsRef = useRef<Versions | null>(null);
 
   // Load the files as they are on disk now, not as they were when the app was bundled.
   // Unsaved edits are kept if this is a retry, so nothing typed is lost. Chats stay as
@@ -149,8 +165,14 @@ export default function DemoPanelScreen() {
     try {
       const res = await fetch(apiUrl());
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `HTTP ${res.status}`);
-      const data = (await res.json()) as { companies: EditRecord[]; proposals: EditRecord[]; plans: Plans };
+      const data = (await res.json()) as {
+        companies: EditRecord[];
+        proposals: EditRecord[];
+        plans: Plans;
+        versions: Versions;
+      };
       if (isCancelled()) return;
+      versionsRef.current = data.versions;
       setOrigCompanies(data.companies);
       setDraftCompanies((current) => (current === initial.companies ? data.companies : current));
       setCompanies(data.companies as unknown as Company[]);
@@ -258,6 +280,7 @@ export default function DemoPanelScreen() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          ...(versionsRef.current ? { versions: versionsRef.current } : {}),
           ...(changed('companies') ? { companies } : {}),
           ...(changed('proposals') ? { proposals } : {}),
           ...(changed('chats') ? { leads } : {}),
@@ -265,7 +288,17 @@ export default function DemoPanelScreen() {
         }),
       });
       const result = await res.json().catch(() => ({}));
+      if (res.status === 409 && result.conflict) {
+        setConfirmOpen(false);
+        setBanner({
+          tone: 'error',
+          action: 'reload',
+          text: `${result.error} Tap Reload to get their changes. Your edits stay applied on top, so you can check them and save again.`,
+        });
+        return;
+      }
       if (!res.ok) throw new Error(result.error ?? `HTTP ${res.status}`);
+      if (result.versions) versionsRef.current = result.versions;
       applyToSession();
       setConfirmOpen(false);
       setBanner({ tone: 'success', text: `Saved ${summary} to ${files.join(' and ')}.` });
@@ -274,6 +307,38 @@ export default function DemoPanelScreen() {
       setBanner({ tone: 'error', text: `Nothing was saved: ${(error as Error).message}` });
     } finally {
       setSaving(false);
+    }
+  }
+
+  /** After a conflict: load the latest files and re-apply this person's edited records on top. */
+  async function reloadKeepingEdits() {
+    setBanner({ tone: 'info', text: 'Loading the latest demo data…' });
+    try {
+      const res = await fetch(apiUrl());
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `HTTP ${res.status}`);
+      const data = (await res.json()) as {
+        companies: EditRecord[];
+        proposals: EditRecord[];
+        plans: Plans;
+        versions: Versions;
+      };
+      const freshPlans = planRecords(data.plans);
+      setDraftCompanies(keepEdits(data.companies, origCompanies, companies));
+      setDraftProposals(keepEdits(data.proposals, origProposals, proposals));
+      setDraftPlans(keepEdits(freshPlans, origPlans, draftPlans));
+      setOrigCompanies(data.companies);
+      setOrigProposals(data.proposals);
+      setOrigPlans(freshPlans);
+      setCompanies(data.companies as unknown as Company[]);
+      setDemoProposals(data.proposals as unknown as CompanyProposal[]);
+      setPlans(data.plans);
+      versionsRef.current = data.versions;
+      setBanner({
+        tone: 'info',
+        text: "Loaded the latest data with your edits on top. If you both edited the same item, your version of it is the one shown, so check the change list before saving.",
+      });
+    } catch (error) {
+      setBanner({ tone: 'error', action: 'reload', text: `Couldn't reload: ${(error as Error).message}` });
     }
   }
 
@@ -441,7 +506,11 @@ export default function DemoPanelScreen() {
           color={colors.ink}
         />
         <Text style={[type.caption, styles.flex, { color: colors.ink }]}>{banner.text}</Text>
-        {banner.tone === 'error' && HAS_DEV_SERVER && !canSave ? (
+        {banner.action === 'reload' ? (
+          <Pressable accessibilityRole="button" hitSlop={8} onPress={reloadKeepingEdits}>
+            <Text style={[type.label, { color: colors.link }]}>Reload</Text>
+          </Pressable>
+        ) : banner.tone === 'error' && HAS_DEV_SERVER && !canSave ? (
           <Pressable accessibilityRole="button" hitSlop={8} onPress={() => load()}>
             <Text style={[type.label, { color: colors.link }]}>Retry</Text>
           </Pressable>
