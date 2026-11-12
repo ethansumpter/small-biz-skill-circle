@@ -1,3 +1,5 @@
+import { getCompany } from '@/data/companies';
+
 /**
  * Demo matches and chat for the logged-in account (c01) — see docs/bond-demo-data.md
  * ("Leads: demo chat"). Fictional. No owner or personal names.
@@ -10,9 +12,9 @@ export type Message = {
 };
 
 export type Lead = {
+  /** Company id in companies.json. */
   id: string;
   company: string;
-  initials: string;
   industry: string;
   location: string;
   /** The comment sent with the original like/proposal, pinned at the top of the thread. */
@@ -21,13 +23,14 @@ export type Lead = {
   muted: boolean;
 };
 
+function companyFields(id: string) {
+  const { name, industry, location } = getCompany(id);
+  return { id, company: name, industry, location };
+}
+
 export const DEMO_LEADS: Lead[] = [
   {
-    id: 'c02',
-    company: 'Wick & Wild Candle Co.',
-    initials: 'WW',
-    industry: 'Home fragrance',
-    location: 'Headingley, Leeds',
+    ...companyFields('c02'),
     pinnedComment: "We love your speckled mugs. Could they hold a 200g pour? We'd love to talk refills.",
     muted: false,
     messages: [
@@ -48,11 +51,7 @@ export const DEMO_LEADS: Lead[] = [
     ],
   },
   {
-    id: 'c10',
-    company: 'Reel North Studio',
-    initials: 'RN',
-    industry: 'Social content creation',
-    location: 'Leeds Dock',
+    ...companyFields('c10'),
     muted: false,
     messages: [],
   },

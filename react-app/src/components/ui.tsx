@@ -93,27 +93,6 @@ export function ListRow({
   );
 }
 
-/** Circle with a firm's initials — stand-in until companies have logos. */
-export function Avatar({ initials, size = 48 }: { initials: string; size?: number }) {
-  const colors = useBondColors();
-  return (
-    <View
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      style={{
-        width: size,
-        height: size,
-        borderRadius: radius.full,
-        backgroundColor: colors.accent,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Text style={[size >= 64 ? type.heading : type.label, { color: colors.onAccent }]}>{initials}</Text>
-    </View>
-  );
-}
-
 export function FieldLabel({ label, required, error }: { label: string; required?: boolean; error?: string }) {
   const colors = useBondColors();
   return (

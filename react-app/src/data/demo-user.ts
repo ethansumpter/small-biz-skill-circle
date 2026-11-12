@@ -1,37 +1,19 @@
+import { DEMO_USER_ID, getCompany } from '@/data/companies';
+
 /**
- * Hardcoded demo account (c01 Kiln & Clay Studio) — see docs/bond-demo-data.md.
+ * The logged-in demo account (c01 Kiln & Clay Studio). Profile fields come from
+ * companies.json; plan and activity are from docs/bond-demo-data.md.
  * All content is fictional. No owner or personal names.
  */
 export const demoUser = {
-  id: 'c01',
-  name: 'Kiln & Clay Studio',
-  initials: 'KC',
-  industry: 'Ceramics',
-  location: 'Chapel Allerton, Leeds',
-  size: 'Micro',
-  verified: true,
-  rating: 4.9,
+  ...getCompany(DEMO_USER_ID),
+  // App state for the demo account (not part of the public company profile).
   plan: 'Free',
-  offer: 'Hand-thrown stoneware in small batches. Textured mugs, planters and vessels. Custom glazes.',
-  lookingFor: "A maker who can fill or use our vessels, so they're sold as a finished product.",
-  interests: ['Product collaborations', 'Cross-promotion'],
-  prompts: [
-    {
-      question: 'Our favourite collab would be…',
-      answer: 'Something people keep and refill long after the first use.',
-    },
-    { question: "We're best at…", answer: 'Glazes nobody else in Leeds is making.' },
-  ],
-  links: ['kilnandclay.example', 'Instagram @kilnandclay.example'],
   activity: {
     incomingProposals: 2,
     saved: 1,
     matches: 2,
   },
-  reviews: [
-    { from: 'Clear Space Staging', stars: 5, text: 'Reliable, beautiful work, and delivered a week early.' },
-    { from: 'Wick & Wild Candle Co.', stars: 5, text: 'Easy to work with, and clear on costs from day one.' },
-  ],
 };
 
 export const plans = {

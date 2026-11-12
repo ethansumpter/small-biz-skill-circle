@@ -4,10 +4,11 @@ import { type ComponentRef, useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { CompanyAvatar } from '@/components/company-avatar';
 import { Composer } from '@/components/leads/composer';
 import { MessageBubble } from '@/components/leads/message-bubble';
 import { type ThreadAction, ThreadMenu } from '@/components/leads/thread-menu';
-import { Avatar, IconButton } from '@/components/ui';
+import { IconButton } from '@/components/ui';
 import { useLeads } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
@@ -83,7 +84,7 @@ export default function LeadThreadScreen() {
           onPress={() => notInPreview('Company profiles')}
           style={styles.who}
         >
-          <Avatar initials={lead.initials} size={40} />
+          <CompanyAvatar companyId={lead.id} size={40} />
           <View style={styles.whoText}>
             <Text numberOfLines={1} style={[type.label, { color: colors.ink }]}>
               {lead.company}

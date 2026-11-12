@@ -2,7 +2,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { BondLogo } from '@/components/bond-logo';
-import { Avatar, IconButton } from '@/components/ui';
+import { CompanyAvatar } from '@/components/company-avatar';
+import { IconButton } from '@/components/ui';
 import { demoUser } from '@/data/demo-user';
 import { radius, space, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
@@ -23,9 +24,9 @@ export function ProfileHeader() {
         </View>
       </View>
 
-      {/* Firm logo or other image; initials until profile images exist. */}
-      <View style={styles.avatarWrap} accessible accessibilityLabel={`${demoUser.name} logo`}>
-        <Avatar initials={demoUser.initials} size={AVATAR_SIZE} />
+      {/* Firm logo or other image (assets/images/companies/), else a building silhouette. */}
+      <View style={styles.avatarWrap}>
+        <CompanyAvatar companyId={demoUser.id} size={AVATAR_SIZE} />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Edit profile"

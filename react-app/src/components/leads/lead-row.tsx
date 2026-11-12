@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Avatar } from '@/components/ui';
+import { CompanyAvatar } from '@/components/company-avatar';
 import type { Lead } from '@/data/demo-leads';
 import { space, type, useBondColors } from '@/theme/tokens';
 
@@ -25,7 +25,7 @@ export function LeadRow({ lead, last }: { lead: Lead; last?: boolean }) {
         pressed && { opacity: 0.6 },
       ]}
     >
-      <Avatar initials={lead.initials} size={52} />
+      <CompanyAvatar companyId={lead.id} size={52} />
       <View style={styles.text}>
         <View style={styles.nameRow}>
           <Text numberOfLines={1} style={[type.subheading, styles.name, { color: colors.ink }]}>

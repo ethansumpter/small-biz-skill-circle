@@ -78,6 +78,12 @@ npx expo install <package>
 
 Commit the updated `package.json` and `package-lock.json`.
 
+## Company data and logos
+
+Demo company profiles live in [`src/data/companies.json`](src/data/companies.json), generated from [`docs/bond-demo-data.md`](docs/bond-demo-data.md).
+
+To give a company a logo, add a square image (512 × 512 px, `.png`, `.jpg` or `.webp`) to `assets/images/companies/`. Name it like the company's `profileImage`, e.g. `c01-kiln-and-clay-studio.png`. It's picked up automatically. Restart `npx expo start` after adding one. Companies without an image show a building silhouette.
+
 ## Useful commands
 
 All of these assume the venv is active.

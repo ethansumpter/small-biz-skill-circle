@@ -1,0 +1,938 @@
+{
+  "source": "docs/bond-demo-data.md. All companies, reviews and links are fictional.",
+  "demoUserId": "c01",
+  "companies": [
+    {
+      "id": "c01",
+      "name": "Kiln & Clay Studio",
+      "initials": "KC",
+      "profileImage": "assets/images/companies/c01-kiln-and-clay-studio.png",
+      "industry": "Ceramics",
+      "location": "Chapel Allerton, Leeds",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": true,
+      "rating": 4.9,
+      "offer": "Hand-thrown stoneware in small batches. Textured mugs, planters and vessels. Custom glazes.",
+      "lookingFor": "A maker who can fill or use our vessels, so they're sold as a finished product.",
+      "interests": [
+        "Product collaborations",
+        "Cross-promotion"
+      ],
+      "prompts": [
+        {
+          "question": "Our favourite collab would be…",
+          "answer": "Something people keep and refill long after the first use."
+        },
+        {
+          "question": "We're best at…",
+          "answer": "Glazes nobody else in Leeds is making."
+        }
+      ],
+      "gallery": [
+        "speckled oatmeal mugs on a shelf",
+        "a wheel mid-throw",
+        "a row of glazed planters"
+      ],
+      "links": [
+        "kilnandclay.example",
+        "Instagram @kilnandclay.example"
+      ],
+      "reviews": [
+        {
+          "fromId": "c12",
+          "from": "Clear Space Staging",
+          "stars": 5,
+          "text": "Reliable, beautiful work, and delivered a week early."
+        },
+        {
+          "fromId": "c02",
+          "from": "Wick & Wild Candle Co.",
+          "stars": 5,
+          "text": "Easy to work with, and clear on costs from day one."
+        }
+      ],
+      "proposalIds": [
+        "p01"
+      ]
+    },
+    {
+      "id": "c02",
+      "name": "Wick & Wild Candle Co.",
+      "initials": "WW",
+      "profileImage": "assets/images/companies/c02-wick-and-wild-candle-co.png",
+      "industry": "Home fragrance",
+      "location": "Headingley, Leeds",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": true,
+      "rating": 4.8,
+      "offer": "Hand-poured soy candles with scents developed in-house. Refill service.",
+      "lookingFor": "Reusable, collectible vessels so our candles don't come in single-use glass.",
+      "interests": [
+        "Product collaborations",
+        "Cross-promotion"
+      ],
+      "prompts": [
+        {
+          "question": "A scent we're proud of…",
+          "answer": "Rhubarb, fig leaf and Yorkshire moorland heather."
+        },
+        {
+          "question": "Our customers care about…",
+          "answer": "Less waste, more ritual."
+        }
+      ],
+      "gallery": [
+        "amber candles burning",
+        "wax pouring from a jug",
+        "gift box with kraft paper"
+      ],
+      "links": [],
+      "reviews": [
+        {
+          "fromId": "c01",
+          "from": "Kiln & Clay Studio",
+          "stars": 5,
+          "text": "Brilliant scents and fair on the split."
+        }
+      ],
+      "proposalIds": [
+        "p01"
+      ]
+    },
+    {
+      "id": "c03",
+      "name": "Oak & Grain Workshop",
+      "initials": "OG",
+      "profileImage": "assets/images/companies/c03-oak-and-grain-workshop.png",
+      "industry": "Woodworking",
+      "location": "Kirkstall, Leeds",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": true,
+      "rating": 4.9,
+      "offer": "Bespoke furniture and joinery in British hardwoods (oak, walnut, ash). CNC and hand finishing.",
+      "lookingFor": "Product partners who need precise, beautiful wooden housings.",
+      "interests": [
+        "Product collaborations",
+        "Service collaborations"
+      ],
+      "prompts": [
+        {
+          "question": "The tool we can't live without…",
+          "answer": "A 1950s bandsaw we restored ourselves."
+        },
+        {
+          "question": "We'd love to make…",
+          "answer": "Something that sounds as good as it looks."
+        }
+      ],
+      "gallery": [
+        "walnut offcuts stacked",
+        "dovetail joint close-up",
+        "finished oak sideboard"
+      ],
+      "links": [],
+      "reviews": [
+        {
+          "fromId": "c11",
+          "from": "Keyhouse Estates",
+          "stars": 5,
+          "text": "Built bespoke shelving for our office, and it's flawless."
+        }
+      ],
+      "proposalIds": [
+        "p02"
+      ]
+    },
+    {
+      "id": "c04",
+      "name": "Northfield Audio",
+      "initials": "NA",
+      "profileImage": "assets/images/companies/c04-northfield-audio.png",
+      "industry": "Consumer audio",
+      "location": "Holbeck, Leeds",
+      "distanceMiles": null,
+      "size": "SME",
+      "verified": true,
+      "rating": 4.7,
+      "offer": "Bluetooth speaker internals and turntable components, with in-house acoustic tuning.",
+      "lookingFor": "A craft partner for small-run premium enclosures and plinths.",
+      "interests": [
+        "Product collaborations",
+        "Cross-promotion"
+      ],
+      "prompts": [
+        {
+          "question": "Our listening room rule…",
+          "answer": "No screens, just records."
+        },
+        {
+          "question": "We want customers to say…",
+          "answer": "\"I didn't know wood could sound like that.\""
+        }
+      ],
+      "gallery": [
+        "speaker driver on a workbench",
+        "turntable platter",
+        "test room with acoustic panels"
+      ],
+      "links": [],
+      "reviews": [],
+      "proposalIds": [
+        "p02"
+      ]
+    },
+    {
+      "id": "c05",
+      "name": "Loomhouse Textiles",
+      "initials": "LT",
+      "profileImage": "assets/images/companies/c05-loomhouse-textiles.png",
+      "industry": "Textile weaving",
+      "location": "Saltaire, Bradford",
+      "distanceMiles": 9,
+      "size": "Micro",
+      "verified": true,
+      "rating": 4.9,
+      "offer": "Handwoven wool and hemp fabrics on floor looms. Custom patterns in short runs.",
+      "lookingFor": "A brand that turns our cloth into durable everyday goods.",
+      "interests": [
+        "Product collaborations",
+        "Service collaborations"
+      ],
+      "prompts": [
+        {
+          "question": "A pattern we're known for…",
+          "answer": "The Aire stripe, in moss and slate."
+        },
+        {
+          "question": "We'd love our fabric to be…",
+          "answer": "Chewed, walked and washed for years."
+        }
+      ],
+      "gallery": [
+        "loom with warp threads",
+        "bolts of striped fabric",
+        "wool skeins in natural dyes"
+      ],
+      "links": [],
+      "reviews": [],
+      "proposalIds": [
+        "p03"
+      ]
+    },
+    {
+      "id": "c06",
+      "name": "Good Boy Goods",
+      "initials": "GB",
+      "profileImage": "assets/images/companies/c06-good-boy-goods.png",
+      "industry": "Pet accessories",
+      "location": "Horsforth, Leeds",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": false,
+      "rating": 4.6,
+      "offer": "Pet collars, leads and beds, made and sold through our online shop and two local pet stores.",
+      "lookingFor": "Sustainable, distinctive fabric to anchor a premium range.",
+      "interests": [
+        "Product collaborations",
+        "Cross-promotion"
+      ],
+      "prompts": [
+        {
+          "question": "Our toughest tester…",
+          "answer": "A spaniel called Biscuit."
+        },
+        {
+          "question": "Customers keep asking for…",
+          "answer": "Something that isn't nylon."
+        }
+      ],
+      "gallery": [
+        "dog on a patterned bed",
+        "collar and lead set",
+        "packing table"
+      ],
+      "links": [],
+      "reviews": [],
+      "proposalIds": [
+        "p03"
+      ]
+    },
+    {
+      "id": "c07",
+      "name": "Hide & Thread Leather",
+      "initials": "HT",
+      "profileImage": "assets/images/companies/c07-hide-and-thread-leather.png",
+      "industry": "Leatherwork",
+      "location": "Leeds city centre",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": true,
+      "rating": 4.8,
+      "offer": "Hand-stitched vegetable-tanned leather goods: covers, wallets, straps.",
+      "lookingFor": "A stationery brand to co-design a travel journal system.",
+      "interests": [
+        "Product collaborations"
+      ],
+      "prompts": [
+        {
+          "question": "Every piece is…",
+          "answer": "Saddle-stitched by hand, two needles, one thread."
+        },
+        {
+          "question": "Our leather ages into…",
+          "answer": "Something nobody else owns."
+        }
+      ],
+      "gallery": [
+        "tan leather hides",
+        "stitching in progress",
+        "finished A5 cover"
+      ],
+      "links": [],
+      "reviews": [],
+      "proposalIds": [
+        "p04"
+      ]
+    },
+    {
+      "id": "c08",
+      "name": "Nib & Ledger Stationery",
+      "initials": "NL",
+      "profileImage": "assets/images/companies/c08-nib-and-ledger-stationery.png",
+      "industry": "Pens & stationery",
+      "location": "Harrogate",
+      "distanceMiles": 15,
+      "size": "SME",
+      "verified": true,
+      "rating": 4.7,
+      "offer": "Fountain pens, inks and custom-bound notebooks. Wholesale to 40 UK shops.",
+      "lookingFor": "A leatherworker for covers built around our pens.",
+      "interests": [
+        "Product collaborations",
+        "Cross-promotion"
+      ],
+      "prompts": [
+        {
+          "question": "Our best-selling ink…",
+          "answer": "Harrogate Green."
+        },
+        {
+          "question": "We obsess over…",
+          "answer": "Paper that doesn't feather."
+        }
+      ],
+      "gallery": [
+        "pens in a tray",
+        "ink bottles",
+        "stack of bound notebooks"
+      ],
+      "links": [],
+      "reviews": [],
+      "proposalIds": [
+        "p04"
+      ]
+    },
+    {
+      "id": "c09",
+      "name": "Brightframe Photography",
+      "initials": "BP",
+      "profileImage": "assets/images/companies/c09-brightframe-photography.png",
+      "industry": "Event photography",
+      "location": "Roundhay, Leeds",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": true,
+      "rating": 4.9,
+      "offer": "Wedding and corporate event photography with a 48-hour gallery turnaround.",
+      "lookingFor": "A video creator so clients get photo and short-form video from one booking.",
+      "interests": [
+        "Service collaborations",
+        "Cross-promotion"
+      ],
+      "prompts": [
+        {
+          "question": "Our favourite moment to shoot…",
+          "answer": "The five minutes after the speeches."
+        },
+        {
+          "question": "Clients book us because…",
+          "answer": "We're calm when things run late."
+        }
+      ],
+      "gallery": [
+        "venue at golden hour",
+        "camera on a tripod",
+        "printed album spread"
+      ],
+      "links": [],
+      "reviews": [
+        {
+          "fromId": "c10",
+          "from": "Reel North Studio",
+          "stars": 5,
+          "text": "Calm under pressure and great at sharing the shot list."
+        }
+      ],
+      "proposalIds": [
+        "p05"
+      ]
+    },
+    {
+      "id": "c10",
+      "name": "Reel North Studio",
+      "initials": "RN",
+      "profileImage": "assets/images/companies/c10-reel-north-studio.png",
+      "industry": "Social content creation",
+      "location": "Leeds Dock",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": true,
+      "rating": 4.6,
+      "offer": "Vertical video reels shot, edited and posted on the day for events and brands.",
+      "lookingFor": "Photographers who want to add video without hiring.",
+      "interests": [
+        "Service collaborations",
+        "Cross-promotion"
+      ],
+      "prompts": [
+        {
+          "question": "Our record turnaround…",
+          "answer": "A reel posted 40 minutes after the first dance."
+        },
+        {
+          "question": "We're best at…",
+          "answer": "Making events look as good online as they felt in the room."
+        }
+      ],
+      "gallery": [
+        "phone on a gimbal",
+        "editing timeline",
+        "reel analytics screen"
+      ],
+      "links": [],
+      "reviews": [],
+      "proposalIds": [
+        "p05"
+      ]
+    },
+    {
+      "id": "c11",
+      "name": "Keyhouse Estates",
+      "initials": "KE",
+      "profileImage": "assets/images/companies/c11-keyhouse-estates.png",
+      "industry": "Estate agency",
+      "location": "Meanwood, Leeds",
+      "distanceMiles": null,
+      "size": "SME",
+      "verified": true,
+      "rating": 4.5,
+      "offer": "Independent estate agency, sales and lettings across north Leeds. About 120 listings a year.",
+      "lookingFor": "A staging partner to help sellers get market-ready before photos.",
+      "interests": [
+        "Service collaborations",
+        "Cross-promotion"
+      ],
+      "prompts": [
+        {
+          "question": "Sellers always ask…",
+          "answer": "\"Should we redecorate first?\""
+        },
+        {
+          "question": "Our edge over the big chains…",
+          "answer": "We answer the phone."
+        }
+      ],
+      "gallery": [
+        "terraced street in Meanwood",
+        "bright staged lounge",
+        "\"For sale\" board"
+      ],
+      "links": [],
+      "reviews": [
+        {
+          "fromId": "c12",
+          "from": "Clear Space Staging",
+          "stars": 4,
+          "text": "Good referrals. Payments are occasionally slow."
+        }
+      ],
+      "proposalIds": [
+        "p06"
+      ]
+    },
+    {
+      "id": "c12",
+      "name": "Clear Space Staging",
+      "initials": "CS",
+      "profileImage": "assets/images/companies/c12-clear-space-staging.png",
+      "industry": "Home staging & decluttering",
+      "location": "Oakwood, Leeds",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": true,
+      "rating": 4.8,
+      "offer": "Decluttering, furniture and decor rental, and light cosmetic refreshes.",
+      "lookingFor": "Agents who'll refer sellers, plus local makers whose pieces we can stage with.",
+      "interests": [
+        "Service collaborations",
+        "Cross-promotion"
+      ],
+      "prompts": [
+        {
+          "question": "Our first question in any house…",
+          "answer": "What can go in the loft?"
+        },
+        {
+          "question": "We stage with…",
+          "answer": "Local, handmade pieces wherever we can."
+        }
+      ],
+      "gallery": [
+        "before/after living room",
+        "rental furniture store",
+        "styled kitchen shelf"
+      ],
+      "links": [],
+      "reviews": [],
+      "proposalIds": [
+        "p06"
+      ]
+    },
+    {
+      "id": "c13",
+      "name": "Forge Fitness",
+      "initials": "FF",
+      "profileImage": "assets/images/companies/c13-forge-fitness.png",
+      "industry": "Personal training",
+      "location": "Kirkstall, Leeds",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": true,
+      "rating": 4.8,
+      "offer": "1:1 and small-group personal training. Strength and conditioning.",
+      "lookingFor": "A registered nutritionist for a joint programme.",
+      "interests": [
+        "Service collaborations"
+      ],
+      "prompts": [
+        {
+          "question": "Our clients stay because…",
+          "answer": "We write the plan around their week."
+        },
+        {
+          "question": "We won't…",
+          "answer": "Sell supplements."
+        }
+      ],
+      "gallery": [
+        "gym floor with racks",
+        "kettlebell session",
+        "client progress board"
+      ],
+      "links": [],
+      "reviews": [],
+      "proposalIds": [
+        "p07"
+      ]
+    },
+    {
+      "id": "c14",
+      "name": "Fuel Well Nutrition",
+      "initials": "FW",
+      "profileImage": "assets/images/companies/c14-fuel-well-nutrition.png",
+      "industry": "Registered nutrition",
+      "location": "Headingley, Leeds",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": true,
+      "rating": 4.9,
+      "offer": "Registered nutritionist offering meal-prep coaching and metabolic tracking.",
+      "lookingFor": "Trainers who want to give clients food support from a qualified professional.",
+      "interests": [
+        "Service collaborations",
+        "Cross-promotion"
+      ],
+      "prompts": [
+        {
+          "question": "We're qualified in…",
+          "answer": "Registered nutrition (AfN)."
+        },
+        {
+          "question": "Our favourite meal-prep trick…",
+          "answer": "Cook once, eat three ways."
+        }
+      ],
+      "gallery": [
+        "prepped meal boxes",
+        "consultation desk",
+        "weekly planner"
+      ],
+      "links": [],
+      "reviews": [
+        {
+          "fromId": "c13",
+          "from": "Forge Fitness",
+          "stars": 5,
+          "text": "Clients love the meal plans. Very professional."
+        }
+      ],
+      "proposalIds": [
+        "p07"
+      ]
+    },
+    {
+      "id": "c15",
+      "name": "Studio Lark Hair",
+      "initials": "SL",
+      "profileImage": "assets/images/companies/c15-studio-lark-hair.png",
+      "industry": "Hair styling",
+      "location": "Chapel Allerton, Leeds",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": true,
+      "rating": 4.7,
+      "offer": "Cutting, colour and styling in a four-chair salon.",
+      "lookingFor": "A colour-analysis partner for a premium image session.",
+      "interests": [
+        "Service collaborations",
+        "Cross-promotion"
+      ],
+      "prompts": [
+        {
+          "question": "Our most-booked service…",
+          "answer": "Lived-in balayage."
+        },
+        {
+          "question": "We'd love to offer…",
+          "answer": "Colour that works with your wardrobe too."
+        }
+      ],
+      "gallery": [
+        "salon interior",
+        "colour swatches",
+        "styling station"
+      ],
+      "links": [],
+      "reviews": [],
+      "proposalIds": [
+        "p08"
+      ]
+    },
+    {
+      "id": "c16",
+      "name": "True Tone Colour Studio",
+      "initials": "TT",
+      "profileImage": "assets/images/companies/c16-true-tone-colour-studio.png",
+      "industry": "Colour analysis",
+      "location": "Leeds city centre",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": false,
+      "rating": 4.8,
+      "offer": "Seasonal colour analysis, undertone testing and wardrobe palettes.",
+      "lookingFor": "A salon to turn our analysis into hair colour.",
+      "interests": [
+        "Service collaborations"
+      ],
+      "prompts": [
+        {
+          "question": "People are surprised that…",
+          "answer": "Undertone matters more than eye colour."
+        },
+        {
+          "question": "Every client leaves with…",
+          "answer": "A printed palette card."
+        }
+      ],
+      "gallery": [
+        "fabric drape session",
+        "palette card",
+        "natural-light studio"
+      ],
+      "links": [],
+      "reviews": [],
+      "proposalIds": [
+        "p08"
+      ]
+    },
+    {
+      "id": "c17",
+      "name": "Tally & Co. Accountants",
+      "initials": "TC",
+      "profileImage": "assets/images/companies/c17-tally-and-co-accountants.png",
+      "industry": "Accounting",
+      "location": "Wellington Place, Leeds",
+      "distanceMiles": null,
+      "size": "SME",
+      "verified": true,
+      "rating": 4.8,
+      "offer": "Bookkeeping, payroll and tax for startups and SMEs. Xero-certified.",
+      "lookingFor": "An HR partner to cover a startup's first hire from end to end.",
+      "interests": [
+        "Service collaborations",
+        "Cross-promotion"
+      ],
+      "prompts": [
+        {
+          "question": "Founders always forget…",
+          "answer": "Pension auto-enrolment."
+        },
+        {
+          "question": "We speak…",
+          "answer": "Plain English, not accountant."
+        }
+      ],
+      "gallery": [
+        "office at Wellington Place",
+        "payroll dashboard",
+        "client workshop"
+      ],
+      "links": [],
+      "reviews": [
+        {
+          "fromId": "c18",
+          "from": "Peopleworks HR",
+          "stars": 5,
+          "text": "Made payroll setup painless for our joint clients."
+        }
+      ],
+      "proposalIds": [
+        "p09"
+      ]
+    },
+    {
+      "id": "c18",
+      "name": "Peopleworks HR",
+      "initials": "PH",
+      "profileImage": "assets/images/companies/c18-peopleworks-hr.png",
+      "industry": "Fractional HR",
+      "location": "Leeds city centre (remote-first)",
+      "distanceMiles": null,
+      "size": "Micro",
+      "verified": true,
+      "rating": 4.7,
+      "offer": "Fractional HR: contracts, policies, onboarding and people processes.",
+      "lookingFor": "An accountant to pair payroll with employment setup.",
+      "interests": [
+        "Service collaborations"
+      ],
+      "prompts": [
+        {
+          "question": "We help with…",
+          "answer": "The bits founders google at 2am."
+        },
+        {
+          "question": "Our favourite document…",
+          "answer": "A one-page handbook people actually read."
+        }
+      ],
+      "gallery": [
+        "onboarding checklist",
+        "video call workshop",
+        "contract templates"
+      ],
+      "links": [],
+      "reviews": [],
+      "proposalIds": [
+        "p09"
+      ]
+    }
+  ],
+  "proposals": [
+    {
+      "id": "p01",
+      "companyIds": [
+        "c01",
+        "c02"
+      ],
+      "collaborationType": [
+        "Product collaboration"
+      ],
+      "businessGoal": "Launch a new product",
+      "contributions": {
+        "c01": "Hand-thrown reusable vessels",
+        "c02": "custom-scented soy wax fill"
+      },
+      "budget": "Revenue share 50/50",
+      "status": "Matched (in Leads)",
+      "title": "Refillable candles in handmade stoneware",
+      "region": "Leeds",
+      "industries": "Ceramics × Home fragrance",
+      "summary": "Our vessels, your wax. Customers bring the pot back for a refill instead of buying new glass."
+    },
+    {
+      "id": "p02",
+      "companyIds": [
+        "c03",
+        "c04"
+      ],
+      "collaborationType": [
+        "Product collaboration"
+      ],
+      "businessGoal": "Launch a new product",
+      "contributions": {
+        "c03": "Acoustic-grade hardwood enclosures and plinths",
+        "c04": "speaker and turntable internals"
+      },
+      "budget": "£2,500 prototype run, split 40/60",
+      "status": "Open",
+      "title": "Handcrafted wooden speakers and turntable plinths",
+      "region": "Leeds",
+      "industries": "Woodworking × Audio",
+      "summary": "Small-run enclosures in oak and walnut, tuned for sound as well as looks."
+    },
+    {
+      "id": "p03",
+      "companyIds": [
+        "c05",
+        "c06"
+      ],
+      "collaborationType": [
+        "Product collaboration"
+      ],
+      "businessGoal": "Reach new customers",
+      "contributions": {
+        "c05": "Patterned wool/hemp fabric",
+        "c06": "collars, leads and beds"
+      },
+      "budget": "£800 fabric order + 10% revenue share",
+      "status": "Open",
+      "title": "A sustainable premium pet range",
+      "region": "Leeds/Bradford",
+      "industries": "Textiles × Pet",
+      "summary": "Handwoven wool and hemp collars, leads and beds made to last years, not months."
+    },
+    {
+      "id": "p04",
+      "companyIds": [
+        "c07",
+        "c08"
+      ],
+      "collaborationType": [
+        "Product collaboration"
+      ],
+      "businessGoal": "Launch a new product",
+      "contributions": {
+        "c07": "Hand-stitched leather covers",
+        "c08": "fountain pens and custom-bound notebooks"
+      },
+      "budget": "£1,200 first batch of 50",
+      "status": "Open",
+      "title": "Modular travel journals",
+      "region": "Leeds/Harrogate",
+      "industries": "Leather × Stationery",
+      "summary": "Saddle-stitched covers cut to hold a specific pen, with refillable custom-bound notebooks."
+    },
+    {
+      "id": "p05",
+      "companyIds": [
+        "c09",
+        "c10"
+      ],
+      "collaborationType": [
+        "Service collaboration",
+        "Bundle deal"
+      ],
+      "businessGoal": "Reach new customers",
+      "contributions": {
+        "c09": "High-res event portraits",
+        "c10": "same-day vertical reels"
+      },
+      "budget": "Package from £1,950; 60/40 split",
+      "status": "Matched (no chat yet)",
+      "title": "Photo + reels event package",
+      "region": "Leeds",
+      "industries": "Photography × Content",
+      "summary": "Portraits within 48 hours and reels posted on the day, from one booking."
+    },
+    {
+      "id": "p06",
+      "companyIds": [
+        "c11",
+        "c12"
+      ],
+      "collaborationType": [
+        "Service collaboration"
+      ],
+      "businessGoal": "Reach new customers",
+      "contributions": {
+        "c11": "Seller referrals and listing photos",
+        "c12": "decluttering, furniture rental and refresh"
+      },
+      "budget": "£650 per property, referral fee 10%",
+      "status": "Open",
+      "title": "Market-ready seller tier",
+      "region": "Leeds",
+      "industries": "Property × Staging",
+      "summary": "Decluttering, furniture rental and a quick refresh before the listing photos are taken."
+    },
+    {
+      "id": "p07",
+      "companyIds": [
+        "c13",
+        "c14"
+      ],
+      "collaborationType": [
+        "Service collaboration",
+        "Bundle deal"
+      ],
+      "businessGoal": "Launch a new product",
+      "contributions": {
+        "c13": "Bespoke 12-week training",
+        "c14": "weekly meal-prep coaching and metabolic tracking"
+      },
+      "budget": "£780 per client, 50/50",
+      "status": "Open",
+      "title": "12-week transformation programme",
+      "region": "Leeds",
+      "industries": "Fitness × Nutrition",
+      "summary": "Training built around your week, plus meal-prep coaching from a registered nutritionist."
+    },
+    {
+      "id": "p08",
+      "companyIds": [
+        "c15",
+        "c16"
+      ],
+      "collaborationType": [
+        "Service collaboration"
+      ],
+      "businessGoal": "Reach new customers",
+      "contributions": {
+        "c15": "Hair colour and styling",
+        "c16": "undertone and wardrobe-palette analysis"
+      },
+      "budget": "£245 per session, 55/45",
+      "status": "Open",
+      "title": "Personal image overhaul",
+      "region": "Leeds",
+      "industries": "Hair × Colour analysis",
+      "summary": "We match your undertone to your ideal hair colour and a wardrobe palette in one session."
+    },
+    {
+      "id": "p09",
+      "companyIds": [
+        "c17",
+        "c18"
+      ],
+      "collaborationType": [
+        "Service collaboration",
+        "Bundle deal"
+      ],
+      "businessGoal": "Reach new customers",
+      "contributions": {
+        "c17": "Payroll and pension setup",
+        "c18": "contracts and onboarding workflows"
+      },
+      "budget": "£1,400 per startup, 50/50",
+      "status": "Open",
+      "title": "First-hire package for startups",
+      "region": "Leeds",
+      "industries": "Finance × HR",
+      "summary": "Payroll, pensions, contracts and onboarding set up together, so the first hire goes smoothly."
+    }
+  ]
+}
