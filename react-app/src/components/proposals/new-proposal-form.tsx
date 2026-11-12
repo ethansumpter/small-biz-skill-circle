@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ChoiceChips, PrimaryButton, TextField } from '@/components/ui';
-import type { ProposalInput } from '@/state/proposals';
+import type { ProposalInput } from '@/state/preview';
 import { space } from '@/theme/tokens';
 
 /** Option lists from docs/bond-features.md and docs/bond-demo-data.md (filter options). */

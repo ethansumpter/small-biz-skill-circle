@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/ui';
-import type { Proposal } from '@/state/proposals';
+import type { Proposal } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 
 export function ProposalCard({ proposal }: { proposal: Proposal }) {

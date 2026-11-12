@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card, Chip, SectionTitle } from '@/components/ui';
 import { demoUser } from '@/data/demo-user';
-import { MAX_ACTIVE_PROPOSALS, useProposals } from '@/state/proposals';
+import { MAX_ACTIVE_PROPOSALS, useProposals } from '@/state/preview';
 import { space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 

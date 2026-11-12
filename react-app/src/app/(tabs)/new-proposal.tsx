@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NewProposalForm } from '@/components/proposals/new-proposal-form';
 import { ProposalCard } from '@/components/proposals/proposal-card';
 import { Card, SectionTitle } from '@/components/ui';
-import { MAX_ACTIVE_PROPOSALS, type ProposalInput, useProposals } from '@/state/proposals';
+import { MAX_ACTIVE_PROPOSALS, type ProposalInput, useProposals } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 
 export default function NewProposalScreen() {
