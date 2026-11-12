@@ -85,10 +85,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#212445',
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
+    // One shadow for iOS, Android and web (the old shadow* props are deprecated on web).
+    boxShadow: '0px 2px 8px rgba(33, 36, 69, 0.15)',
   },
 });

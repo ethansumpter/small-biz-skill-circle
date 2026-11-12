@@ -618,7 +618,7 @@ export default function DemoPanelScreen() {
   return (
     <KeyboardAvoidingView
       style={[styles.root, { backgroundColor: colors.surface }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior="padding"
     >
       <StackHeader title="Demo panel" subtitle="Admin tool for the demo, not part of Bond" />
 

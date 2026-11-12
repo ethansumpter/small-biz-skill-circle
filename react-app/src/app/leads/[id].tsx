@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { type ComponentRef, useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CompanyAvatar } from '@/components/company-avatar';
@@ -11,6 +11,7 @@ import { type ThreadAction, ThreadMenu } from '@/components/leads/thread-menu';
 import { IconButton } from '@/components/ui';
 import { useLeads } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
+import { confirmAction } from '@/utils/dialog';
 import { notInPreview } from '@/utils/preview';
 
 export default function LeadThreadScreen() {
@@ -41,17 +42,16 @@ export default function LeadThreadScreen() {
         toggleMute(lead.id);
         break;
       case 'unmatch':
-        Alert.alert(`Unmatch ${lead.company}?`, 'This removes the chat for both of you.', [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Unmatch',
-            style: 'destructive',
-            onPress: () => {
-              router.back();
-              unmatch(lead.id);
-            },
+        confirmAction({
+          title: `Unmatch ${lead.company}?`,
+          message: 'This removes the chat for both of you.',
+          confirmLabel: 'Unmatch',
+          destructive: true,
+          onConfirm: () => {
+            router.back();
+            unmatch(lead.id);
           },
-        ]);
+        });
         break;
       case 'report':
         notInPreview('Report');
@@ -68,7 +68,7 @@ export default function LeadThreadScreen() {
   return (
     <KeyboardAvoidingView
       style={[styles.root, { backgroundColor: colors.surface }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior="padding"
     >
       {/* Thread header: back, logo + name (→ their profile), ⋮ menu */}
       <View

@@ -10,9 +10,11 @@ import { StatusBar } from 'expo-status-bar';
 import { PreviewProvider } from '@/state/preview';
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({ Lexend_400Regular, Lexend_500Medium, Lexend_600SemiBold });
+  const [fontsLoaded, fontError] = useFonts({ Lexend_400Regular, Lexend_500Medium, Lexend_600SemiBold });
 
-  if (!fontsLoaded) return null;
+  // Wait for Lexend, but if it fails to load (e.g. a flaky mobile connection), show the app in
+  // the system font rather than a blank screen.
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <PreviewProvider>

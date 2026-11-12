@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { TabTrigger, type TabTriggerSlotProps } from 'expo-router/ui';
 import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RingsMark } from '@/components/bond-logo';
@@ -68,8 +68,12 @@ function TabIcon({ name, color }: { name: BondTab['icon']; color: string }) {
 
 type ButtonProps =TabTriggerSlotProps & { tab: BondTab; ref?: ComponentProps<typeof Pressable>['ref'] };
 
+/** Below this width "Your Network" doesn't fit at 12px; iOS can shrink text to fit, Android and web can't. */
+const NARROW_SCREEN = 400;
+
 function TabButton({ tab, isFocused, ...props }: ButtonProps) {
   const colors = useBondColors();
+  const narrow = useWindowDimensions().width < NARROW_SCREEN;
 
   return (
     <Pressable
@@ -91,6 +95,7 @@ function TabButton({ tab, isFocused, ...props }: ButtonProps) {
         minimumFontScale={0.85}
         style={[
           styles.label,
+          narrow && styles.labelNarrow,
           { color: isFocused ? colors.ink : colors.inkMuted, fontFamily: isFocused ? fonts.medium : fonts.regular },
         ]}
       >
@@ -149,6 +154,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     letterSpacing: 0.24,
   },
+  labelNarrow: { fontSize: 11, letterSpacing: 0 },
   centre: {
     width: 52,
     height: 52,
