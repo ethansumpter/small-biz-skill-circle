@@ -71,6 +71,8 @@ Example card: *Looking for a local café partner — Christmas joint promotion �
   - Reviews at bottom, read-only, with small **Report review** button.
 
 ### Settings (gear)
+> **Demo build:** the gear opens `/settings`, which holds only a **Demo panel** button and text saying it is for the demo panel. The demo panel (`/demo-panel`) is an admin tool for the demo, not part of Bond: it lists every demo company, lets anyone edit any field (except `id`), and writes the result to `src/data/companies.json` through the dev-only `/api/demo-companies` route after a confirmation listing every change. It also has a **Logged in as** dropdown that switches the demo account for the session (held in the preview provider; resets to `demoUserId` on reload). The product settings below are not built yet.
+
 - **Account details:** Email & phone · Company information · Manage subscription · Pause account · Delete account
 - **Connected accounts & links:** Company website · LinkedIn · Instagram · Facebook · Google Business Profile
 - **Privacy & data:** Privacy preferences · Data-sharing permissions · AI-matching data permissions · Download my data · Delete my data

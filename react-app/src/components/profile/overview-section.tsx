@@ -2,8 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card, Chip, SectionTitle } from '@/components/ui';
-import { demoUser } from '@/data/demo-user';
-import { MAX_ACTIVE_PROPOSALS, useProposals } from '@/state/preview';
+import { MAX_ACTIVE_PROPOSALS, useCurrentUser, useProposals } from '@/state/preview';
 import { space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
@@ -14,6 +13,7 @@ import { notInPreview } from '@/utils/preview';
  */
 export function OverviewSection() {
   const colors = useBondColors();
+  const { user: demoUser } = useCurrentUser();
   const { activity } = demoUser;
   const { proposals } = useProposals();
 

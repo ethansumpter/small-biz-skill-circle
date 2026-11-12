@@ -1,6 +1,8 @@
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
+import { DEMO_USER_ID } from '@/data/companies';
 import { DEMO_LEADS, type Lead } from '@/data/demo-leads';
+import { buildDemoUser } from '@/data/demo-user';
 
 /**
  * All preview-only app state (proposals, matches, conversations) lives in this
@@ -45,6 +47,9 @@ const SEED_PROPOSALS: Proposal[] = [
 // ── Context ──────────────────────────────────────────────────────────────────
 
 type PreviewState = {
+  /** Which demo company the app is "logged in" as. Switched from the demo panel. */
+  currentUserId: string;
+  setCurrentUserId: (id: string) => void;
   proposals: Proposal[];
   addProposal: (input: ProposalInput) => void;
   leads: Lead[];
@@ -56,6 +61,7 @@ type PreviewState = {
 const PreviewContext = createContext<PreviewState | null>(null);
 
 export function PreviewProvider({ children }: { children: ReactNode }) {
+  const [currentUserId, setCurrentUserId] = useState<string>(DEMO_USER_ID);
   const [proposals, setProposals] = useState<Proposal[]>(SEED_PROPOSALS);
   const [leads, setLeads] = useState<Lead[]>(DEMO_LEADS);
 
@@ -97,8 +103,8 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ proposals, addProposal, leads, sendMessage, toggleMute, unmatch }),
-    [proposals, addProposal, leads, sendMessage, toggleMute, unmatch],
+    () => ({ currentUserId, setCurrentUserId, proposals, addProposal, leads, sendMessage, toggleMute, unmatch }),
+    [currentUserId, proposals, addProposal, leads, sendMessage, toggleMute, unmatch],
   );
 
   return <PreviewContext.Provider value={value}>{children}</PreviewContext.Provider>;
@@ -118,4 +124,10 @@ export function useProposals() {
 export function useLeads() {
   const { leads, sendMessage, toggleMute, unmatch } = usePreview();
   return { leads, sendMessage, toggleMute, unmatch };
+}
+
+/** The demo company the app is logged in as (defaults to c01; switchable in the demo panel). */
+export function useCurrentUser() {
+  const { currentUserId, setCurrentUserId } = usePreview();
+  return { user: buildDemoUser(currentUserId), currentUserId, setCurrentUserId };
 }

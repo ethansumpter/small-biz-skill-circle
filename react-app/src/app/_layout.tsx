@@ -19,6 +19,8 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="leads/[id]" />
+        <Stack.Screen name="settings" />
+        <Stack.Screen name="demo-panel" />
       </Stack>
       <StatusBar style="auto" />
     </PreviewProvider>

@@ -2,18 +2,14 @@ import type { ComponentProps } from 'react';
 import type Ionicons from '@expo/vector-icons/Ionicons';
 
 import { Card, ListRow } from '@/components/ui';
-import { demoUser } from '@/data/demo-user';
+import { useCurrentUser } from '@/state/preview';
 import { notInPreview } from '@/utils/preview';
 
 type Item = { icon: ComponentProps<typeof Ionicons>['name']; label: string; detail?: string };
 
 /** Safety tab items, in the order given in docs/bond-app-structure.md. */
 const ITEMS: Item[] = [
-  {
-    icon: 'shield-checkmark-outline',
-    label: 'Verify your business',
-    detail: demoUser.verified ? 'Verified' : undefined,
-  },
+  { icon: 'shield-checkmark-outline', label: 'Verify your business' },
   { icon: 'ban-outline', label: 'Block list' },
   { icon: 'call-outline', label: 'Contact company help line' },
   { icon: 'help-buoy-outline', label: 'Help centre and AI assistant' },
@@ -22,6 +18,9 @@ const ITEMS: Item[] = [
 ];
 
 export function SafetySection() {
+  const { user } = useCurrentUser();
+  const verifiedDetail = user.verified ? 'Verified' : undefined;
+
   return (
     <Card style={{ paddingVertical: 0 }}>
       {ITEMS.map((item, i) => (
@@ -29,7 +28,7 @@ export function SafetySection() {
           key={item.label}
           icon={item.icon}
           label={item.label}
-          detail={item.detail}
+          detail={i === 0 ? verifiedDetail : item.detail}
           last={i === ITEMS.length - 1}
           onPress={() => notInPreview(item.label)}
         />

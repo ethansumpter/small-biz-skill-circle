@@ -1,20 +1,27 @@
-import { DEMO_USER_ID, getCompany } from '@/data/companies';
+import { getCompany } from '@/data/companies';
 
 /**
- * The logged-in demo account (c01 Kiln & Clay Studio). Profile fields come from
- * companies.json; plan and activity are from docs/bond-demo-data.md.
- * All content is fictional. No owner or personal names.
+ * The logged-in demo account. Defaults to c01 Kiln & Clay Studio and can be
+ * switched to any demo company from the demo panel (Profile → Settings).
+ * Profile fields come from companies.json; plan and activity are from
+ * docs/bond-demo-data.md. All content is fictional. No owner or personal names.
+ *
+ * Read it with `useCurrentUser()` from '@/state/preview'.
  */
-export const demoUser = {
-  ...getCompany(DEMO_USER_ID),
-  // App state for the demo account (not part of the public company profile).
-  plan: 'Free',
-  activity: {
-    incomingProposals: 2,
-    saved: 1,
-    matches: 2,
-  },
-};
+export function buildDemoUser(companyId: string) {
+  return {
+    ...getCompany(companyId),
+    // App state for the demo account (not part of the public company profile).
+    plan: 'Free',
+    activity: {
+      incomingProposals: 2,
+      saved: 1,
+      matches: 2,
+    },
+  };
+}
+
+export type DemoUser = ReturnType<typeof buildDemoUser>;
 
 export const plans = {
   free: { name: 'Free', price: '£0', benefits: ['3 active proposals', '10 likes a day'] },

@@ -12,6 +12,8 @@
 ---
 
 ## Demo user (logged-in account)
+> The demo panel (Profile → Settings → Demo panel) can switch the logged-in company for the session and edit `src/data/companies.json` directly. Edits saved there are not copied back into this doc.
+
 **Kiln & Clay Studio** (`c01`): Independent ceramicist. Plan: **Free**, with a Boost available. Verified: yes.
 
 | Screen | Demo state |
