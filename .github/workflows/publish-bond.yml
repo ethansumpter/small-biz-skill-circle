@@ -1,0 +1,73 @@
+# Publishes the Bond Expo demo (react-app/) on every push to main:
+#   - web:    exports the web build and deploys it to EAS Hosting (production URL)
+#   - native: publishes an EAS Update on the "main" branch, openable in Expo Go
+#
+# Requires the repository secret EXPO_TOKEN (expo.dev → Account settings → Access tokens).
+name: Publish Bond demo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "react-app/**"
+      - ".github/workflows/publish-bond.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: publish-bond
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: react-app
+
+jobs:
+  web:
+    name: Deploy web to EAS Hosting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: react-app/package-lock.json
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - run: npm ci
+
+      - name: Export web build
+        run: npx expo export --platform web
+
+      - name: Deploy to EAS Hosting
+        run: eas deploy --prod --non-interactive
+
+  native:
+    name: Publish EAS Update
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: react-app/package-lock.json
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - run: npm ci
+
+      - name: Publish update
+        env:
+          # Passed via env (not inlined) so commit text can't inject shell commands.
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'Manual publish' }}
+        run: eas update --branch main --message "$(echo "$COMMIT_MESSAGE" | head -n 1)" --non-interactive
