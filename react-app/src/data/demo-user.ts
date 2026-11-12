@@ -1,5 +1,4 @@
 import type { Company } from '@/data/companies';
-import { plans } from '@/data/plans';
 
 /**
  * The logged-in demo account. Defaults to c01 Kiln & Clay Studio and can be
@@ -9,11 +8,11 @@ import { plans } from '@/data/plans';
  *
  * Read it with `useCurrentUser()` from '@/state/preview'.
  */
-export function buildDemoUser(company: Company) {
+export function buildDemoUser(company: Company, planName: string) {
   return {
     ...company,
     // App state for the demo account (not part of the public company profile).
-    plan: plans.free.name,
+    plan: planName,
     activity: {
       incomingProposals: 2,
       saved: 1,

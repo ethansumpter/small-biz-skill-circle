@@ -18,11 +18,21 @@ export type Plan = {
   limits: { activeProposals?: number | null; likesPerDay?: number | null };
 };
 
-export const plans = data.plans as Record<PlanId, Plan>;
+export type Plans = Record<PlanId, Plan>;
 
-/** The Free plan's limits, enforced across the demo. */
-export const MAX_ACTIVE_PROPOSALS = plans.free.limits.activeProposals ?? Infinity;
-export const FREE_LIKES_PER_DAY = plans.free.limits.likesPerDay ?? Infinity;
+/** As bundled. The app reads the session's plans (with demo panel edits) via `usePlans()`. */
+export const BUNDLED_PLANS = data.plans as Plans;
+
+/** The Free plan's limits, enforced across the demo. Not set or null means unlimited (Infinity). */
+export function freeLimits(plans: Plans) {
+  return {
+    maxActiveProposals: plans.free.limits.activeProposals ?? Infinity,
+    likesPerDay: plans.free.limits.likesPerDay ?? Infinity,
+  };
+}
+
+/** 3 → "3", Infinity → "unlimited". */
+export const formatLimit = (n: number) => (Number.isFinite(n) ? String(n) : 'unlimited');
 
 /** "£0", "£4.99 for 7 days", "£14.99 / month". */
 export function formatPrice(plan: Plan): string {

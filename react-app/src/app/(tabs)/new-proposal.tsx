@@ -7,7 +7,7 @@ import { AI_BUTTON_CLEARANCE } from '@/components/ai-assistant-button';
 import { NewProposalForm } from '@/components/proposals/new-proposal-form';
 import { ProposalCard } from '@/components/proposals/proposal-card';
 import { Card, SectionTitle } from '@/components/ui';
-import { MAX_ACTIVE_PROPOSALS } from '@/data/plans';
+import { formatLimit } from '@/data/plans';
 import { type ProposalInput, useProposals } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 
@@ -15,7 +15,7 @@ export default function NewProposalScreen() {
   const colors = useBondColors();
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
-  const { proposals, canAdd, addProposal } = useProposals();
+  const { proposals, canAdd, addProposal, maxActiveProposals } = useProposals();
   const [justPosted, setJustPosted] = useState(false);
 
   const handleSubmit = (input: ProposalInput) => {
@@ -53,7 +53,7 @@ export default function NewProposalScreen() {
 
       <View style={styles.section}>
         <SectionTitle>
-          Your active proposals ({proposals.length} of {MAX_ACTIVE_PROPOSALS})
+          Your active proposals ({proposals.length} of {formatLimit(maxActiveProposals)})
         </SectionTitle>
         {proposals.map((proposal) => (
           <ProposalCard key={proposal.id} proposal={proposal} />
@@ -64,7 +64,7 @@ export default function NewProposalScreen() {
         <NewProposalForm onSubmit={handleSubmit} />
       ) : (
         <Card>
-          <Text style={[type.subheading, { color: colors.ink }]}>You have {MAX_ACTIVE_PROPOSALS} active proposals</Text>
+          <Text style={[type.subheading, { color: colors.ink }]}>You have {maxActiveProposals} active proposals</Text>
           <Text style={[type.body, { color: colors.inkMuted }]}>
             That's the most you can have at once. Close one before posting another.
           </Text>

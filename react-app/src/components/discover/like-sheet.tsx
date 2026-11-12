@@ -143,7 +143,9 @@ export function LikeSheet({
                 {error ||
                   (outOfLikes
                     ? "You've used today's likes on the Free plan. Bond Plus has unlimited likes."
-                    : `${likesLeft} ${likesLeft === 1 ? 'like' : 'likes'} left today. Preview only: nothing is sent.`)}
+                    : Number.isFinite(likesLeft)
+                      ? `${likesLeft} ${likesLeft === 1 ? 'like' : 'likes'} left today. Preview only: nothing is sent.`
+                      : 'Unlimited likes. Preview only: nothing is sent.')}
               </Text>
               <Text style={[type.caption, { color: colors.inkMuted }]}>{comment.length}/280</Text>
             </View>

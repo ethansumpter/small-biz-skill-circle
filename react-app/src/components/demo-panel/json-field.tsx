@@ -25,6 +25,8 @@ type Props = {
   onRemove?: () => void;
   /** Fixed options for a text value (or for each text item of a list), shown as chips. */
   choices?: string[];
+  /** Choices for the fields inside an object value. */
+  nestedChoices?: Choices;
 };
 
 /** Fixed options per field key, e.g. { status: ['Open', …] }. */
@@ -75,6 +77,7 @@ export function ObjectFields({
           original={saved?.[key]}
           readOnly={isReadOnly(key, child)}
           choices={choices?.[key]}
+          nestedChoices={choices}
           onChange={(next) => onChange({ ...value, [key]: next })}
         />
       ))}
@@ -82,12 +85,19 @@ export function ObjectFields({
   );
 }
 
-function ObjectField({ label, value, original, onChange, onRemove }: Props & { value: { [key: string]: Json } }) {
+function ObjectField({
+  label,
+  value,
+  original,
+  onChange,
+  onRemove,
+  nestedChoices,
+}: Props & { value: { [key: string]: Json } }) {
   const colors = useBondColors();
   return (
     <View style={[styles.group, { borderLeftColor: colors.accent }]}>
       <Label text={label} edited={false} onRemove={onRemove} />
-      <ObjectFields value={value} original={original} onChange={onChange} />
+      <ObjectFields value={value} original={original} onChange={onChange} choices={nestedChoices} />
     </View>
   );
 }
@@ -222,7 +232,7 @@ function LeafField(props: Props) {
 }
 
 /** Number box: empty saves as null, anything that isn't a number is flagged and not applied. */
-function NumberInput({ label, value, onChange }: { label: string; value: number | null; onChange: (v: Json) => void }) {
+export function NumberInput({ label, value, onChange }: { label: string; value: number | null; onChange: (v: Json) => void }) {
   const colors = useBondColors();
   const [text, setText] = useState(value === null ? '' : String(value));
   const parsed = text.trim() === '' ? null : Number(text);

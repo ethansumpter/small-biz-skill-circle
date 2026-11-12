@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card, Chip, SectionTitle } from '@/components/ui';
-import { MAX_ACTIVE_PROPOSALS } from '@/data/plans';
+import { formatLimit } from '@/data/plans';
 import { useCurrentUser, useProposals } from '@/state/preview';
 import { space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
@@ -16,10 +16,10 @@ export function OverviewSection() {
   const colors = useBondColors();
   const { user: demoUser } = useCurrentUser();
   const { activity } = demoUser;
-  const { proposals } = useProposals();
+  const { proposals, maxActiveProposals } = useProposals();
 
   const stats = [
-    { value: `${proposals.length} of ${MAX_ACTIVE_PROPOSALS}`, label: 'Active proposals' },
+    { value: `${proposals.length} of ${formatLimit(maxActiveProposals)}`, label: 'Active proposals' },
     { value: String(activity.incomingProposals), label: 'Proposals to you' },
     { value: String(activity.matches), label: 'Matches' },
   ];

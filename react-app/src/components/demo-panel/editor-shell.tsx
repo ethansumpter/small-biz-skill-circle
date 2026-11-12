@@ -167,16 +167,22 @@ export function Tabs({
   value,
   onChange,
   label,
+  wrap = false,
 }: {
   tabs: { key: string; title: string; count?: number }[];
   value: string;
   onChange: (key: string) => void;
   label: string;
+  /** Wrap onto more lines instead of scrolling sideways (so every tab stays visible). */
+  wrap?: boolean;
 }) {
   const colors = useBondColors();
+  const Container = wrap ? View : ScrollView;
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabs}>
-      <View accessibilityRole="tablist" accessibilityLabel={label} style={styles.tabs}>
+    <Container
+      {...(wrap ? {} : { horizontal: true, showsHorizontalScrollIndicator: false, contentContainerStyle: styles.tabs })}
+    >
+      <View accessibilityRole="tablist" accessibilityLabel={label} style={[styles.tabs, wrap && styles.tabsWrap]}>
         {tabs.map((t) => {
           const active = t.key === value;
           return (
@@ -201,7 +207,7 @@ export function Tabs({
           );
         })}
       </View>
-    </ScrollView>
+    </Container>
   );
 }
 
@@ -298,6 +304,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   tabs: { flexDirection: 'row', gap: space[2] },
+  tabsWrap: { flexWrap: 'wrap' },
   tab: {
     flexDirection: 'row',
     alignItems: 'center',

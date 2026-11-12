@@ -10,7 +10,7 @@ import {
 import { DEMO_LEADS, type Lead, type LeadSeed, withCompanyFields } from '@/data/demo-leads';
 import { DEMO_INCOMING, type IncomingProposal } from '@/data/demo-network';
 import { buildDemoUser } from '@/data/demo-user';
-import { MAX_ACTIVE_PROPOSALS } from '@/data/plans';
+import { BUNDLED_PLANS, freeLimits, type Plans } from '@/data/plans';
 
 /**
  * All preview-only app state (proposals, matches, conversations) lives in this
@@ -84,6 +84,9 @@ type PreviewState = {
   /** The demo collaboration proposals (companies.json `proposals`), editable in the demo panel. */
   demoProposals: CompanyProposal[];
   setDemoProposals: (proposals: CompanyProposal[]) => void;
+  /** Plans and prices (plans.json), editable in the demo panel. */
+  plans: Plans;
+  setPlans: (plans: Plans) => void;
   /** Replaces every Leads chat (demo panel). */
   replaceLeads: (seeds: LeadSeed[]) => void;
   /** Which demo company the app is "logged in" as. Switched from the demo panel. */
@@ -121,6 +124,8 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
   );
 
   const [demoProposals, setDemoProposals] = useState<CompanyProposal[]>(BUNDLED_PROPOSALS);
+  const [plans, setPlans] = useState<Plans>(BUNDLED_PLANS);
+  const { maxActiveProposals } = freeLimits(plans);
 
   const [currentUserId, setCurrentUserIdState] = useState<string>(DEMO_USER_ID);
   const [discover, setDiscover] = useState<DiscoverState>(() => seedDiscover(DEMO_USER_ID));
@@ -193,7 +198,7 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
 
   const addProposal = useCallback((input: ProposalInput) => {
     setProposals((current) => {
-      if (current.length >= MAX_ACTIVE_PROPOSALS) return current;
+      if (current.length >= maxActiveProposals) return current;
       const meta = [input.location, input.partnerType, input.collaborationType].filter(Boolean).join(' · ');
       return [
         ...current,
@@ -206,7 +211,7 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
         },
       ];
     });
-  }, []);
+  }, [maxActiveProposals]);
 
   const sendMessage = useCallback((leadId: string, text: string) => {
     const trimmed = text.trim();
@@ -250,6 +255,8 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
       getCompany,
       demoProposals,
       setDemoProposals,
+      plans,
+      setPlans,
       replaceLeads,
       currentUserId,
       setCurrentUserId,
@@ -273,6 +280,7 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
       companies,
       getCompany,
       demoProposals,
+      plans,
       replaceLeads,
       currentUserId,
       setCurrentUserId,
@@ -304,8 +312,9 @@ function usePreview() {
 }
 
 export function useProposals() {
-  const { proposals, addProposal } = usePreview();
-  return { proposals, addProposal, canAdd: proposals.length < MAX_ACTIVE_PROPOSALS };
+  const { proposals, addProposal, plans } = usePreview();
+  const { maxActiveProposals } = freeLimits(plans);
+  return { proposals, addProposal, maxActiveProposals, canAdd: proposals.length < maxActiveProposals };
 }
 
 /** The session's demo companies (with any demo panel edits) and a lookup by id. */
@@ -320,6 +329,12 @@ export function useDemoProposals() {
   return { demoProposals, setDemoProposals };
 }
 
+/** Plans and prices for this session (with any demo panel edits), plus the Free limits the demo enforces. */
+export function usePlans() {
+  const { plans, setPlans } = usePreview();
+  return { plans, setPlans, ...freeLimits(plans) };
+}
+
 export function useLeads() {
   const { leads, sendMessage, toggleMute, unmatch, replaceLeads } = usePreview();
   return { leads, sendMessage, toggleMute, unmatch, replaceLeads };
@@ -327,8 +342,8 @@ export function useLeads() {
 
 /** The demo company the app is logged in as (defaults to c01; switchable in the demo panel). */
 export function useCurrentUser() {
-  const { currentUserId, setCurrentUserId, getCompany } = usePreview();
-  return { user: buildDemoUser(getCompany(currentUserId)), currentUserId, setCurrentUserId };
+  const { currentUserId, setCurrentUserId, getCompany, plans } = usePreview();
+  return { user: buildDemoUser(getCompany(currentUserId), plans.free.name), currentUserId, setCurrentUserId };
 }
 
 /** Discover progress for the logged-in account: passes, saves, blocks and likes sent. */

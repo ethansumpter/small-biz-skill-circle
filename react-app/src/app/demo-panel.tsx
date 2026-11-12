@@ -20,21 +20,23 @@ import { CompanyPicker } from '@/components/demo-panel/company-picker';
 import { type CompanyChanges, ConfirmSaveModal } from '@/components/demo-panel/confirm-save-modal';
 import { ItemRow, Tabs } from '@/components/demo-panel/editor-shell';
 import { LeadDetail } from '@/components/demo-panel/lead-editor';
+import { PlanDetail } from '@/components/demo-panel/plan-editor';
 import { partnerIds, ProposalDetail, proposalTitle, usePartnerNames } from '@/components/demo-panel/proposal-editor';
 import { StackHeader } from '@/components/stack-header';
 import { type Company, type CompanyProposal, DEMO_USER_ID, getCompany as getBundledCompany } from '@/data/companies';
 import { type LeadSeed, toLeadSeed } from '@/data/demo-leads';
-import { useCompanies, useCurrentUser, useDemoProposals, useLeads } from '@/state/preview';
+import { formatPrice, type Plan, type Plans } from '@/data/plans';
+import { useCompanies, useCurrentUser, useDemoProposals, useLeads, usePlans } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { diffJson, type Json } from '@/utils/json-diff';
 
 /**
  * Demo panel: an admin view for the demo, separate from the Bond product.
- * Three editors (companies, collaboration proposals and Leads chats), each a
- * list plus a detail view. Edits are applied after a confirmation listing each
+ * Four editors (companies, collaboration proposals, Leads chats and plans),
+ * each a list plus a detail view. Edits are applied after a confirmation listing each
  * change, and always update the session (preview provider). With the dev
- * server they're also written to src/data/companies.json and
- * src/data/leads.json via the dev-only /api/demo-companies route; hosted demos
+ * server they're also written to src/data/companies.json, leads.json and
+ * plans.json via the dev-only /api/demo-companies route; hosted demos
  * (web on EAS Hosting, EAS Update) have no dev server, so there edits last for
  * the session only.
  * Also switches which company the app is logged in as (session only).
@@ -70,13 +72,20 @@ const SESSION_ONLY_BANNER: Banner = {
   text: 'This hosted demo has no dev server, so edits apply to this session only and reset when you reload. Nobody else sees them.',
 };
 
-type Tab = 'companies' | 'proposals' | 'chats';
-const TAB_TITLES: Record<Tab, string> = { companies: 'Companies', proposals: 'Proposals', chats: 'Chats' };
+type Tab = 'companies' | 'proposals' | 'chats' | 'plans';
+const TAB_TITLES: Record<Tab, string> = { companies: 'Companies', proposals: 'Proposals', chats: 'Chats', plans: 'Plans' };
 const NOUN: Record<Tab, [string, string]> = {
   companies: ['company', 'companies'],
   proposals: ['proposal', 'proposals'],
   chats: ['chat', 'chats'],
+  plans: ['plan', 'plans'],
 };
+
+/** plans.json keys plans by id; the editor works on a list of records with an `id`. */
+const planRecords = (plans: Plans) =>
+  Object.entries(plans).map(([id, plan]) => ({ id, ...plan })) as unknown as EditRecord[];
+const plansFromRecords = (records: EditRecord[]) =>
+  Object.fromEntries(records.map(({ id, ...plan }) => [id, plan])) as unknown as Plans;
 
 /** A row in the current tab's list. */
 type Entry = { id: string; avatarIds: string[]; title: string; subtitle: string; tag?: string };
@@ -95,12 +104,14 @@ export default function DemoPanelScreen() {
   const { companies: sessionCompanies, setCompanies } = useCompanies();
   const { demoProposals, setDemoProposals } = useDemoProposals();
   const { leads: sessionLeads, replaceLeads } = useLeads();
+  const { plans: sessionPlans, setPlans } = usePlans();
   const partnerNames = usePartnerNames();
 
   // Saved ("original") and edited ("draft") copies of each dataset.
   const initial = useRef({
     companies: clone(sessionCompanies) as unknown as EditRecord[],
     proposals: clone(demoProposals) as unknown as EditRecord[],
+    plans: clone(planRecords(sessionPlans)),
   }).current;
   const [origCompanies, setOrigCompanies] = useState(initial.companies);
   const [companies, setDraftCompanies] = useState(initial.companies);
@@ -108,6 +119,8 @@ export default function DemoPanelScreen() {
   const [proposals, setDraftProposals] = useState(initial.proposals);
   const [origLeads, setOrigLeads] = useState<LeadSeed[]>(() => clone(sessionLeads.map(toLeadSeed)));
   const [leads, setDraftLeads] = useState<LeadSeed[]>(origLeads);
+  const [origPlans, setOrigPlans] = useState(initial.plans);
+  const [draftPlans, setDraftPlans] = useState(initial.plans);
 
   /** True once the data files are reachable; otherwise applied edits last for the session only. */
   const [canSave, setCanSave] = useState(false);
@@ -116,7 +129,12 @@ export default function DemoPanelScreen() {
   );
   const [tab, setTab] = useState<Tab>('companies');
   /** The item open in each tab; null shows the list (narrow) or a default item (wide). */
-  const [selected, setSelected] = useState<Record<Tab, string | null>>({ companies: null, proposals: null, chats: null });
+  const [selected, setSelected] = useState<Record<Tab, string | null>>({
+    companies: null,
+    proposals: null,
+    chats: null,
+    plans: null,
+  });
   const [query, setQuery] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -131,7 +149,7 @@ export default function DemoPanelScreen() {
     try {
       const res = await fetch(apiUrl());
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `HTTP ${res.status}`);
-      const data = (await res.json()) as { companies: EditRecord[]; proposals: EditRecord[] };
+      const data = (await res.json()) as { companies: EditRecord[]; proposals: EditRecord[]; plans: Plans };
       if (isCancelled()) return;
       setOrigCompanies(data.companies);
       setDraftCompanies((current) => (current === initial.companies ? data.companies : current));
@@ -139,6 +157,10 @@ export default function DemoPanelScreen() {
       setOrigProposals(data.proposals);
       setDraftProposals((current) => (current === initial.proposals ? data.proposals : current));
       setDemoProposals(data.proposals as unknown as CompanyProposal[]);
+      const filePlans = planRecords(data.plans);
+      setOrigPlans(filePlans);
+      setDraftPlans((current) => (current === initial.plans ? filePlans : current));
+      setPlans(data.plans);
       setCanSave(true);
       setBanner(null);
     } catch (error) {
@@ -192,8 +214,9 @@ export default function DemoPanelScreen() {
       ...byIndex('companies', companies, origCompanies, companyName),
       ...byIndex('proposals', proposals, origProposals, (p) => `Proposal: ${proposalTitle(p)}`),
       ...chatGroups,
+      ...byIndex('plans', draftPlans, origPlans, (p) => `Plan: ${String(p.name || p.id)}`),
     ].filter((g) => g.changes.length > 0);
-  }, [companies, origCompanies, proposals, origProposals, leads, origLeads, nameOf]);
+  }, [companies, origCompanies, proposals, origProposals, leads, origLeads, draftPlans, origPlans, nameOf]);
 
   const changeCounts = useMemo(
     () => new Map(groups.map((g) => [`${g.tab}:${g.itemId}`, g.changes.length])),
@@ -205,6 +228,7 @@ export default function DemoPanelScreen() {
   const files = [
     ...(changed('companies') || changed('proposals') ? ['src/data/companies.json'] : []),
     ...(changed('chats') ? ['src/data/leads.json'] : []),
+    ...(changed('plans') ? ['src/data/plans.json'] : []),
   ];
 
   // ── Saving ─────────────────────────────────────────────────────────────────
@@ -213,6 +237,8 @@ export default function DemoPanelScreen() {
     setCompanies(companies as unknown as Company[]);
     setDemoProposals(proposals as unknown as CompanyProposal[]);
     replaceLeads(leads);
+    setPlans(plansFromRecords(draftPlans));
+    setOrigPlans(draftPlans);
     setOrigCompanies(companies);
     setOrigProposals(proposals);
     setOrigLeads(leads);
@@ -235,6 +261,7 @@ export default function DemoPanelScreen() {
           ...(changed('companies') ? { companies } : {}),
           ...(changed('proposals') ? { proposals } : {}),
           ...(changed('chats') ? { leads } : {}),
+          ...(changed('plans') ? { plans: plansFromRecords(draftPlans) } : {}),
         }),
       });
       const result = await res.json().catch(() => ({}));
@@ -254,6 +281,7 @@ export default function DemoPanelScreen() {
     setDraftCompanies(origCompanies);
     setDraftProposals(origProposals);
     setDraftLeads(origLeads);
+    setDraftPlans(origPlans);
   }
 
   // ── Lists ──────────────────────────────────────────────────────────────────
@@ -277,6 +305,15 @@ export default function DemoPanelScreen() {
         subtitle: [p.id, p.status, partnerNames(p)].filter(Boolean).join(' · '),
       }));
     }
+    if (tab === 'plans') {
+      return draftPlans.map((p) => ({
+        id: p.id,
+        avatarIds: [],
+        title: String(p.name || p.id),
+        subtitle: `${p.id} · ${formatPrice(p as unknown as Plan)}`,
+        tag: typeof p.type === 'string' ? p.type : undefined,
+      }));
+    }
     return leads.map((l) => ({
       id: l.id,
       avatarIds: [l.id],
@@ -284,7 +321,7 @@ export default function DemoPanelScreen() {
       subtitle: `${plural(l.messages.length, ['message', 'messages'])}${l.pinnedComment ? ' · pinned comment' : ''}${l.muted ? ' · muted' : ''}`,
       tag: origLeads.some((o) => o.id === l.id) ? undefined : 'New',
     }));
-  }, [tab, companies, proposals, leads, origLeads, currentUserId, partnerNames, nameOf]);
+  }, [tab, companies, proposals, leads, origLeads, draftPlans, currentUserId, partnerNames, nameOf]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -347,6 +384,20 @@ export default function DemoPanelScreen() {
           original={saved}
           onChange={(next) => setDraftProposals((list) => replaceById(list, next))}
           onDiscard={() => setDraftProposals((list) => replaceById(list, saved))}
+          {...nav}
+        />
+      );
+    }
+  } else if (tab === 'plans') {
+    const plan = draftPlans.find((p) => p.id === shownId);
+    if (plan) {
+      const saved = origPlans.find((p) => p.id === plan.id) ?? plan;
+      detail = (
+        <PlanDetail
+          plan={plan}
+          original={saved}
+          onChange={(next) => setDraftPlans((list) => replaceById(list, next))}
+          onDiscard={() => setDraftPlans((list) => replaceById(list, saved))}
           {...nav}
         />
       );
@@ -427,6 +478,7 @@ export default function DemoPanelScreen() {
       <View style={styles.section}>
         <Tabs
           label="What to edit"
+          wrap
           tabs={(Object.keys(TAB_TITLES) as Tab[]).map((t) => ({ key: t, title: TAB_TITLES[t], count: tabCount(t) }))}
           value={tab}
           onChange={switchTab}

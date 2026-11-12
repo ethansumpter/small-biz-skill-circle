@@ -8,6 +8,7 @@ import path from 'node:path';
  * machine running `npx expo start`:
  *   - src/data/companies.json: `companies` and `proposals` (other keys kept as-is)
  *   - src/data/leads.json: `leads`, the Leads chats (other keys kept as-is)
+ *   - src/data/plans.json: `plans`, keyed by plan id (other keys kept as-is)
  * A POST only writes the datasets it includes. Not part of the Bond product: it
  * exists so the demo data can be edited.
  */
@@ -15,10 +16,12 @@ import path from 'node:path';
 const DATA_DIR = path.join(process.cwd(), 'src', 'data');
 const COMPANIES_FILE = path.join(DATA_DIR, 'companies.json');
 const LEADS_FILE = path.join(DATA_DIR, 'leads.json');
+const PLANS_FILE = path.join(DATA_DIR, 'plans.json');
 
 type Item = { id: string; [key: string]: unknown };
 type CompaniesFile = { companies: Item[]; proposals: Item[]; [key: string]: unknown };
 type LeadsFile = { leads: Item[]; [key: string]: unknown };
+type PlansFile = { plans: Record<string, Record<string, unknown>>; [key: string]: unknown };
 
 const devOnly = () =>
   process.env.NODE_ENV === 'production'
@@ -58,14 +61,16 @@ function sameIds(current: Item[], next: Item[], name: string) {
 export async function GET() {
   const blocked = devOnly();
   if (blocked) return blocked;
-  const [companiesFile, leadsFile] = await Promise.all([
+  const [companiesFile, leadsFile, plansFile] = await Promise.all([
     readJson<CompaniesFile>(COMPANIES_FILE),
     readJson<LeadsFile>(LEADS_FILE),
+    readJson<PlansFile>(PLANS_FILE),
   ]);
   return Response.json({
     companies: companiesFile.companies,
     proposals: companiesFile.proposals,
     leads: leadsFile.leads,
+    plans: plansFile.plans,
   });
 }
 
@@ -73,7 +78,7 @@ export async function POST(request: Request) {
   const blocked = devOnly();
   if (blocked) return blocked;
 
-  let body: { companies?: unknown; proposals?: unknown; leads?: unknown };
+  let body: { companies?: unknown; proposals?: unknown; leads?: unknown; plans?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -107,9 +112,33 @@ export async function POST(request: Request) {
       leadsFile = { ...(await readJson<LeadsFile>(LEADS_FILE)), leads };
     }
 
+    let plansFile: PlansFile | null = null;
+    if (body.plans !== undefined) {
+      const plans = body.plans;
+      const isObject = (v: unknown): v is Record<string, unknown> =>
+        typeof v === 'object' && v !== null && !Array.isArray(v);
+      if (!isObject(plans) || !Object.values(plans).every(isObject)) {
+        throw new BadRequest('`plans` must be an object of plan objects, keyed by plan id.');
+      }
+      const current = await readJson<PlansFile>(PLANS_FILE);
+      // The panel edits plans but never adds, removes or renames them (the app looks them up by id).
+      if (Object.keys(current.plans).sort().join(',') !== Object.keys(plans).sort().join(',')) {
+        throw new BadRequest('Plan ids changed. Reload the demo panel and try again.', 409);
+      }
+      if (
+        Object.values(plans).some(
+          (p) => !isObject(p) || typeof p.pricePence !== 'number' || p.pricePence < 0,
+        )
+      ) {
+        throw new BadRequest('Every plan needs a price in pence of 0 or more.');
+      }
+      plansFile = { ...current, plans: plans as PlansFile['plans'] };
+    }
+
     // Validate everything before writing anything.
     if (companiesChanged) await writeJson(COMPANIES_FILE, companiesFile);
     if (leadsFile) await writeJson(LEADS_FILE, leadsFile);
+    if (plansFile) await writeJson(PLANS_FILE, plansFile);
     return Response.json({ ok: true });
   } catch (error) {
     if (error instanceof BadRequest) return Response.json({ error: error.message }, { status: error.status });

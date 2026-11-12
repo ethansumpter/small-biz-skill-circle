@@ -2,15 +2,16 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Card, PrimaryButton } from '@/components/ui';
-import { formatPrice, plans } from '@/data/plans';
-import { useCurrentUser } from '@/state/preview';
+import { formatPrice } from '@/data/plans';
+import { useCurrentUser, usePlans } from '@/state/preview';
 import { space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
-/** In-app purchases: Boost and Bond Plus. Prices from src/data/plans.json. */
+/** In-app purchases: Boost and Bond Plus. Prices from src/data/plans.json (via usePlans, so demo panel edits show). */
 export function GetMoreSection() {
   const colors = useBondColors();
   const { user: demoUser } = useCurrentUser();
+  const { plans } = usePlans();
 
   return (
     <View style={styles.container}>

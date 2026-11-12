@@ -12,8 +12,7 @@ import { FilterBar } from '@/components/discover/filter-bar';
 import { LikeSheet } from '@/components/discover/like-sheet';
 import { Card, PrimaryButton } from '@/components/ui';
 import { DISCOVER_ORDER, type Filters, matchesFilters } from '@/data/discover';
-import { FREE_LIKES_PER_DAY } from '@/data/plans';
-import { useCompanies, useCurrentUser, useDemoProposals, useDiscover } from '@/state/preview';
+import { useCompanies, useCurrentUser, useDemoProposals, useDiscover, usePlans } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
@@ -50,7 +49,8 @@ export default function DiscoverScreen() {
     [remaining, filters, demoProposals],
   );
   const company = feed[0];
-  const likesLeft = Math.max(0, FREE_LIKES_PER_DAY - sent.length);
+  const { likesPerDay } = usePlans();
+  const likesLeft = Math.max(0, likesPerDay - sent.length);
 
   // New company: back to the top, no proposal type picked.
   useEffect(() => {

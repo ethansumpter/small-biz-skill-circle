@@ -8,8 +8,7 @@ import { CardMenu } from '@/components/discover/card-menu';
 import { DiscoverCard } from '@/components/discover/discover-card';
 import { LikeSheet } from '@/components/discover/like-sheet';
 import { StackHeader } from '@/components/stack-header';
-import { FREE_LIKES_PER_DAY } from '@/data/plans';
-import { useCompanies, useDiscover, useNetwork } from '@/state/preview';
+import { useCompanies, useDiscover, useNetwork, usePlans } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
@@ -26,6 +25,7 @@ export default function NetworkProfileScreen() {
   const { incoming, saved, acceptProposal, rejectProposal, toggleSaved } = useNetwork();
   const { sent, sendLike, blockCompany } = useDiscover();
   const { companies } = useCompanies();
+  const { likesPerDay } = usePlans();
 
   // Snapshot on open, so the page doesn't flash "not found" while leaving after Accept/Reject.
   const [proposal] = useState(() => incoming.find((p) => p.companyId === id));
@@ -179,7 +179,7 @@ export default function NetworkProfileScreen() {
           visible={sheetOpen}
           proposalType={proposalType}
           onProposalType={setProposalType}
-          likesLeft={Math.max(0, FREE_LIKES_PER_DAY - sent.length)}
+          likesLeft={Math.max(0, likesPerDay - sent.length)}
           onClose={() => setSheetOpen(false)}
           onSend={send}
         />
