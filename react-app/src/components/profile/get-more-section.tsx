@@ -2,12 +2,12 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Card, PrimaryButton } from '@/components/ui';
-import { plans } from '@/data/demo-user';
+import { formatPrice, plans } from '@/data/plans';
 import { useCurrentUser } from '@/state/preview';
 import { space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
-/** In-app purchases: Boost and Bond Plus. Prices from docs/bond-demo-data.md. */
+/** In-app purchases: Boost and Bond Plus. Prices from src/data/plans.json. */
 export function GetMoreSection() {
   const colors = useBondColors();
   const { user: demoUser } = useCurrentUser();
@@ -21,14 +21,14 @@ export function GetMoreSection() {
       <OfferCard
         icon="rocket-outline"
         title="Boost your profile"
-        price={plans.boost.price}
+        price={formatPrice(plans.boost)}
         benefits={plans.boost.benefits}
         cta="Boost profile"
       />
       <OfferCard
         icon="star-outline"
         title={plans.plus.name}
-        price={plans.plus.price}
+        price={formatPrice(plans.plus)}
         benefits={plans.plus.benefits}
         cta={`Get ${plans.plus.name}`}
       />

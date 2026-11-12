@@ -10,6 +10,7 @@ import {
 import { DEMO_LEADS, type Lead, type LeadSeed, withCompanyFields } from '@/data/demo-leads';
 import { DEMO_INCOMING, type IncomingProposal } from '@/data/demo-network';
 import { buildDemoUser } from '@/data/demo-user';
+import { MAX_ACTIVE_PROPOSALS } from '@/data/plans';
 
 /**
  * All preview-only app state (proposals, matches, conversations) lives in this
@@ -21,7 +22,6 @@ import { buildDemoUser } from '@/data/demo-user';
 
 // ── Proposals ────────────────────────────────────────────────────────────────
 
-export const MAX_ACTIVE_PROPOSALS = 3;
 
 export type ProposalInput = {
   lookingFor: string;

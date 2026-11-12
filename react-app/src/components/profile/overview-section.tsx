@@ -2,7 +2,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card, Chip, SectionTitle } from '@/components/ui';
-import { MAX_ACTIVE_PROPOSALS, useCurrentUser, useProposals } from '@/state/preview';
+import { MAX_ACTIVE_PROPOSALS } from '@/data/plans';
+import { useCurrentUser, useProposals } from '@/state/preview';
 import { space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 

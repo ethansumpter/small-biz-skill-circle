@@ -1,0 +1,30 @@
+{
+  "source": "docs/bond-demo-data.md (Monetisation). Demo values only: nothing is ever charged. Prices are in pence; the app formats them. `limits` are enforced in the app; null means unlimited.",
+  "currency": "GBP",
+  "plans": {
+    "free": {
+      "name": "Free",
+      "type": "plan",
+      "pricePence": 0,
+      "period": null,
+      "benefits": ["3 active proposals", "10 likes a day"],
+      "limits": { "activeProposals": 3, "likesPerDay": 10 }
+    },
+    "boost": {
+      "name": "Boost",
+      "type": "one-off",
+      "pricePence": 499,
+      "period": { "count": 7, "unit": "day" },
+      "benefits": ["Shown first in Discover within 10 miles"],
+      "limits": {}
+    },
+    "plus": {
+      "name": "Bond Plus",
+      "type": "subscription",
+      "pricePence": 1499,
+      "period": { "count": 1, "unit": "month" },
+      "benefits": ["Unlimited likes", "See who saved you", "\"Why this match\" detail", "Priority verification"],
+      "limits": { "likesPerDay": null }
+    }
+  }
+}

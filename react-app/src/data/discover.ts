@@ -11,8 +11,6 @@ export const DISCOVER_ORDER = [
   'c06', 'c08', 'c13', 'c14', 'c15', 'c16', 'c17', 'c18', 'c01',
 ];
 
-/** Free plan allowance (docs/bond-demo-data.md, Monetisation). */
-export const FREE_LIKES_PER_DAY = 10;
 
 // ── Filters ──────────────────────────────────────────────────────────────────
 

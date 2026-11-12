@@ -8,7 +8,7 @@ import { CardMenu } from '@/components/discover/card-menu';
 import { DiscoverCard } from '@/components/discover/discover-card';
 import { LikeSheet } from '@/components/discover/like-sheet';
 import { StackHeader } from '@/components/stack-header';
-import { FREE_LIKES_PER_DAY } from '@/data/discover';
+import { FREE_LIKES_PER_DAY } from '@/data/plans';
 import { useCompanies, useDiscover, useNetwork } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';

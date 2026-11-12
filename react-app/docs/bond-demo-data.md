@@ -262,6 +262,8 @@ Each review shows a small **Report review** link.
 - Suggested chips: Draft a proposal · Explain my matches · Improve my profile · Safety help
 
 ## Monetisation (demo values)
+Stored in `src/data/plans.json` (prices in pence, formatted by the app; the Free plan's `limits` set the 3 active proposals and 10 likes a day used across the demo). Change values there and keep this table in step.
+
 | Product | Price | Benefit |
 |---|---|---|
 | Free | £0 | 3 active proposals, 10 likes a day |
