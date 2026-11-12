@@ -70,4 +70,39 @@ jobs:
         env:
           # Passed via env (not inlined) so commit text can't inject shell commands.
           COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'Manual publish' }}
-        run: eas update --branch main --message "$(echo "$COMMIT_MESSAGE" | head -n 1)" --non-interactive
+        # --json prints the published updates (one per platform) to stdout; logs go to stderr.
+        run: eas update --branch main --message "$(echo "$COMMIT_MESSAGE" | head -n 1)" --non-interactive --json > eas-update.json
+
+      # Link and QR code for opening this update in Expo Go, on the run's summary page.
+      # Each update group has its own link, so every run gets a new one.
+      - name: Add Expo Go link to run summary
+        run: |
+          node <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          const fs = require('fs');
+          const updates = JSON.parse(fs.readFileSync('eas-update.json', 'utf8'));
+          const projectId = require('./app.json').expo.extra.eas.projectId;
+          const { group, runtimeVersion, message } = updates[0];
+          const link = `exp://u.expo.dev/${projectId}/group/${group}`;
+          const qr = `https://qr.expo.dev/eas-update?slug=exp&projectId=${projectId}&groupId=${group}`;
+          const platforms = updates.map((u) => u.platform).join(', ');
+          console.log(`## Open in Expo Go
+
+          Scan with the iPhone Camera app, or from inside Expo Go on Android. Needs the latest Expo Go.
+
+          <img src="${qr}" alt="QR code for opening this update in Expo Go" width="240" height="240" />
+
+          Or open this link on the phone:
+
+          \`\`\`
+          ${link}
+          \`\`\`
+
+          | | |
+          |---|---|
+          | Update | ${String(message).replace(/\|/g, "\\|")} |
+          | Group | \`${group}\` |
+          | Runtime | \`${runtimeVersion}\` |
+          | Platforms | ${platforms} |
+
+          It runs as a production build: demo panel changes only last until the app reloads.`.replace(/^ {10}/gm, ''));
+          EOF

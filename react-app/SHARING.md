@@ -7,6 +7,7 @@ One person, the **host**, runs the app from their computer. Everyone else opens 
 - [For the host](#for-the-host)
 - [For teammates](#for-teammates)
 - [How saving works when several people edit](#how-saving-works-when-several-people-edit)
+- [Opening the published version (no host needed)](#opening-the-published-version-no-host-needed)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -114,6 +115,19 @@ Everyone saves to the same files, so the panel checks that nobody else saved sin
 - If you both edited **the same item**, your version of that item wins when you save again. The change list shows exactly what you'd overwrite, so look before you confirm.
 
 To keep it simple, split the work: one person per company, or per tab.
+
+---
+
+## Opening the published version (no host needed)
+
+Every push to `main` publishes the app with the **Publish Bond demo** GitHub Action. To open that version in Expo Go without anyone running a dev server:
+
+1. On GitHub, open **Actions → Publish Bond demo**, then the latest successful run.
+2. On the run's summary page, under **Open in Expo Go**, scan the QR code. On iPhone use the Camera app; on Android, scan from inside Expo Go. Or open the `exp://` link shown there on your phone.
+
+Each run has its own QR code, so use the newest run to get the latest version.
+
+This is a **production** build: the demo panel shows **Build mode: production**, and edits only last until the app reloads. To change the shared demo data, use a host's dev server as described above.
 
 ---
 
