@@ -1,0 +1,16 @@
+{
+  "name": "Bond",
+  "short_name": "Bond",
+  "description": "Stronger Together: match with small businesses to trade skills and collaborate.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F0F3F5",
+  "theme_color": "#F0F3F5",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

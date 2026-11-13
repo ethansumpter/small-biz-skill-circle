@@ -114,6 +114,7 @@ All files are 2000×2000 transparent PNGs in `assets/logo/` (full-size originals
 | `assets/android-icon-monochrome.png` | 1024×1024, transparent | B silhouette in white, 55% height |
 | `assets/favicon.png` | 48×48, opaque | B on Platinum |
 | `public/apple-touch-icon.png` | 180×180, opaque | B on Platinum (scaled from `icon.png`); web home-screen icon, linked in `src/app/+html.tsx` |
+| `public/icon-192.png`, `public/icon-512.png` | 192×192, 512×512, opaque | B on Platinum (scaled from `icon.png`); web app icons for Chrome/Android install, listed in `public/manifest.webmanifest` |
 | `assets/splash-icon.png` | 1024×1024, transparent | B at 90% height. Splash via the `expo-splash-screen` plugin in `app.json` (200pt wide, Platinum background); held until Lexend loads in `src/app/_layout.tsx` |
 
 ### Rules

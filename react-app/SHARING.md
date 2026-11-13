@@ -127,6 +127,8 @@ Every push to `main` publishes the app with the **Publish Bond demo** GitHub Act
 
 Each run has its own QR code, so use the newest run to get the latest version.
 
+**You must be signed in to Expo Go** (Profile tab → Sign in) with an Expo account that's a member of the **ethansumpters-team** organisation. Since May 2026 Expo Go only opens published updates for projects your account owns or belongs to; anyone else gets `Failed to download remote update`. The host adds teammates on expo.dev → ethansumpters-team → Members. (A dev server link from `npx expo start` doesn't need this.)
+
 This is a **production** build: the demo panel shows **Build mode: production**, and edits only last until the app reloads. To change the shared demo data, use a host's dev server as described above.
 
 ---
@@ -137,7 +139,7 @@ This is a **production** build: the demo panel shows **Build mode: production**,
 |---|---|
 | The QR code doesn't open anything | **iPhone:** use the Camera app. **Android:** scan from inside Expo Go. |
 | An error that the project needs a different Expo SDK version | Update Expo Go from the app store. |
-| **Android:** `Failed to download remote update` on the published QR code (iPhone opens it fine) | Expo Go only loads updates published under its SDK runtime (`exposdk:58.0.0`). Keep `"runtimeVersion": { "policy": "sdkVersion" }` in `app.json`, and use a QR code from a run published after that was set. Older runs used runtime `1.0.0` and won't open on Android. |
+| `Failed to download remote update` on the published QR code | 1. Sign in to Expo Go with an account in the **ethansumpters-team** organisation ([see above](#opening-the-published-version-no-host-needed)). 2. Use a QR code from a run after the "Fix Android bug" commit: Android Expo Go only loads updates under its SDK runtime (`exposdk:58.0.0`), so keep `"runtimeVersion": { "policy": "sdkVersion" }` in `app.json`. Older runs used runtime `1.0.0` and won't open on Android. |
 | The app loads forever or shows a network error | Check the host's terminal is still running. Over Wi-Fi without `--tunnel`, you must be on the same network as the host. |
 | The demo panel says it **couldn't reach the dev server**, or shows **Apply…** | The host's dev server isn't reachable from your phone. Ask the host to restart with `npx expo start --tunnel`, then tap **Retry**. |
 | "Someone else saved … after you opened the demo panel" | Tap **Reload**, check your changes, then save again. See [above](#how-saving-works-when-several-people-edit). |

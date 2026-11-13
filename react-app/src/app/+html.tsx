@@ -33,6 +33,8 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="apple-mobile-web-app-title" content="Bond" />
         {/* Home-screen icon: the B on Platinum (opaque 180×180, from assets/icon.png; served from public/). */}
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        {/* Lets Chrome/Android offer "Install app" (name, icons, standalone display). */}
+        <link rel="manifest" href="/manifest.webmanifest" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="format-detection" content="telephone=no" />
 
