@@ -1,5 +1,7 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useBottomClearance } from '@/components/ai-assistant-button';
+import { useTabBarScrollHandler } from '@/components/tab-bar-visibility';
 import { LeadRow } from '@/components/leads/lead-row';
 import { Card } from '@/components/ui';
 import { useLeads } from '@/state/preview';
@@ -8,11 +10,18 @@ import { space, type, useBondColors } from '@/theme/tokens';
 export default function LeadsScreen() {
   const colors = useBondColors();
   const bottomClearance = useBottomClearance();
+  // Hides the tab bar while scrolling down, shows it scrolling up.
+  const onScroll = useTabBarScrollHandler();
   const { leads } = useLeads();
 
   return (
     <View style={[styles.root, { backgroundColor: colors.surface }]}>
-      <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        style={styles.root}
+        contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}
+      >
         <View style={styles.intro}>
           <Text accessibilityRole="header" style={[type.heading, { color: colors.ink }]}>
             Leads
@@ -34,7 +43,7 @@ export default function LeadsScreen() {
             </Text>
           </Card>
         )}
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }

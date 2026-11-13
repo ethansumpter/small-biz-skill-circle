@@ -79,8 +79,8 @@ export function GlassGroup({
 }
 
 /**
- * How much of the bottom of a tab screen the floating glass bar covers. 0 when
- * the bar is solid (it then sits below the screen, not over it).
+ * How much of the bottom of a tab screen the floating tab bar covers (glass or
+ * solid: both float so the bar can hide on scroll). Screens pad by this.
  */
 export const TabBarOverlapContext = createContext(0);
 

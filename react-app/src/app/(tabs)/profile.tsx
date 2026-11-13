@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { useBottomClearance } from '@/components/ai-assistant-button';
+import { useTabBarScrollHandler } from '@/components/tab-bar-visibility';
 import { GetMoreSection } from '@/components/profile/get-more-section';
 import { OverviewSection } from '@/components/profile/overview-section';
 import { ProfileHeader } from '@/components/profile/profile-header';
@@ -12,17 +14,24 @@ import { space, useBondColors } from '@/theme/tokens';
 export default function ProfileScreen() {
   const colors = useBondColors();
   const bottomClearance = useBottomClearance();
+  // Hides the tab bar while scrolling down, shows it scrolling up.
+  const onScroll = useTabBarScrollHandler();
   const [tab, setTab] = useState<ProfileTab>('Get more');
 
   return (
     <View style={[styles.root, { backgroundColor: colors.surface }]}>
-      <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        style={styles.root}
+        contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}
+      >
         <ProfileHeader />
         <ProfileTabs value={tab} onChange={setTab} />
         {tab === 'Get more' && <GetMoreSection />}
         {tab === 'Safety' && <SafetySection />}
         {tab === 'Overview' && <OverviewSection />}
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }

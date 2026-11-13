@@ -2,10 +2,12 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { TabTrigger, type TabTriggerSlotProps } from 'expo-router/ui';
 import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RingsMark } from '@/components/bond-logo';
 import { GlassSurface } from '@/components/glass';
+import { useTabBarSlideStyle } from '@/components/tab-bar-visibility';
 import { radius, space, useBondColors } from '@/theme/tokens';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -35,13 +37,16 @@ export const BOND_TABS: BondTab[] = [
  * Bond's bottom navigation. Render inside expo-router/ui `<Tabs>`; each trigger
  * matches a route declared by name in the layout's (hidden) `<TabList>`.
  *
- * With `glass` (iOS 26+, see components/glass.tsx) it is a floating liquid glass
- * pill over the screen, and reports its height through `onHeight` so screens can
- * scroll clear of it. Otherwise it is the solid full-width bar below the screen.
+ * It floats over the bottom of the screen and reports its height through
+ * `onHeight`, so screens pad clear of it and it can slide away while you scroll
+ * down (components/tab-bar-visibility.tsx). With `glass` (iOS 26+, see
+ * components/glass.tsx) it is a liquid glass pill; otherwise a solid full-width bar.
  */
 export function BondTabBar({ glass, onHeight }: { glass: boolean; onHeight?: (height: number) => void }) {
   const colors = useBondColors();
   const insets = useSafeAreaInsets();
+  // Slides past its own height plus a little, so the glass pill's shadow clears the edge too.
+  const slide = useTabBarSlideStyle(space[2]);
 
   const tabs = BOND_TABS.map((tab) => (
     <TabTrigger key={tab.name} name={tab.name} asChild>
@@ -49,46 +54,46 @@ export function BondTabBar({ glass, onHeight }: { glass: boolean; onHeight?: (he
     </TabTrigger>
   ));
 
-  if (glass) {
-    return (
-      <View
-        pointerEvents="box-none"
-        onLayout={(e) => onHeight?.(Math.ceil(e.nativeEvent.layout.height))}
-        style={[
-          styles.floating,
-          {
+  return (
+    <Animated.View
+      pointerEvents="box-none"
+      onLayout={(e) => onHeight?.(Math.ceil(e.nativeEvent.layout.height))}
+      style={[styles.floating, slide]}
+    >
+      {glass ? (
+        <View
+          pointerEvents="box-none"
+          style={{
             paddingBottom: Math.max(insets.bottom - space[2], space[2]),
             paddingLeft: insets.left + space[3],
             paddingRight: insets.right + space[3],
-          },
-        ]}
-      >
-        {/* Untinted glass: a tint over the plain background just reads as flat grey. */}
-        <GlassSurface glass style={styles.pill}>
-          <View accessibilityRole="tablist" style={styles.row}>
-            {tabs}
-          </View>
-        </GlassSurface>
-      </View>
-    );
-  }
-
-  return (
-    <View
-      accessibilityRole="tablist"
-      style={[
-        styles.bar,
-        {
-          backgroundColor: colors.surfaceRaised,
-          borderTopColor: colors.line,
-          paddingBottom: Math.max(insets.bottom, space[2]),
-          paddingLeft: insets.left + space[2],
-          paddingRight: insets.right + space[2],
-        },
-      ]}
-    >
-      {tabs}
-    </View>
+          }}
+        >
+          {/* Untinted glass: a tint over the plain background just reads as flat grey. */}
+          <GlassSurface glass style={styles.pill}>
+            <View accessibilityRole="tablist" style={styles.row}>
+              {tabs}
+            </View>
+          </GlassSurface>
+        </View>
+      ) : (
+        <View
+          accessibilityRole="tablist"
+          style={[
+            styles.bar,
+            {
+              backgroundColor: colors.surfaceRaised,
+              borderTopColor: colors.line,
+              paddingBottom: Math.max(insets.bottom, space[2]),
+              paddingLeft: insets.left + space[2],
+              paddingRight: insets.right + space[2],
+            },
+          ]}
+        >
+          {tabs}
+        </View>
+      )}
+    </Animated.View>
   );
 }
 

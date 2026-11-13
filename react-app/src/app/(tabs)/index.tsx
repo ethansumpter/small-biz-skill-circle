@@ -1,8 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, type ScrollViewInstance, StyleSheet, Text, View } from 'react-native';
+import { type ComponentRef, useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { useBottomClearance } from '@/components/ai-assistant-button';
+import { useTabBarScrollHandler } from '@/components/tab-bar-visibility';
 import { ACTION_RAIL_WIDTH, ActionRail } from '@/components/discover/action-rail';
 import { CardMenu } from '@/components/discover/card-menu';
 import { DiscoverCard } from '@/components/discover/discover-card';
@@ -25,6 +27,8 @@ const RAIL_EXTRA = ACTION_RAIL_WIDTH * 2 + space[3] * 3;
 export default function DiscoverScreen() {
   const colors = useBondColors();
   const bottomClearance = useBottomClearance();
+  // Hides the tab bar while scrolling down, shows it scrolling up.
+  const onScroll = useTabBarScrollHandler();
   const { currentUserId } = useCurrentUser();
   const { getCompany } = useCompanies();
   const { demoProposals } = useDemoProposals();
@@ -36,7 +40,7 @@ export default function DiscoverScreen() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const scrollRef = useRef<ScrollViewInstance>(null);
+  const scrollRef = useRef<ComponentRef<typeof Animated.ScrollView>>(null);
 
   const remaining = useMemo(() => {
     const done = new Set([...passed, ...blocked, ...sent.map((s) => s.companyId), currentUserId]);
@@ -83,7 +87,9 @@ export default function DiscoverScreen() {
         ) : null}
       </View>
 
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         ref={scrollRef}
         style={styles.root}
         contentContainerStyle={[styles.content, { paddingBottom: bottomClearance + (company ? RAIL_EXTRA : 0) }]}
@@ -118,7 +124,7 @@ export default function DiscoverScreen() {
             onAction={restartDiscover}
           />
         )}
-      </ScrollView>
+      </Animated.ScrollView>
 
       {company ? (
         <>

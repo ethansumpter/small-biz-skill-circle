@@ -1,9 +1,11 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { AI_BUTTON_CLEARANCE } from '@/components/ai-assistant-button';
 import { GlassGroup, GlassSurface, useLiquidGlass, useTabBarOverlap } from '@/components/glass';
+import { useTabBarSlideStyle } from '@/components/tab-bar-visibility';
 import { space, useBondColors } from '@/theme/tokens';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -29,9 +31,11 @@ export function ActionRail({
 }) {
   const glass = useLiquidGlass();
   const overlap = useTabBarOverlap();
+  // Drops down with the tab bar when it hides on scroll.
+  const slide = useTabBarSlideStyle();
 
   return (
-    <View style={[styles.rail, { bottom: AI_BUTTON_CLEARANCE + overlap }]} pointerEvents="box-none">
+    <Animated.View style={[styles.rail, { bottom: AI_BUTTON_CLEARANCE + overlap }, slide]} pointerEvents="box-none">
       <GlassGroup glass={glass} spacing={space[3]} style={styles.group}>
         <RailButton
           glass={glass}
@@ -42,7 +46,7 @@ export function ActionRail({
         />
         <RailButton glass={glass} icon="close" label={`Pass on ${companyName}`} onPress={onCross} />
       </GlassGroup>
-    </View>
+    </Animated.View>
   );
 }
 

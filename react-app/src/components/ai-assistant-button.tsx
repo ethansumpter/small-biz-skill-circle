@@ -1,7 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet } from 'react-native';
 
+import Animated from 'react-native-reanimated';
+
 import { GlassSurface, useLiquidGlass, useTabBarOverlap } from '@/components/glass';
+import { useTabBarSlideStyle } from '@/components/tab-bar-visibility';
 import { space, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
@@ -23,38 +26,37 @@ export function AiAssistantButton() {
   const colors = useBondColors();
   const glass = useLiquidGlass();
   const overlap = useTabBarOverlap();
+  // Drops down with the tab bar when it hides on scroll.
+  const slide = useTabBarSlideStyle();
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel="AI assistant"
-      onPress={() => notInPreview('AI assistant')}
-      style={({ pressed }) => [
-        styles.button,
-        { bottom: space[4] + overlap },
-        // Glass must stay fully opaque, so it shrinks on press instead of fading.
-        glass ? { transform: [{ scale: pressed ? 0.94 : 1 }] } : { opacity: pressed ? 0.85 : 1 },
-      ]}
-    >
-      <GlassSurface
-        glass={glass}
-        interactive
-        style={styles.surface}
-        fallbackStyle={[styles.solid, { backgroundColor: colors.surfaceRaised, borderColor: colors.ink }]}
+    <Animated.View style={[styles.position, { bottom: space[4] + overlap }, slide]}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="AI assistant"
+        onPress={() => notInPreview('AI assistant')}
+        style={({ pressed }) => [
+          styles.button,
+          // Glass must stay fully opaque, so it shrinks on press instead of fading.
+          glass ? { transform: [{ scale: pressed ? 0.94 : 1 }] } : { opacity: pressed ? 0.85 : 1 },
+        ]}
       >
-        <Ionicons name="happy-outline" size={30} color={colors.ink} />
-      </GlassSurface>
-    </Pressable>
+        <GlassSurface
+          glass={glass}
+          interactive
+          style={styles.surface}
+          fallbackStyle={[styles.solid, { backgroundColor: colors.surfaceRaised, borderColor: colors.ink }]}
+        >
+          <Ionicons name="happy-outline" size={30} color={colors.ink} />
+        </GlassSurface>
+      </Pressable>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    position: 'absolute',
-    right: space[4],
-    width: SIZE,
-    height: SIZE,
-  },
+  position: { position: 'absolute', right: space[4] },
+  button: { width: SIZE, height: SIZE },
   surface: {
     flex: 1,
     borderRadius: SIZE / 2, // exact radius: glass doesn't draw a true circle from 999

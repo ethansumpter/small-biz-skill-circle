@@ -1,8 +1,10 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { useBottomClearance } from '@/components/ai-assistant-button';
+import { useTabBarScrollHandler } from '@/components/tab-bar-visibility';
 import { FilterBar } from '@/components/discover/filter-bar';
 import { NetworkTile } from '@/components/network/network-tile';
 import { Card, PrimaryButton, SectionTitle } from '@/components/ui';
@@ -21,6 +23,8 @@ const GAP = space[3];
 export default function NetworkScreen() {
   const colors = useBondColors();
   const bottomClearance = useBottomClearance();
+  // Hides the tab bar while scrolling down, shows it scrolling up.
+  const onScroll = useTabBarScrollHandler();
   const { width } = useWindowDimensions();
   const { incoming, saved } = useNetwork();
   const { getCompany } = useCompanies();
@@ -62,7 +66,11 @@ export default function NetworkScreen() {
         />
       </View>
 
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}
+      >
         <View style={styles.intro}>
           <Text accessibilityRole="header" style={[type.heading, { color: colors.ink }]}>
             Your Network
@@ -120,7 +128,7 @@ export default function NetworkScreen() {
             </View>
           </View>
         ) : null}
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }

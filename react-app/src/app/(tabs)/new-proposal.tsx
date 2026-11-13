@@ -1,10 +1,11 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { useBottomClearance } from '@/components/ai-assistant-button';
+import { useTabBarScrollHandler } from '@/components/tab-bar-visibility';
 import { ProposalCard } from '@/components/proposals/proposal-card';
 import { Card } from '@/components/ui';
 import { formatLimit } from '@/data/plans';
@@ -21,6 +22,8 @@ const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 export default function NewProposalScreen() {
   const colors = useBondColors();
   const bottomClearance = useBottomClearance();
+  // Hides the tab bar while scrolling down, shows it scrolling up.
+  const onScroll = useTabBarScrollHandler();
   const { proposals, canAdd, maxActiveProposals } = useProposals();
 
   // /proposals/new returns here with a fresh `posted` stamp after each post.
@@ -34,7 +37,12 @@ export default function NewProposalScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.surface }]}>
-      <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        style={styles.root}
+        contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}
+      >
         <View style={styles.titleRow}>
           <Text accessibilityRole="header" style={[type.heading, styles.flex, { color: colors.ink }]}>
             Your proposals
@@ -103,7 +111,7 @@ export default function NewProposalScreen() {
             </Text>
           ) : null}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }
