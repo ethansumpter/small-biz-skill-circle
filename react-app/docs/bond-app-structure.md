@@ -14,6 +14,7 @@ Bond is a **B2B collaboration-matching phone app** (Hinge-style UX) that matches
   4. **Leads** — chats with matched companies
   5. **Profile** — own profile, purchases, safety, settings
 - **AI assistant bubble:** floating, bottom-right, on every screen (above tab bar).
+- **iOS 26+:** the tab bar is a floating liquid glass pill that tab content scrolls underneath, and the floating buttons are glass (see brand kit, *iOS liquid glass*). Other platforms keep the solid bar below the content.
 
 ## 1. Discover
 Vertical scroll card showing **one profile at a time**. Top → bottom:

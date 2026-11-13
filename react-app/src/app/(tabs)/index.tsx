@@ -2,8 +2,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, type ScrollViewInstance, StyleSheet, Text, View } from 'react-native';
 
-import { AI_BUTTON_CLEARANCE } from '@/components/ai-assistant-button';
-import { ActionRail } from '@/components/discover/action-rail';
+import { useBottomClearance } from '@/components/ai-assistant-button';
+import { ACTION_RAIL_WIDTH, ActionRail } from '@/components/discover/action-rail';
 import { CardMenu } from '@/components/discover/card-menu';
 import { DiscoverCard } from '@/components/discover/discover-card';
 import { FilterBar } from '@/components/discover/filter-bar';
@@ -14,8 +14,8 @@ import { useCompanies, useCurrentUser, useDemoProposals, useDiscover, usePlans }
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
-/** Room for the floating action rail and AI bubble below the last review. */
-const RAIL_CLEARANCE = AI_BUTTON_CLEARANCE + 52 * 2 + space[3] * 3;
+/** Extra room for the floating action rail (two buttons) above the AI bubble. */
+const RAIL_EXTRA = ACTION_RAIL_WIDTH * 2 + space[3] * 3;
 
 /**
  * Discover: one company at a time (docs/bond-app-structure.md §1, laid out
@@ -24,6 +24,7 @@ const RAIL_CLEARANCE = AI_BUTTON_CLEARANCE + 52 * 2 + space[3] * 3;
  */
 export default function DiscoverScreen() {
   const colors = useBondColors();
+  const bottomClearance = useBottomClearance();
   const { currentUserId } = useCurrentUser();
   const { getCompany } = useCompanies();
   const { demoProposals } = useDemoProposals();
@@ -85,7 +86,7 @@ export default function DiscoverScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.root}
-        contentContainerStyle={[styles.content, { paddingBottom: company ? RAIL_CLEARANCE : AI_BUTTON_CLEARANCE }]}
+        contentContainerStyle={[styles.content, { paddingBottom: bottomClearance + (company ? RAIL_EXTRA : 0) }]}
       >
         {company ? (
           <DiscoverCard

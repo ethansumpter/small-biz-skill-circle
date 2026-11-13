@@ -66,6 +66,13 @@ Stack: `"Lexend", ui-sans-serif, system-ui, sans-serif`
 - Radius: `--radius-sm` 6 (inputs, small badges) · `--radius-md` 12 (cards, dialogs, buttons) · `--radius-full` (skill chips, avatars, match circles).
 - Motif: **circles/pills for people, skills and matches** — two overlapping circles = a match.
 
+## iOS liquid glass
+- **iOS 26+ only** (`expo-glass-effect`, wrapped in `src/components/glass.tsx`). Android, web, older iOS and iOS with *Reduce Transparency* on keep the solid surfaces above.
+- **Where:** the footer tab bar (a floating pill of untinted glass) and the floating buttons: AI assistant bubble and the Discover save/cross rail (saved = powder-blue tint; the two blend as one group). Nothing else uses glass, and glass never sits on glass: the centre ＋ inside the bar is a solid powder-blue circle (ink ring when selected), and the selected tab gets a faint ink wash instead of the solid powder-blue pill.
+- Give glass shapes an exact corner radius (half the height), not `radius.full`; glass doesn't draw true circles from 999.
+- Icons and labels on glass keep their normal ink / ink-muted tokens.
+- Never fade glass (opacity below 1 stops it rendering); buttons shrink slightly on press instead.
+
 ## Logo
 - `bond-logo.png` — two overlapping rings with orbiting dots + "Bond" wordmark (navy) + "Stronger Together". 1560×672, on white.
 - `bond-mark.png` — rings only, transparent. 637×372. Use where space is tight or name is set separately.

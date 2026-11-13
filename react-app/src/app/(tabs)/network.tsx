@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import { AI_BUTTON_CLEARANCE } from '@/components/ai-assistant-button';
+import { useBottomClearance } from '@/components/ai-assistant-button';
 import { FilterBar } from '@/components/discover/filter-bar';
 import { NetworkTile } from '@/components/network/network-tile';
 import { Card, PrimaryButton, SectionTitle } from '@/components/ui';
@@ -20,6 +20,7 @@ const GAP = space[3];
  */
 export default function NetworkScreen() {
   const colors = useBondColors();
+  const bottomClearance = useBottomClearance();
   const { width } = useWindowDimensions();
   const { incoming, saved } = useNetwork();
   const { getCompany } = useCompanies();
@@ -55,7 +56,7 @@ export default function NetworkScreen() {
         <FilterBar filters={filters} onChange={setFilters} primary={['location', 'identity', 'size']} more={[]} />
       </View>
 
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: AI_BUTTON_CLEARANCE }]}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}>
         <View style={styles.intro}>
           <Text accessibilityRole="header" style={[type.heading, { color: colors.ink }]}>
             Your Network

@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { AI_BUTTON_CLEARANCE } from '@/components/ai-assistant-button';
+import { useBottomClearance } from '@/components/ai-assistant-button';
 import { LeadRow } from '@/components/leads/lead-row';
 import { Card } from '@/components/ui';
 import { useLeads } from '@/state/preview';
@@ -7,11 +7,12 @@ import { space, type, useBondColors } from '@/theme/tokens';
 
 export default function LeadsScreen() {
   const colors = useBondColors();
+  const bottomClearance = useBottomClearance();
   const { leads } = useLeads();
 
   return (
     <View style={[styles.root, { backgroundColor: colors.surface }]}>
-      <ScrollView style={styles.root} contentContainerStyle={styles.content}>
+      <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}>
         <View style={styles.intro}>
           <Text accessibilityRole="header" style={[type.heading, { color: colors.ink }]}>
             Leads
@@ -43,7 +44,6 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: space[4],
     paddingTop: space[4],
-    paddingBottom: AI_BUTTON_CLEARANCE,
     gap: space[6],
   },
   intro: { gap: space[2] },

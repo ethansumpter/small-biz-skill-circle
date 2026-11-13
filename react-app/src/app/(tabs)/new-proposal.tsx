@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { type ComponentRef, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { AI_BUTTON_CLEARANCE } from '@/components/ai-assistant-button';
+import { useBottomClearance } from '@/components/ai-assistant-button';
 import { NewProposalForm } from '@/components/proposals/new-proposal-form';
 import { ProposalCard } from '@/components/proposals/proposal-card';
 import { Card, SectionTitle } from '@/components/ui';
@@ -11,6 +11,7 @@ import { radius, space, type, useBondColors } from '@/theme/tokens';
 
 export default function NewProposalScreen() {
   const colors = useBondColors();
+  const bottomClearance = useBottomClearance();
   const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
   const { proposals, canAdd, addProposal, maxActiveProposals } = useProposals();
   const [justPosted, setJustPosted] = useState(false);
@@ -26,7 +27,7 @@ export default function NewProposalScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.root}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
         automaticallyAdjustKeyboardInsets
@@ -78,7 +79,6 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: space[4],
     paddingTop: space[4],
-    paddingBottom: AI_BUTTON_CLEARANCE,
     gap: space[6],
   },
   intro: { gap: space[2] },

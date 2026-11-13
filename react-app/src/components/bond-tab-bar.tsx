@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RingsMark } from '@/components/bond-logo';
+import { GlassSurface } from '@/components/glass';
 import { fonts, radius, space, useBondColors } from '@/theme/tokens';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -32,10 +33,44 @@ export const BOND_TABS: BondTab[] = [
 /**
  * Bond's bottom navigation. Render inside expo-router/ui `<Tabs>`; each trigger
  * matches a route declared by name in the layout's (hidden) `<TabList>`.
+ *
+ * With `glass` (iOS 26+, see components/glass.tsx) it is a floating liquid glass
+ * pill over the screen, and reports its height through `onHeight` so screens can
+ * scroll clear of it. Otherwise it is the solid full-width bar below the screen.
  */
-export function BondTabBar() {
+export function BondTabBar({ glass, onHeight }: { glass: boolean; onHeight?: (height: number) => void }) {
   const colors = useBondColors();
   const insets = useSafeAreaInsets();
+
+  const tabs = BOND_TABS.map((tab) => (
+    <TabTrigger key={tab.name} name={tab.name} asChild>
+      {tab.centre ? <CentreButton tab={tab} glass={glass} /> : <TabButton tab={tab} glass={glass} />}
+    </TabTrigger>
+  ));
+
+  if (glass) {
+    return (
+      <View
+        pointerEvents="box-none"
+        onLayout={(e) => onHeight?.(Math.ceil(e.nativeEvent.layout.height))}
+        style={[
+          styles.floating,
+          {
+            paddingBottom: Math.max(insets.bottom - space[2], space[2]),
+            paddingLeft: insets.left + space[3],
+            paddingRight: insets.right + space[3],
+          },
+        ]}
+      >
+        {/* Untinted glass: a tint over the plain background just reads as flat grey. */}
+        <GlassSurface glass style={styles.pill}>
+          <View accessibilityRole="tablist" style={styles.row}>
+            {tabs}
+          </View>
+        </GlassSurface>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -51,14 +86,17 @@ export function BondTabBar() {
         },
       ]}
     >
-      {BOND_TABS.map((tab) => (
-        <TabTrigger key={tab.name} name={tab.name} asChild>
-          {tab.centre ? <CentreButton tab={tab} /> : <TabButton tab={tab} />}
-        </TabTrigger>
-      ))}
+      {tabs}
     </View>
   );
 }
+
+/** Pill height; corners are exactly half of it (glass needs a real radius, not 999). */
+const PILL_HEIGHT = 64;
+/** Selected tab on glass: a faint ink wash instead of the solid powder-blue pill. */
+const GLASS_SELECTED = 'rgba(84, 74, 99, 0.12)';
+const CENTRE_SIZE = 52;
+const CENTRE_SIZE_GLASS = 44;
 
 function TabIcon({ name, color }: { name: BondTab['icon']; color: string }) {
   if (name === 'rings') return <RingsMark color={color} size={16} />;
@@ -66,12 +104,12 @@ function TabIcon({ name, color }: { name: BondTab['icon']; color: string }) {
   return <Ionicons name={name} size={22} color={color} />;
 }
 
-type ButtonProps =TabTriggerSlotProps & { tab: BondTab; ref?: ComponentProps<typeof Pressable>['ref'] };
+type ButtonProps = TabTriggerSlotProps & { tab: BondTab; ref?: ComponentProps<typeof Pressable>['ref'] };
 
 /** Below this width "Your Network" doesn't fit at 12px; iOS can shrink text to fit, Android and web can't. */
 const NARROW_SCREEN = 400;
 
-function TabButton({ tab, isFocused, ...props }: ButtonProps) {
+function TabButton({ tab, glass, isFocused, ...props }: ButtonProps & { glass: boolean }) {
   const colors = useBondColors();
   const narrow = useWindowDimensions().width < NARROW_SCREEN;
 
@@ -83,10 +121,10 @@ function TabButton({ tab, isFocused, ...props }: ButtonProps) {
       accessibilityState={{ selected: !!isFocused }}
       style={styles.tab}
     >
-      <View style={[styles.indicator, isFocused && { backgroundColor: colors.accent }]}>
+      <View style={[styles.indicator, isFocused && { backgroundColor: glass ? GLASS_SELECTED : colors.accent }]}>
         <TabIcon
           name={isFocused ? tab.iconFocused : tab.icon}
-          color={isFocused ? colors.onAccent : colors.inkMuted}
+          color={isFocused ? (glass ? colors.ink : colors.onAccent) : colors.inkMuted}
         />
       </View>
       <Text
@@ -105,7 +143,7 @@ function TabButton({ tab, isFocused, ...props }: ButtonProps) {
   );
 }
 
-function CentreButton({ tab, isFocused, ...props }: ButtonProps) {
+function CentreButton({ tab, glass, isFocused, ...props }: ButtonProps & { glass: boolean }) {
   const colors = useBondColors();
 
   return (
@@ -114,15 +152,19 @@ function CentreButton({ tab, isFocused, ...props }: ButtonProps) {
       accessibilityRole="tab"
       accessibilityLabel={tab.label}
       accessibilityState={{ selected: !!isFocused }}
-      style={styles.tab}
+      style={({ pressed }) => [styles.tab, glass && { transform: [{ scale: pressed ? 0.94 : 1 }] }]}
     >
+      {/* Solid, not glass: it already sits on the glass bar, and glass on glass looks muddy.
+          On glass it's smaller and powder blue so it fits the pill; elsewhere solid ink. */}
       <View
         style={[
-          styles.centre,
-          { backgroundColor: colors.ink, borderColor: isFocused ? colors.accent : 'transparent' },
+          glass ? styles.centreGlass : styles.centre,
+          glass
+            ? { backgroundColor: colors.accent, borderColor: isFocused ? colors.ink : 'transparent' }
+            : { backgroundColor: colors.ink, borderColor: isFocused ? colors.accent : 'transparent' },
         ]}
       >
-        <Ionicons name="add" size={28} color={colors.surface} />
+        <Ionicons name="add" size={glass ? 26 : 28} color={glass ? colors.onAccent : colors.surface} />
       </View>
     </Pressable>
   );
@@ -135,6 +177,9 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     paddingTop: space[2],
   },
+  floating: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+  pill: { height: PILL_HEIGHT, borderRadius: PILL_HEIGHT / 2, paddingHorizontal: space[1], justifyContent: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center' },
   tab: {
     flex: 1,
     alignItems: 'center',
@@ -154,11 +199,19 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     letterSpacing: 0.24,
   },
+  centreGlass: {
+    width: CENTRE_SIZE_GLASS,
+    height: CENTRE_SIZE_GLASS,
+    borderRadius: CENTRE_SIZE_GLASS / 2,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   labelNarrow: { fontSize: 11, letterSpacing: 0 },
   centre: {
-    width: 52,
-    height: 52,
-    borderRadius: radius.full,
+    width: CENTRE_SIZE,
+    height: CENTRE_SIZE,
+    borderRadius: CENTRE_SIZE / 2,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
