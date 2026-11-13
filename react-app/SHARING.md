@@ -137,6 +137,7 @@ This is a **production** build: the demo panel shows **Build mode: production**,
 |---|---|
 | The QR code doesn't open anything | **iPhone:** use the Camera app. **Android:** scan from inside Expo Go. |
 | An error that the project needs a different Expo SDK version | Update Expo Go from the app store. |
+| **Android:** `Failed to download remote update` on the published QR code (iPhone opens it fine) | Expo Go only loads updates published under its SDK runtime (`exposdk:58.0.0`). Keep `"runtimeVersion": { "policy": "sdkVersion" }` in `app.json`, and use a QR code from a run published after that was set. Older runs used runtime `1.0.0` and won't open on Android. |
 | The app loads forever or shows a network error | Check the host's terminal is still running. Over Wi-Fi without `--tunnel`, you must be on the same network as the host. |
 | The demo panel says it **couldn't reach the dev server**, or shows **Apply…** | The host's dev server isn't reachable from your phone. Ask the host to restart with `npx expo start --tunnel`, then tap **Retry**. |
 | "Someone else saved … after you opened the demo panel" | Tap **Reload**, check your changes, then save again. See [above](#how-saving-works-when-several-people-edit). |
