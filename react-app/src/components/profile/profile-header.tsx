@@ -1,10 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { CompanyAvatar } from '@/components/company-avatar';
 import { useCompanies, useCurrentUser } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
-import { notInPreview } from '@/utils/preview';
 
 const AVATAR_SIZE = 144;
 const AVATAR_BORDER = 4;
@@ -30,7 +30,7 @@ export function ProfileHeader() {
           accessibilityRole="button"
           accessibilityLabel="Edit profile"
           hitSlop={8}
-          onPress={() => notInPreview('Edit profile')}
+          onPress={() => router.push('/edit-profile')}
           style={[styles.editBadge, { backgroundColor: colors.ink, borderColor: colors.surface }]}
         >
           <Ionicons name="pencil" size={18} color={colors.surface} />

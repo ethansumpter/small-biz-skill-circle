@@ -5,7 +5,16 @@ import { IconButton } from '@/components/ui';
 import { space, type, useBondColors } from '@/theme/tokens';
 
 /** Back button and title for screens pushed on the root stack, below the global AppHeader. */
-export function StackHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+export function StackHeader({
+  title,
+  subtitle,
+  onBack,
+}: {
+  title: string;
+  subtitle?: string;
+  /** Replaces the default `router.back()`, e.g. to confirm discarding edits. */
+  onBack?: () => void;
+}) {
   const colors = useBondColors();
 
   return (
@@ -15,7 +24,7 @@ export function StackHeader({ title, subtitle }: { title: string; subtitle?: str
         { backgroundColor: colors.surfaceRaised, borderBottomColor: colors.line },
       ]}
     >
-      <IconButton icon="chevron-back" label="Back" onPress={() => router.back()} />
+      <IconButton icon="chevron-back" label="Back" onPress={onBack ?? (() => router.back())} />
       <View style={styles.titles}>
         <Text accessibilityRole="header" numberOfLines={1} style={[type.subheading, { color: colors.ink }]}>
           {title}

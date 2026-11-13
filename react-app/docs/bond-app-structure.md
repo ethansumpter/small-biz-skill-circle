@@ -83,7 +83,7 @@ Example card: *Looking for a local café partner — Christmas joint promotion �
 - **Get More** (in-app purchases): Boost profile (premium visibility) · Premium subscription.
 - **Safety:** Verify your business · Block list · Contact company help line · Help centre / AI chatbot · Personal safety · Account & privacy.
 - **Overview:** summary of own profile/activity.
-- **Edit profile (pencil):** looks **identical to the Discover card** but every field editable / empty to fill.
+- **Edit profile (pencil):** opens `/edit-profile`, a page with every field of the Discover card pre-filled and editable, in the card's order: logo (*Change logo*), **Your offer** (We can offer · We're looking for), **Company details** (company name · your name · industry · location · firm size · interests · verification status), **Prompts**, **Gallery** (tiles, tap to replace), **Links**, and a note that **Reviews** can't be edited. A fixed **Save changes** button (*Done* until something changes). *Demo build:* edits stay on the page and aren't saved; Save says so in a message and goes back, and leaving with edits asks to discard them.
   - Show/hide **toggle** beside each field.
   - **Min 3 gallery images, min 2 prompts** (spec elsewhere says max 3 prompts).
   - Reviews at bottom, read-only, with small **Report review** button.

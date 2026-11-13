@@ -29,6 +29,7 @@ export default function RootLayout() {
           <Stack.Screen name="network/[id]" />
           <Stack.Screen name="proposals/new" />
           <Stack.Screen name="settings" />
+          <Stack.Screen name="edit-profile" />
           <Stack.Screen name="demo-panel" />
         </Stack>
       </View>
