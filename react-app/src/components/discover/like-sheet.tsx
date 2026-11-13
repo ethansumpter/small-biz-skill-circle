@@ -1,24 +1,24 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { BottomSheet } from '@/components/bottom-sheet';
 import { CompanyAvatar } from '@/components/company-avatar';
 import type { Company } from '@/data/companies';
 import { proposalTypesFor } from '@/data/discover';
 import { useCurrentUser } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 
+const MAX_COMMENT = 280;
+/** Only show the character count once it's worth watching. */
+const SHOW_COUNT_FROM = 200;
+
 /**
  * Send a like, or a proposal when a type is picked. A short comment is
  * required (docs/bond-features.md, Proposals). Preview only: nothing is sent.
+ * Layout, top to bottom: who it's to (with close), optional proposal type,
+ * the comment, one line of status, and a single Send button.
  */
 export function LikeSheet({
   company,
@@ -38,7 +38,6 @@ export function LikeSheet({
   onSend: (comment: string) => void;
 }) {
   const colors = useBondColors();
-  const insets = useSafeAreaInsets();
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
   const [focused, setFocused] = useState(false);
@@ -55,6 +54,7 @@ export function LikeSheet({
 
   const outOfLikes = likesLeft <= 0;
   const noun = proposalType ? 'proposal' : 'like';
+  const types = proposalTypesFor(company);
 
   const send = () => {
     if (!comment.trim()) {
@@ -66,30 +66,42 @@ export function LikeSheet({
     setError('');
   };
 
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView style={styles.root} behavior="padding">
-        <Pressable accessibilityLabel="Close" style={styles.backdrop} onPress={onClose} />
-        <View
-          style={[
-            styles.sheet,
-            { backgroundColor: colors.surfaceRaised, paddingBottom: Math.max(insets.bottom, space[4]) },
-          ]}
-        >
-          <View style={styles.head}>
-            <CompanyAvatar companyId={company.id} size={40} />
-            <View style={styles.flex}>
-              <Text accessibilityRole="header" style={[type.subheading, { color: colors.ink }]}>
-                Send a {noun}
-              </Text>
-              <Text numberOfLines={1} style={[type.caption, { color: colors.inkMuted }]}>
-                to {company.name}
-              </Text>
-            </View>
-          </View>
+  const status =
+    error ||
+    (outOfLikes
+      ? "You've used today's likes on the Free plan. Bond Plus has unlimited likes."
+      : Number.isFinite(likesLeft)
+        ? `${likesLeft} ${likesLeft === 1 ? 'like' : 'likes'} left today`
+        : 'Unlimited likes');
 
+  return (
+    <BottomSheet visible={visible} onRequestClose={onClose} avoidKeyboard>
+      <View style={styles.head}>
+        <CompanyAvatar companyId={company.id} size={44} />
+        <View style={styles.flex}>
+          <Text accessibilityRole="header" style={[type.subheading, { color: colors.ink }]}>
+            Send a {noun}
+          </Text>
+          <Text numberOfLines={1} style={[type.caption, { color: colors.inkMuted }]}>
+            to {company.name}
+          </Text>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          hitSlop={8}
+          onPress={onClose}
+          style={({ pressed }) => [styles.close, { backgroundColor: colors.surface, opacity: pressed ? 0.6 : 1 }]}
+        >
+          <Ionicons name="close" size={20} color={colors.ink} />
+        </Pressable>
+      </View>
+
+      {types.length ? (
+        <View style={styles.section}>
+          <Text style={[type.label, { color: colors.inkMuted }]}>Make it a proposal (optional)</Text>
           <View accessibilityRole="radiogroup" accessibilityLabel="Proposal type" style={styles.chips}>
-            {proposalTypesFor(company).map((option) => {
+            {types.map((option) => {
               const selected = option === proposalType;
               return (
                 <Pressable
@@ -97,124 +109,119 @@ export function LikeSheet({
                   accessibilityRole="radio"
                   accessibilityState={{ checked: selected }}
                   onPress={() => onProposalType(selected ? undefined : option)}
-                  style={[
+                  style={({ pressed }) => [
                     styles.choice,
                     selected
-                      ? { backgroundColor: colors.accent, borderColor: colors.accent }
-                      : { backgroundColor: colors.surface, borderColor: colors.line },
+                      ? { backgroundColor: colors.ink, borderColor: colors.ink }
+                      : { backgroundColor: colors.surfaceRaised, borderColor: colors.line },
+                    pressed && { opacity: 0.7 },
                   ]}
                 >
-                  <Text style={[type.caption, { color: selected ? colors.onAccent : colors.ink }]}>{option}</Text>
+                  {selected ? (
+                    <Animated.View entering={FadeIn.duration(150)}>
+                      <Ionicons name="checkmark" size={16} color={colors.surface} />
+                    </Animated.View>
+                  ) : null}
+                  <Text style={[type.label, { color: selected ? colors.surface : colors.ink }]}>{option}</Text>
                 </Pressable>
               );
             })}
           </View>
-
-          <View style={styles.field}>
-            <Text style={[type.label, { color: colors.ink }]}>Your comment</Text>
-            <TextInput
-              accessibilityLabel="Your comment"
-              value={comment}
-              onChangeText={(text) => {
-                setComment(text);
-                if (error && text.trim()) setError('');
-              }}
-              placeholder={example}
-              placeholderTextColor={colors.inkMuted}
-              multiline
-              maxLength={280}
-              editable={!outOfLikes}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
-              style={[
-                type.body,
-                styles.input,
-                {
-                  color: colors.ink,
-                  backgroundColor: colors.surfaceRaised,
-                  borderColor: focused || error ? colors.focusRing : colors.line,
-                  borderWidth: focused || error ? 2 : 1,
-                },
-              ]}
-            />
-            <View style={styles.meta}>
-              <Text style={[type.caption, styles.flex, { color: error ? colors.ink : colors.inkMuted }]}>
-                {error ||
-                  (outOfLikes
-                    ? "You've used today's likes on the Free plan. Bond Plus has unlimited likes."
-                    : Number.isFinite(likesLeft)
-                      ? `${likesLeft} ${likesLeft === 1 ? 'like' : 'likes'} left today. Preview only: nothing is sent.`
-                      : 'Unlimited likes. Preview only: nothing is sent.')}
-              </Text>
-              <Text style={[type.caption, { color: colors.inkMuted }]}>{comment.length}/280</Text>
-            </View>
-          </View>
-
-          <View style={styles.actions}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={onClose}
-              style={({ pressed }) => [styles.button, { borderColor: colors.line, opacity: pressed ? 0.7 : 1 }]}
-            >
-              <Text style={[type.label, { color: colors.ink }]}>Cancel</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              disabled={outOfLikes}
-              onPress={send}
-              style={({ pressed }) => [
-                styles.button,
-                styles.flex,
-                {
-                  backgroundColor: colors.ink,
-                  borderColor: colors.ink,
-                  opacity: outOfLikes ? 0.4 : pressed ? 0.85 : 1,
-                },
-              ]}
-            >
-              <Text style={[type.label, { color: colors.surface }]}>Send {noun}</Text>
-            </Pressable>
-          </View>
         </View>
-      </KeyboardAvoidingView>
-    </Modal>
+      ) : null}
+
+      <View style={styles.section}>
+        <View>
+          <TextInput
+            accessibilityLabel="Your comment"
+            accessibilityHint="Required"
+            value={comment}
+            onChangeText={(text) => {
+              setComment(text);
+              if (error && text.trim()) setError('');
+            }}
+            placeholder={example}
+            placeholderTextColor={colors.inkMuted}
+            multiline
+            maxLength={MAX_COMMENT}
+            editable={!outOfLikes}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            style={[
+              type.body,
+              styles.input,
+              {
+                color: colors.ink,
+                backgroundColor: colors.surface,
+                borderColor: error ? colors.ink : focused ? colors.focusRing : 'transparent',
+              },
+            ]}
+          />
+          {comment.length >= SHOW_COUNT_FROM ? (
+            <Text style={[type.caption, styles.count, { color: colors.inkMuted }]}>
+              {MAX_COMMENT - comment.length}
+            </Text>
+          ) : null}
+        </View>
+        <View style={styles.status}>
+          {error ? <Ionicons name="alert-circle" size={16} color={colors.ink} /> : null}
+          <Text style={[type.caption, styles.flex, { color: error ? colors.ink : colors.inkMuted }]}>{status}</Text>
+        </View>
+      </View>
+
+      <Pressable
+        accessibilityRole="button"
+        disabled={outOfLikes}
+        onPress={send}
+        style={({ pressed }) => [
+          styles.send,
+          { backgroundColor: colors.ink, opacity: outOfLikes ? 0.4 : pressed ? 0.85 : 1 },
+        ]}
+      >
+        <Ionicons name={proposalType ? 'paper-plane' : 'thumbs-up'} size={18} color={colors.surface} />
+        <Text style={[type.label, { color: colors.surface }]}>Send {noun}</Text>
+      </Pressable>
+    </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
   flex: { flex: 1 },
-  backdrop: { flex: 1, backgroundColor: 'rgba(33, 36, 69, 0.4)' },
-  sheet: {
-    borderTopLeftRadius: radius.md,
-    borderTopRightRadius: radius.md,
-    padding: space[4],
-    gap: space[4],
-  },
   head: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
-  choice: {
-    borderRadius: radius.full,
-    borderWidth: 1,
-    paddingHorizontal: space[3],
-    minHeight: 32,
+  close: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  field: { gap: space[2] },
-  input: {
-    minHeight: 104,
-    borderRadius: radius.sm,
+  section: { gap: space[2] },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
+  choice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[1],
+    borderRadius: 18,
+    borderWidth: 1,
     paddingHorizontal: space[3],
-    paddingVertical: space[3],
+    minHeight: 36,
+  },
+  input: {
+    minHeight: 112,
+    borderRadius: radius.md,
+    borderWidth: 2,
+    paddingHorizontal: space[3],
+    paddingTop: space[3],
+    paddingBottom: space[6],
     textAlignVertical: 'top',
   },
-  meta: { flexDirection: 'row', gap: space[2] },
-  actions: { flexDirection: 'row', gap: space[2] },
-  button: {
-    minHeight: 48,
-    paddingHorizontal: space[4],
+  count: { position: 'absolute', right: space[3], bottom: space[2] },
+  status: { flexDirection: 'row', alignItems: 'center', gap: space[1] },
+  send: {
+    flexDirection: 'row',
+    gap: space[2],
+    minHeight: 52,
     borderRadius: radius.md,
-    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

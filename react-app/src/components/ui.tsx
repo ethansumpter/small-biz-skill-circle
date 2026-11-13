@@ -93,13 +93,24 @@ export function ListRow({
   );
 }
 
-export function FieldLabel({ label, required, error }: { label: string; required?: boolean; error?: string }) {
+export function FieldLabel({
+  label,
+  required,
+  error,
+  showOptional = true,
+}: {
+  label: string;
+  required?: boolean;
+  error?: string;
+  /** Turn off inside a section already marked optional, so "(optional)" isn't repeated on every field. */
+  showOptional?: boolean;
+}) {
   const colors = useBondColors();
   return (
     <View style={styles.fieldLabel}>
       <Text style={[type.label, { color: colors.ink }]}>
         {label}
-        {required ? '' : <Text style={{ color: colors.inkMuted }}> (optional)</Text>}
+        {required || !showOptional ? '' : <Text style={{ color: colors.inkMuted }}> (optional)</Text>}
       </Text>
       {error ? <Text style={[type.caption, { color: colors.ink }]}>{error}</Text> : null}
     </View>
@@ -114,6 +125,7 @@ export function TextField({
   multiline,
   required,
   error,
+  showOptional,
 }: {
   label: string;
   value: string;
@@ -122,13 +134,14 @@ export function TextField({
   multiline?: boolean;
   required?: boolean;
   error?: string;
+  showOptional?: boolean;
 }) {
   const colors = useBondColors();
   const [focused, setFocused] = useState(false);
 
   return (
     <View style={styles.field}>
-      <FieldLabel label={label} required={required} error={error} />
+      <FieldLabel label={label} required={required} error={error} showOptional={showOptional} />
       <TextInput
         accessibilityLabel={label}
         value={value}
@@ -154,7 +167,7 @@ export function TextField({
   );
 }
 
-/** Single-choice pill group. */
+/** Single-choice pill group. Picked: ink fill with a tick (same as the filter chips). */
 export function ChoiceChips({
   label,
   options,
@@ -162,6 +175,7 @@ export function ChoiceChips({
   onChange,
   required,
   error,
+  showOptional,
 }: {
   label: string;
   options: readonly string[];
@@ -169,12 +183,13 @@ export function ChoiceChips({
   onChange: (value: string) => void;
   required?: boolean;
   error?: string;
+  showOptional?: boolean;
 }) {
   const colors = useBondColors();
 
   return (
     <View style={styles.field}>
-      <FieldLabel label={label} required={required} error={error} />
+      <FieldLabel label={label} required={required} error={error} showOptional={showOptional} />
       <View accessibilityRole="radiogroup" accessibilityLabel={label} style={styles.choices}>
         {options.map((option) => {
           const selected = option === value;
@@ -184,14 +199,16 @@ export function ChoiceChips({
               accessibilityRole="radio"
               accessibilityState={{ checked: selected }}
               onPress={() => onChange(selected ? '' : option)}
-              style={[
+              style={({ pressed }) => [
                 styles.choice,
                 selected
-                  ? { backgroundColor: colors.accent, borderColor: colors.accent }
+                  ? { backgroundColor: colors.ink, borderColor: colors.ink }
                   : { backgroundColor: colors.surfaceRaised, borderColor: colors.line },
+                pressed && { opacity: 0.7 },
               ]}
             >
-              <Text style={[type.label, { color: selected ? colors.onAccent : colors.ink }]}>{option}</Text>
+              {selected ? <Ionicons name="checkmark" size={16} color={colors.surface} /> : null}
+              <Text style={[type.label, { color: selected ? colors.surface : colors.ink }]}>{option}</Text>
             </Pressable>
           );
         })}
@@ -212,11 +229,13 @@ const styles = StyleSheet.create({
   inputMultiline: { minHeight: 96, textAlignVertical: 'top' },
   choices: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
   choice: {
-    borderRadius: radius.full,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[1],
+    borderRadius: 20,
     borderWidth: 1,
     paddingHorizontal: space[3],
     minHeight: 40,
-    justifyContent: 'center',
   },
   card: {
     borderRadius: radius.md,

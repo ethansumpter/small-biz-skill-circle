@@ -1,74 +1,108 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { type ComponentRef, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { Easing, FadeIn, FadeOut } from 'react-native-reanimated';
+
 import { useBottomClearance } from '@/components/ai-assistant-button';
-import { NewProposalForm } from '@/components/proposals/new-proposal-form';
 import { ProposalCard } from '@/components/proposals/proposal-card';
-import { Card, SectionTitle } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { formatLimit } from '@/data/plans';
-import { type ProposalInput, useProposals } from '@/state/preview';
+import { useProposals } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 
+const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
+
+/**
+ * ＋ New Proposal tab (docs/new-proposal-section-mockup.png): your active
+ * proposals, then one "＋ New proposal" button that opens the form on its own
+ * page (/proposals/new). A short note confirms a new post when you come back.
+ */
 export default function NewProposalScreen() {
   const colors = useBondColors();
   const bottomClearance = useBottomClearance();
-  const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
-  const { proposals, canAdd, addProposal, maxActiveProposals } = useProposals();
-  const [justPosted, setJustPosted] = useState(false);
+  const { proposals, canAdd, maxActiveProposals } = useProposals();
 
-  const handleSubmit = (input: ProposalInput) => {
-    addProposal(input);
-    setJustPosted(true);
-    scrollRef.current?.scrollTo({ y: 0, animated: true });
-  };
+  // /proposals/new returns here with a fresh `posted` stamp after each post.
+  const { posted } = useLocalSearchParams<{ posted?: string }>();
+  const [seenPosted, setSeenPosted] = useState(posted);
+  const [justPosted, setJustPosted] = useState(false);
+  if (posted !== seenPosted) {
+    setSeenPosted(posted);
+    setJustPosted(!!posted);
+  }
 
   return (
     <View style={[styles.root, { backgroundColor: colors.surface }]}>
-      <ScrollView
-        ref={scrollRef}
-        style={styles.root}
-        contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
-        automaticallyAdjustKeyboardInsets
-      >
-        <View style={styles.intro}>
-          <Text accessibilityRole="header" style={[type.heading, { color: colors.ink }]}>
-            New proposal
+      <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}>
+        <View style={styles.titleRow}>
+          <Text accessibilityRole="header" style={[type.heading, styles.flex, { color: colors.ink }]}>
+            Your proposals
           </Text>
-          <Text style={[type.body, { color: colors.inkMuted }]}>
-            Say what you need and what you can give back. Other businesses see it first on your Discover card.
-          </Text>
+          <View style={[styles.count, { borderColor: colors.line }]}>
+            <Text style={[type.caption, { color: colors.inkMuted }]}>
+              {proposals.length} of {formatLimit(maxActiveProposals)} active
+            </Text>
+          </View>
         </View>
 
         {justPosted ? (
-          <View accessibilityRole="alert" style={[styles.notice, { backgroundColor: colors.accent }]}>
-            <Ionicons name="checkmark-circle" size={20} color={colors.onAccent} />
-            <Text style={[type.label, styles.noticeText, { color: colors.onAccent }]}>
-              Proposal added. This is a preview, so it isn't shared with anyone and resets when the app reloads.
+          <Animated.View
+            entering={FadeIn.duration(200).easing(EASE_OUT)}
+            exiting={FadeOut.duration(150)}
+            accessibilityRole="alert"
+            style={[styles.notice, { backgroundColor: colors.surfaceRaised, borderColor: colors.line }]}
+          >
+            <Ionicons name="checkmark-circle" size={20} color={colors.ink} />
+            <Text style={[type.caption, styles.flex, { color: colors.ink }]}>
+              Proposal added. Preview only: it isn&apos;t shared and resets on reload.
             </Text>
-          </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss"
+              hitSlop={10}
+              onPress={() => setJustPosted(false)}
+            >
+              <Ionicons name="close" size={18} color={colors.inkMuted} />
+            </Pressable>
+          </Animated.View>
         ) : null}
 
-        <View style={styles.section}>
-          <SectionTitle>
-            Your active proposals ({proposals.length} of {formatLimit(maxActiveProposals)})
-          </SectionTitle>
-          {proposals.map((proposal) => (
-            <ProposalCard key={proposal.id} proposal={proposal} />
-          ))}
-        </View>
-
-        {canAdd ? (
-          <NewProposalForm onSubmit={handleSubmit} />
+        {proposals.length ? (
+          <View style={styles.list}>
+            {proposals.map((proposal) => (
+              <ProposalCard key={proposal.id} proposal={proposal} />
+            ))}
+          </View>
         ) : (
           <Card>
-            <Text style={[type.subheading, { color: colors.ink }]}>You have {maxActiveProposals} active proposals</Text>
+            <Text style={[type.subheading, { color: colors.ink }]}>No proposals yet</Text>
             <Text style={[type.body, { color: colors.inkMuted }]}>
-              That's the most you can have at once. Close one before posting another.
+              Say what you need and what you can give back. Other businesses see it first on your Discover card.
             </Text>
           </Card>
         )}
+
+        <View style={styles.action}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ disabled: !canAdd }}
+            disabled={!canAdd}
+            onPress={() => router.push('/proposals/new')}
+            style={({ pressed }) => [
+              styles.newButton,
+              { backgroundColor: colors.ink, opacity: !canAdd ? 0.4 : pressed ? 0.85 : 1 },
+            ]}
+          >
+            <Ionicons name="add" size={22} color={colors.surface} />
+            <Text style={[type.label, { color: colors.surface }]}>New proposal</Text>
+          </Pressable>
+          {!canAdd ? (
+            <Text style={[type.caption, styles.center, { color: colors.inkMuted }]}>
+              You&apos;re at the limit of {maxActiveProposals}. Close one to post another.
+            </Text>
+          ) : null}
+        </View>
       </ScrollView>
     </View>
   );
@@ -76,19 +110,39 @@ export default function NewProposalScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  flex: { flex: 1 },
+  center: { textAlign: 'center' },
   content: {
     paddingHorizontal: space[4],
     paddingTop: space[4],
-    gap: space[6],
+    gap: space[4],
+    width: '100%',
+    maxWidth: 720,
+    alignSelf: 'center',
   },
-  intro: { gap: space[2] },
-  section: { gap: space[3] },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
+  count: {
+    borderWidth: 1,
+    borderRadius: radius.full,
+    paddingHorizontal: space[2],
+    paddingVertical: 2,
+  },
   notice: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: space[2],
     padding: space[3],
     borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
   },
-  noticeText: { flex: 1 },
+  list: { gap: space[3] },
+  action: { gap: space[2], marginTop: space[2] },
+  newButton: {
+    flexDirection: 'row',
+    gap: space[2],
+    minHeight: 52,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

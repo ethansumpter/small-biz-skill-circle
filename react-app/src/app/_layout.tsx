@@ -27,6 +27,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="leads/[id]" />
           <Stack.Screen name="network/[id]" />
+          <Stack.Screen name="proposals/new" />
           <Stack.Screen name="settings" />
           <Stack.Screen name="demo-panel" />
         </Stack>

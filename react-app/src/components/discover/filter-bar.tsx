@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -8,25 +8,18 @@ import Animated, {
   FadeInRight,
   FadeOut,
   LinearTransition,
-  useAnimatedStyle,
   useReducedMotion,
-  useSharedValue,
-  withTiming,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { scheduleOnRN } from 'react-native-worklets';
 
+import { BottomSheet } from '@/components/bottom-sheet';
 import { FILTER_LABELS, FILTER_OPTIONS, type FilterKey, type Filters, industriesOf } from '@/data/discover';
 import { useCompanies } from '@/state/preview';
 import { fonts, radius, space, type, useBondColors } from '@/theme/tokens';
 
 const CHIP_HEIGHT = 36;
 
-/** Motion (see expo-animation guidance): strong ease-out for UI, iOS sheet curve for the sheet. */
+/** Motion (see expo-animation guidance): strong ease-out for UI. The sheet's own motion is BottomSheet's. */
 const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
-const EASE_SHEET = Easing.bezier(0.32, 0.72, 0, 1);
-const SHEET_IN_MS = 300;
-const SHEET_OUT_MS = 200;
 /** Chip colour, ×, Clear all: small state changes. */
 const CHIP_MS = 180;
 /** Row reflow when a chip's width changes or Clear all appears. */
@@ -218,15 +211,24 @@ function FilterSheet({
   // Industries follow the session's companies, so demo panel edits show up here.
   const { companies } = useCompanies();
   const options = useMemo(() => ({ ...FILTER_OPTIONS, industry: industriesOf(companies) }), [companies]);
-  const insets = useSafeAreaInsets();
-  const shown = keys ?? [];
+  const visible = keys !== null;
+  // Keep showing the last categories while the sheet slides away after closing.
+  const [lastKeys, setLastKeys] = useState(keys);
   // The category opened from the overview, when the sheet was opened with several.
   const [opened, setOpened] = useState<FilterKey | null>(null);
   // Which way the last level change went; null until the user moves between levels,
   // so the first level doesn't slide in on top of the sheet's own entrance.
   const [direction, setDirection] = useState<'forward' | 'back' | null>(null);
+  if (keys && keys !== lastKeys) {
+    // Opened afresh: start at the top level.
+    setLastKeys(keys);
+    setOpened(null);
+    setDirection(null);
+  }
+  const shown = keys ?? lastKeys ?? [];
   const current: FilterKey | null = shown.length === 1 ? shown[0] : opened;
   const canGoBack = shown.length > 1 && current !== null;
+  const reduced = useReducedMotion();
 
   const openCategory = (key: FilterKey) => {
     setDirection('forward');
@@ -236,44 +238,7 @@ function FilterSheet({
     setDirection('back');
     setOpened(null);
   };
-
-  // Sheet entrance/exit: 0 = hidden, 1 = shown. Slides up by its own height while the
-  // backdrop fades; with Reduce Motion it only fades. Runs on the UI thread.
-  const reduced = useReducedMotion();
-  const progress = useSharedValue(0);
-  const sheetHeight = useSharedValue(800);
-  const closing = useRef(false);
-  const visible = keys !== null;
-
-  useEffect(() => {
-    if (!visible) return;
-    closing.current = false;
-    progress.set(0);
-    progress.set(withTiming(1, { duration: SHEET_IN_MS, easing: EASE_SHEET }));
-  }, [visible, progress]);
-
-  const finishClose = () => {
-    setOpened(null);
-    setDirection(null);
-    onClose();
-  };
-  // Play the exit, then tell the parent; the content stays put until it's gone.
-  const close = () => {
-    if (closing.current) return;
-    closing.current = true;
-    progress.set(
-      withTiming(0, { duration: SHEET_OUT_MS, easing: EASE_OUT }, (finished) => {
-        if (finished) scheduleOnRN(finishClose);
-      }),
-    );
-  };
-
-  const backdropStyle = useAnimatedStyle(() => ({ opacity: progress.get() }));
-  const sheetStyle = useAnimatedStyle(() =>
-    reduced
-      ? { opacity: progress.get() }
-      : { transform: [{ translateY: (1 - progress.get()) * sheetHeight.get() }] },
-  );
+  const close = onClose;
 
   const levelEntering =
     direction === null
@@ -298,116 +263,104 @@ function FilterSheet({
         : `Show ${resultCount} ${resultCount === 1 ? 'business' : 'businesses'}`;
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={close}>
-      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]} />
-      <Pressable accessibilityLabel="Close filters" style={styles.flex} onPress={close} />
-      <Animated.View
-        onLayout={(e) => sheetHeight.set(e.nativeEvent.layout.height)}
-        style={[
-          styles.sheet,
-          { backgroundColor: colors.surfaceRaised, paddingBottom: Math.max(insets.bottom, space[4]) },
-          sheetStyle,
-        ]}
-      >
-        <View style={[styles.handle, { backgroundColor: colors.line }]} />
-        <View style={styles.sheetHead}>
-          {canGoBack ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="All filters"
-              hitSlop={8}
-              onPress={backToOverview}
-              style={styles.back}
-            >
-              <Ionicons name="chevron-back" size={22} color={colors.ink} />
-            </Pressable>
-          ) : null}
-          <Text accessibilityRole="header" style={[type.subheading, styles.flex, { color: colors.ink }]}>
-            {current ? FILTER_LABELS[current] : 'Filters'}
-          </Text>
-          {anyActive ? (
-            <Pressable accessibilityRole="button" hitSlop={8} onPress={clearScope}>
-              <Text style={[type.label, { color: colors.link }]}>{current ? 'Clear' : 'Clear all'}</Text>
-            </Pressable>
-          ) : null}
-        </View>
+    <BottomSheet visible={visible} onRequestClose={close}>
+      <View style={styles.sheetHead}>
+        {canGoBack ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="All filters"
+            hitSlop={8}
+            onPress={backToOverview}
+            style={styles.back}
+          >
+            <Ionicons name="chevron-back" size={22} color={colors.ink} />
+          </Pressable>
+        ) : null}
+        <Text accessibilityRole="header" style={[type.subheading, styles.flex, { color: colors.ink }]}>
+          {current ? FILTER_LABELS[current] : 'Filters'}
+        </Text>
+        {anyActive ? (
+          <Pressable accessibilityRole="button" hitSlop={8} onPress={clearScope}>
+            <Text style={[type.label, { color: colors.link }]}>{current ? 'Clear' : 'Clear all'}</Text>
+          </Pressable>
+        ) : null}
+      </View>
 
-        <ScrollView style={styles.sheetBody}>
-          {/* Keyed by level so each change re-enters: forward slides in from the right, back from the left. */}
-          <Animated.View key={current ?? 'all'} entering={levelEntering}>
-            {current ? (
-              <View accessibilityRole="radiogroup" accessibilityLabel={FILTER_LABELS[current]}>
-                {[undefined, ...options[current]].map((option, i, list) => {
-                  const selected = filters[current] === option;
-                  return (
-                    <Pressable
-                      key={option ?? 'any'}
-                      accessibilityRole="radio"
-                      accessibilityState={{ checked: selected }}
-                      onPress={() => {
-                        onChange({ ...filters, [current]: option });
-                        if (shown.length > 1) backToOverview();
-                      }}
-                      style={({ pressed }) => [
-                        styles.listRow,
-                        i < list.length - 1 && { borderBottomColor: colors.line, borderBottomWidth: StyleSheet.hairlineWidth },
-                        pressed && { opacity: 0.6 },
+      <ScrollView style={styles.sheetBody}>
+        {/* Keyed by level so each change re-enters: forward slides in from the right, back from the left. */}
+        <Animated.View key={current ?? 'all'} entering={levelEntering}>
+          {current ? (
+            <View accessibilityRole="radiogroup" accessibilityLabel={FILTER_LABELS[current]}>
+              {[undefined, ...options[current]].map((option, i, list) => {
+                const selected = filters[current] === option;
+                return (
+                  <Pressable
+                    key={option ?? 'any'}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: selected }}
+                    onPress={() => {
+                      onChange({ ...filters, [current]: option });
+                      if (shown.length > 1) backToOverview();
+                    }}
+                    style={({ pressed }) => [
+                      styles.listRow,
+                      i < list.length - 1 && { borderBottomColor: colors.line, borderBottomWidth: StyleSheet.hairlineWidth },
+                      pressed && { opacity: 0.6 },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        selected ? type.label : type.body,
+                        styles.flex,
+                        { color: option ? colors.ink : colors.inkMuted },
                       ]}
                     >
-                      <Text
-                        style={[
-                          selected ? type.label : type.body,
-                          styles.flex,
-                          { color: option ? colors.ink : colors.inkMuted },
-                        ]}
-                      >
-                        {option ?? 'Any'}
-                      </Text>
-                      {selected ? (
-                        <Animated.View entering={appear}>
-                          <Ionicons name="checkmark" size={20} color={colors.ink} />
-                        </Animated.View>
-                      ) : null}
-                    </Pressable>
-                  );
-                })}
-              </View>
-            ) : (
-              shown.map((key, i) => (
-                <Pressable
-                  key={key}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${FILTER_LABELS[key]}: ${filters[key] ?? 'Any'}`}
-                  onPress={() => openCategory(key)}
-                  style={({ pressed }) => [
-                    styles.listRow,
-                    i < shown.length - 1 && { borderBottomColor: colors.line, borderBottomWidth: StyleSheet.hairlineWidth },
-                    pressed && { opacity: 0.6 },
-                  ]}
+                      {option ?? 'Any'}
+                    </Text>
+                    {selected ? (
+                      <Animated.View entering={appear}>
+                        <Ionicons name="checkmark" size={20} color={colors.ink} />
+                      </Animated.View>
+                    ) : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : (
+            shown.map((key, i) => (
+              <Pressable
+                key={key}
+                accessibilityRole="button"
+                accessibilityLabel={`${FILTER_LABELS[key]}: ${filters[key] ?? 'Any'}`}
+                onPress={() => openCategory(key)}
+                style={({ pressed }) => [
+                  styles.listRow,
+                  i < shown.length - 1 && { borderBottomColor: colors.line, borderBottomWidth: StyleSheet.hairlineWidth },
+                  pressed && { opacity: 0.6 },
+                ]}
+              >
+                <Text style={[type.body, styles.flex, { color: colors.ink }]}>{FILTER_LABELS[key]}</Text>
+                <Text
+                  numberOfLines={1}
+                  style={[filters[key] ? type.label : type.body, styles.rowValue, { color: filters[key] ? colors.ink : colors.inkMuted }]}
                 >
-                  <Text style={[type.body, styles.flex, { color: colors.ink }]}>{FILTER_LABELS[key]}</Text>
-                  <Text
-                    numberOfLines={1}
-                    style={[filters[key] ? type.label : type.body, styles.rowValue, { color: filters[key] ? colors.ink : colors.inkMuted }]}
-                  >
-                    {filters[key] ?? 'Any'}
-                  </Text>
-                  <Ionicons name="chevron-forward" size={18} color={colors.inkMuted} />
-                </Pressable>
-              ))
-            )}
-          </Animated.View>
-        </ScrollView>
+                  {filters[key] ?? 'Any'}
+                </Text>
+                <Ionicons name="chevron-forward" size={18} color={colors.inkMuted} />
+              </Pressable>
+            ))
+          )}
+        </Animated.View>
+      </ScrollView>
 
-        <Pressable
-          accessibilityRole="button"
-          onPress={close}
-          style={({ pressed }) => [styles.done, { backgroundColor: colors.ink, opacity: pressed ? 0.85 : 1 }]}
-        >
-          <Text style={[type.label, { color: colors.surface }]}>{doneLabel}</Text>
-        </Pressable>
-      </Animated.View>
-    </Modal>
+      <Pressable
+        accessibilityRole="button"
+        onPress={close}
+        style={({ pressed }) => [styles.done, { backgroundColor: colors.ink, opacity: pressed ? 0.85 : 1 }]}
+      >
+        <Text style={[type.label, { color: colors.surface }]}>{doneLabel}</Text>
+      </Pressable>
+    </BottomSheet>
   );
 }
 
@@ -460,16 +413,6 @@ const styles = StyleSheet.create({
   chipText: { flexShrink: 1 },
   chipClear: { height: '100%', paddingLeft: space[1], paddingRight: space[3], justifyContent: 'center' },
   clearAll: { height: CHIP_HEIGHT, justifyContent: 'center', paddingHorizontal: space[1] },
-  backdrop: { backgroundColor: 'rgba(33, 36, 69, 0.4)' },
-  sheet: {
-    maxHeight: '80%',
-    borderTopLeftRadius: radius.md * 2,
-    borderTopRightRadius: radius.md * 2,
-    paddingHorizontal: space[4],
-    paddingTop: space[2],
-    gap: space[4],
-  },
-  handle: { alignSelf: 'center', width: 36, height: 5, borderRadius: 3 },
   sheetHead: { flexDirection: 'row', alignItems: 'center' },
   sheetBody: { flexGrow: 0 },
   back: { marginRight: space[2], marginLeft: -space[1] },
