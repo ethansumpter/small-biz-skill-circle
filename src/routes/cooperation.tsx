@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { Handshake, ArrowUpRight } from 'lucide-react';
 import { pageHead } from '@/lib/page-head';
 import { BUSINESSES, matchForBusiness } from '@/lib/businesses';
-import { useSwapkit } from '@/components/swapkit-state';
+import { useBond } from '@/components/bond-state';
 import { Button } from '@/components/ui/button';
 import { JointCampaign } from '@/components/joint-campaign';
 import { ExpertDialog } from '@/components/expert-dialog';
@@ -14,7 +14,7 @@ export const Route = createFileRoute('/cooperation')({
 });
 
 function Cooperation() {
-  const { cooperations, setCooperations, offers, needs } = useSwapkit();
+  const { cooperations, setCooperations, offers, needs } = useBond();
 
   return (
     <>

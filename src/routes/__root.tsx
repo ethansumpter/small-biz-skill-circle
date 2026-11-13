@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { SwapkitProvider } from "@/components/swapkit-state";
+import { BondProvider } from "@/components/bond-state";
 import { AppShell } from "@/components/app-shell";
 
 function NotFoundComponent() {
@@ -83,10 +83,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Swapkit" },
+      { title: "Bond" },
       { name: "description", content: "Sales and marketing skill swaps for small business owners" },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Swapkit" },
+      { property: "og:title", content: "Bond" },
       { property: "og:description", content: "Sales and marketing skill swaps for small business owners" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -127,7 +127,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <SwapkitProvider><AppShell><Outlet /></AppShell></SwapkitProvider>
+      <BondProvider><AppShell><Outlet /></AppShell></BondProvider>
     </QueryClientProvider>
   );
 }

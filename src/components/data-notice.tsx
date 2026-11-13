@@ -18,7 +18,7 @@ export function DataNotice() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Privacy &amp; data</DialogTitle>
-            <DialogDescription>In plain English: what Swapkit uses, and what it never does.</DialogDescription>
+            <DialogDescription>In plain English: what Bond uses, and what it never does.</DialogDescription>
           </DialogHeader>
           <ul className="space-y-4">
             {POINTS.map((p) => (

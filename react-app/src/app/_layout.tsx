@@ -5,18 +5,28 @@ import {
   useFonts,
 } from '@expo-google-fonts/lexend';
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AppHeader } from '@/components/app-header';
 import { PreviewProvider } from '@/state/preview';
 
+// Keep the Bond splash up until Lexend is ready, instead of flashing a blank screen.
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({ Lexend_400Regular, Lexend_500Medium, Lexend_600SemiBold });
+  const ready = fontsLoaded || !!fontError;
+
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
 
   // Wait for Lexend, but if it fails to load (e.g. a flaky mobile connection), show the app in
-  // the system font rather than a blank screen.
-  if (!fontsLoaded && !fontError) return null;
+  // the system font rather than leaving the splash up.
+  if (!ready) return null;
 
   return (
     <PreviewProvider>

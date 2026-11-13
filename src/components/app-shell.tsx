@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { LayoutDashboard, Compass, HeartHandshake, Users, MessageSquare, Handshake, CreditCard, ArrowUpRight, ArrowLeftRight } from "lucide-react";
 import { type ReactNode } from "react";
-import { useSwapkit } from "./swapkit-state";
+import { useBond } from "./bond-state";
 
 const navigation = [
   { to: "/", label: "Overview", icon: LayoutDashboard },
@@ -14,10 +14,10 @@ const navigation = [
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { profile } = useSwapkit();
+  const { profile } = useBond();
   return <div className="app-layout">
     <aside className="app-sidebar">
-      <Link to="/" className="brand"><ArrowLeftRight className="size-6 text-primary" />Swapkit<span className="text-primary">.</span></Link>
+      <Link to="/" className="brand"><ArrowLeftRight className="size-6 text-primary" />Bond<span className="text-primary">.</span></Link>
       <p className="sidebar-caption">A little give. A lot of growth.</p>
       <nav aria-label="Main navigation" className="app-nav">{navigation.map(({ to, label, icon: Icon }) => <Link key={to} to={to} activeOptions={{ exact: true }} activeProps={{ className: "nav-item nav-active" }} inactiveProps={{ className: "nav-item" }}><Icon className="size-[18px]" /><span>{label}</span></Link>)}</nav>
       <div className="sidebar-bottom"><span className="label">Your circle, your potential</span><Link to="/discover" className="flex items-center justify-between text-sm font-semibold">Find your next partner<ArrowUpRight className="size-4" /></Link></div>

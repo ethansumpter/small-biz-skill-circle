@@ -32,9 +32,14 @@ export const brand = {
   platinum: '#F0F3F5',
   vintageGrape: '#544A63',
   powderBlue: '#A2B2D8',
-  navy: '#212445',
   grapeDeep: '#2E2838',
 };
+
+/** Overlays tinted with grape-deep (#2E2838), never navy or black: sheet/menu backdrops and floating-button shadows. */
+export const overlay = {
+  scrim: 'rgba(46, 40, 56, 0.4)',
+  shadow: '0px 2px 8px rgba(46, 40, 56, 0.15)',
+} as const;
 
 export function useBondColors(): BondColors {
   return useColorScheme() === 'dark' ? dark : light;

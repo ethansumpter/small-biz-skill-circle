@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { radius, space, type, useBondColors } from '@/theme/tokens';
+import { overlay, radius, space, type, useBondColors } from '@/theme/tokens';
 
 export type ThreadAction = 'unmatch' | 'mute' | 'report' | 'block' | 'notifications';
 
@@ -71,7 +71,7 @@ export function ThreadMenu({
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(33, 36, 69, 0.4)' },
+  backdrop: { flex: 1, backgroundColor: overlay.scrim },
   sheet: {
     borderTopLeftRadius: radius.md,
     borderTopRightRadius: radius.md,

@@ -76,7 +76,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Swapkit brand kit: Platinum #f0f3f5 (60%), Vintage Grape #544a63 (30%), Powder Blue #a2b2d8 (20%).
+/* Bond brand kit: Platinum #f0f3f5 (60%), Vintage Grape #544a63 (30%), Powder Blue #a2b2d8 (20%).
    Grape on Platinum is 7.4:1. Powder Blue is never text on light grounds (1.9:1). */
 :root {
   --radius: 0.75rem;

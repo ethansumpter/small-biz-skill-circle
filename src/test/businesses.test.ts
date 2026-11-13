@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { BUSINESSES, SKILLS, SKILL_GROUPS, findMatches, matchForBusiness } from "@/lib/businesses";
 
-// Swapkit is scoped to Sales and Marketing functions only. These tests lock that
+// Bond is scoped to Sales and Marketing functions only. These tests lock that
 // scope in: the skill picker must stay inside those two groups, and every
 // profile must trade using skills that actually exist in the picker.
 describe("Sales & Marketing scope", () => {

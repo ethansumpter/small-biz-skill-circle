@@ -10,7 +10,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 
-import { space, useBondColors } from '@/theme/tokens';
+import { overlay, space, useBondColors } from '@/theme/tokens';
 
 const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 /** iOS sheet curve. */
@@ -98,7 +98,7 @@ export function BottomSheet({
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  backdrop: { backgroundColor: 'rgba(33, 36, 69, 0.4)' },
+  backdrop: { backgroundColor: overlay.scrim },
   sheet: {
     maxHeight: '85%',
     borderTopLeftRadius: SHEET_RADIUS,

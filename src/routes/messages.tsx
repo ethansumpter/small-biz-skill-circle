@@ -3,12 +3,12 @@ import { useState } from 'react';
 import { Send, MessageSquare, Handshake } from 'lucide-react';
 import { pageHead } from '@/lib/page-head';
 import { BUSINESSES } from '@/lib/businesses';
-import { useSwapkit } from '@/components/swapkit-state';
+import { useBond } from '@/components/bond-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 export const Route = createFileRoute('/messages')({ head: () => pageHead('Messages', 'Discuss mutual sales and marketing swaps with your business partners.'), component: Messages });
 function Messages() {
- const { messages, proposed, sendMessage, cooperations, startCooperation } = useSwapkit();
+ const { messages, proposed, sendMessage, cooperations, startCooperation } = useBond();
  const [selected, setSelected] = useState<string | null>(null);
  const [text, setText] = useState('');
  const ids = [...new Set([...proposed, ...messages.map((m) => m.businessId)])];

@@ -5,7 +5,7 @@ import Animated from 'react-native-reanimated';
 
 import { GlassSurface, useLiquidGlass, useTabBarOverlap } from '@/components/glass';
 import { useTabBarSlideStyle } from '@/components/tab-bar-visibility';
-import { space, useBondColors } from '@/theme/tokens';
+import { overlay, space, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
 const SIZE = 56;
@@ -66,6 +66,6 @@ const styles = StyleSheet.create({
   solid: {
     borderWidth: 2,
     // One shadow for iOS, Android and web (the old shadow* props are deprecated on web).
-    boxShadow: '0px 2px 8px rgba(33, 36, 69, 0.15)',
+    boxShadow: overlay.shadow,
   },
 });

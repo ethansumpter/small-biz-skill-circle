@@ -2,10 +2,10 @@ import { Bookmark, ArrowUpRight, Check, MapPin } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { type Business } from "@/lib/businesses";
-import { useSwapkit } from "./swapkit-state";
+import { useBond } from "./bond-state";
 
 export function PartnerCard({ business, mutual = false }: { business: Business; mutual?: boolean }) {
-  const { saved, toggleSaved, proposed, propose, offers, needs } = useSwapkit();
+  const { saved, toggleSaved, proposed, propose, offers, needs } = useBond();
   const theyGive = business.offers.filter((skill) => needs.includes(skill));
   const youGive = business.needs.filter((skill) => offers.includes(skill));
   return <article className="partner-card">

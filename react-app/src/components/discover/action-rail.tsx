@@ -6,7 +6,7 @@ import Animated from 'react-native-reanimated';
 import { AI_BUTTON_CLEARANCE } from '@/components/ai-assistant-button';
 import { GlassGroup, GlassSurface, useLiquidGlass, useTabBarOverlap } from '@/components/glass';
 import { useTabBarSlideStyle } from '@/components/tab-bar-visibility';
-import { space, useBondColors } from '@/theme/tokens';
+import { overlay, space, useBondColors } from '@/theme/tokens';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -108,6 +108,6 @@ const styles = StyleSheet.create({
   solid: {
     borderWidth: 1,
     // One shadow for iOS, Android and web (the old shadow* props are deprecated on web).
-    boxShadow: '0px 2px 8px rgba(33, 36, 69, 0.15)',
+    boxShadow: overlay.shadow,
   },
 });

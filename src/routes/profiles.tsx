@@ -3,15 +3,15 @@ import { useState } from 'react';
 import { Check, ArrowLeft } from 'lucide-react';
 import { BUSINESSES } from '@/lib/businesses';
 import { pageHead } from '@/lib/page-head';
-import { useSwapkit } from '@/components/swapkit-state';
+import { useBond } from '@/components/bond-state';
 import { SkillPicker } from '@/components/skill-picker';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-export const Route = createFileRoute('/profiles')({ validateSearch: (search: Record<string, unknown>): { member?: string } => typeof search['member'] === 'string' ? { member: search['member'] } : {}, head: () => pageHead('Profiles', 'Business profiles and sales and marketing skills in your Swapkit circle.'), component: Profiles });
+export const Route = createFileRoute('/profiles')({ validateSearch: (search: Record<string, unknown>): { member?: string } => typeof search['member'] === 'string' ? { member: search['member'] } : {}, head: () => pageHead('Profiles', 'Business profiles and sales and marketing skills in your Bond circle.'), component: Profiles });
 function Profiles() {
  const { member } = Route.useSearch();
- const { profile, setProfile, offers, setOffers, needs, setNeeds, propose, proposed } = useSwapkit();
+ const { profile, setProfile, offers, setOffers, needs, setNeeds, propose, proposed } = useBond();
  const [draft, setDraft] = useState(profile);
  const [saved, setSaved] = useState(false);
  const business = BUSINESSES.find((b) => b.id === member);

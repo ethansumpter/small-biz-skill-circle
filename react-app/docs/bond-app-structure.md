@@ -6,7 +6,7 @@
 Bond is a **B2B collaboration-matching phone app** (Hinge-style UX) that matches small businesses on what they *can offer* and what they are *looking for*, so they can run joint promotions, bundles and skill/service swaps.
 
 ## Global layout (phone, portrait)
-- **Top bar:** one fixed header on **every page**, tabs and pushed screens alike (`AppHeader`, rendered once in the root layout so it never scrolls or moves when you navigate): `BOND` wordmark on a platinum tile (left, no rings); page-specific icons (right; currently only Profile has them). Pushed screens put their own back/title bar underneath it. Filter rows sit just below it and also stay put while the content scrolls.
+- **Top bar:** one fixed header on **every page**, tabs and pushed screens alike (`AppHeader`, rendered once in the root layout so it never scrolls or moves when you navigate): the atoms logo (36px tall) beside the `BOND` text wordmark on a platinum tile (left); page-specific icons (right; currently only Profile has them). Pushed screens put their own back/title bar underneath it. Filter rows sit just below it and also stay put while the content scrolls.
 - **Bottom tab bar, icons only (no text labels; each tab's name is read out by screen readers), in this order:**
   1. **Discover** — one company profile at a time
   2. **Your Network** — incoming proposals/likes

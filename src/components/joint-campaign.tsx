@@ -4,12 +4,12 @@ import { Check, Loader2, Repeat, Rocket, ShieldCheck, Sparkles } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { canLaunch, draftCampaign, exampleResults, resultsSuggestion, type CampaignDraft } from "@/lib/campaign";
 import { type Match } from "@/lib/businesses";
-import { useSwapkit } from "./swapkit-state";
+import { useBond } from "./bond-state";
 
 type Stage = "idle" | "drafting" | "ready";
 
 export function JointCampaign({ match }: { match: Match }) {
-  const { profile } = useSwapkit();
+  const { profile } = useBond();
   const partner = match.business;
   const [stage, setStage] = useState<Stage>("idle");
   const [draft, setDraft] = useState<CampaignDraft | null>(null);

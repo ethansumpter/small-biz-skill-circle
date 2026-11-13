@@ -35,12 +35,12 @@ function usePreviewState() {
 
 type PreviewState = ReturnType<typeof usePreviewState>;
 const PreviewContext = createContext<PreviewState | null>(null);
-export function SwapkitProvider({ children }: { children: ReactNode }) {
+export function BondProvider({ children }: { children: ReactNode }) {
   const state = usePreviewState();
   return <PreviewContext.Provider value={state}>{children}</PreviewContext.Provider>;
 }
-export function useSwapkit() {
+export function useBond() {
   const state = useContext(PreviewContext);
-  if (!state) throw new Error("SwapkitProvider is required");
+  if (!state) throw new Error("BondProvider is required");
   return state;
 }

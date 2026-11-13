@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { RingsMark } from '@/components/bond-logo';
+import { ConnectionIcon } from '@/components/bond-logo';
 import { GlassSurface } from '@/components/glass';
 import { useTabBarSlideStyle } from '@/components/tab-bar-visibility';
 import { radius, space, useBondColors } from '@/theme/tokens';
@@ -17,9 +17,9 @@ type BondTab = {
   href: '/' | '/network' | '/new-proposal' | '/leads' | '/profile';
   /** Read out by screen readers; the bar shows icons only. */
   label: string;
-  /** 'rings' draws Bond's two-overlapping-circles "match" motif. */
-  icon: IconName | 'rings';
-  iconFocused: IconName | 'rings';
+  /** 'connection' draws two overlapping circles (see ConnectionIcon). */
+  icon: IconName | 'connection';
+  iconFocused: IconName | 'connection';
   /** The Instagram-style centre "create" button. */
   centre?: boolean;
 };
@@ -27,7 +27,7 @@ type BondTab = {
 /** Footer tabs, in the order set by docs/bond-app-structure.md. */
 export const BOND_TABS: BondTab[] = [
   { name: 'discover', href: '/', label: 'Discover', icon: 'compass-outline', iconFocused: 'compass' },
-  { name: 'network', href: '/network', label: 'Your Network', icon: 'rings', iconFocused: 'rings' },
+  { name: 'network', href: '/network', label: 'Your Network', icon: 'connection', iconFocused: 'connection' },
   { name: 'new-proposal', href: '/new-proposal', label: 'New proposal', icon: 'add', iconFocused: 'add', centre: true },
   { name: 'leads', href: '/leads', label: 'Leads', icon: 'chatbubble-outline', iconFocused: 'chatbubble' },
   { name: 'profile', href: '/profile', label: 'Profile', icon: 'person-circle-outline', iconFocused: 'person-circle' },
@@ -105,7 +105,7 @@ const CENTRE_SIZE = 52;
 const CENTRE_SIZE_GLASS = 44;
 
 function TabIcon({ name, color }: { name: BondTab['icon']; color: string }) {
-  if (name === 'rings') return <RingsMark color={color} size={18} />;
+  if (name === 'connection') return <ConnectionIcon color={color} size={18} />;
   if (name === 'add') return null;
   return <Ionicons name={name} size={24} color={color} />;
 }

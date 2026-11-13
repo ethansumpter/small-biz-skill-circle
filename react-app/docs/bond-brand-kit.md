@@ -3,7 +3,7 @@
 > Context for AI agents. Source: Bond Brand Kit PDF (colour scheme, typeface, logo, general theme), plus the Bond Design System artifact for derived and semantic tokens. Where they disagree, the Brand Kit PDF wins. Use semantic tokens in UI code; use brand tokens directly only in marketing/illustration.
 
 ## Brand
-- **Name:** Bond (formerly Swapkit) · **Tagline:** "Stronger Together"
+- **Name:** Bond · **Tagline:** "Stronger Together"
 - **What it is:** matches small businesses by skills/offers so they can trade expertise and collaborate.
 - **Feel:** calm, friendly, trustworthy — "a neighbour who knows a lot of people", not a growth-hacking startup.
 - **General theme:** minimalist and futuristic, with a neutral palette. The brand is about **unity and innovation**: think Star Trek (optimistic, clean, collaborative), not Blade Runner (dark, gritty, neon).
@@ -18,7 +18,7 @@
 
 These three are the whole brand palette. *(The Brand Kit lists 60 / 30 / 20, which sums to 110%; read it as dominant / secondary / accent rather than exact shares.)*
 
-Navy (`#212445`) is no longer a brand colour: the new logo and wordmark are grape. `brand.navy` still exists in `src/theme/tokens.ts` and is used by the header wordmark in `src/components/bond-logo.tsx`; move those to grape when the code is next updated.
+Navy (`#212445`) is no longer a brand colour: the new logo and wordmark are grape. Don't reintroduce navy.
 
 ### Derived
 | Token | Hex | Use |
@@ -26,6 +26,10 @@ Navy (`#212445`) is no longer a brand colour: the new logo and wordmark are grap
 | `--grape-deep` | `#2E2838` | Text on powder-blue fills (6.7:1) |
 | `--link` (light) | `#4A5A8A` | Links/inline actions on platinum (6.0:1) |
 | `--surface` (dark) | `#231E2B` | Dark-mode page ground |
+| `overlay.scrim` | grape-deep at 40% | Backdrop behind bottom sheets and menus |
+| `overlay.shadow` | grape-deep at 15%, `0 2px 8px` | Shadow on floating buttons (AI assistant, Discover rail) |
+
+Tint scrims and shadows with grape-deep, never navy or black.
 
 ### Semantic tokens (use these in UI)
 | Token | Light | Dark | Use |
@@ -109,13 +113,15 @@ All files are 2000×2000 transparent PNGs in `assets/logo/` (full-size originals
 | `assets/android-icon-background.png` | 1024×1024, opaque | Solid Platinum (`adaptiveIcon.backgroundColor` is `#F0F3F5` too) |
 | `assets/android-icon-monochrome.png` | 1024×1024, transparent | B silhouette in white, 55% height |
 | `assets/favicon.png` | 48×48, opaque | B on Platinum |
-| `assets/splash-icon.png` | 1024×1024, transparent | B at 90% height (not referenced in `app.json` yet; no splash config) |
+| `public/apple-touch-icon.png` | 180×180, opaque | B on Platinum (scaled from `icon.png`); web home-screen icon, linked in `src/app/+html.tsx` |
+| `assets/splash-icon.png` | 1024×1024, transparent | B at 90% height. Splash via the `expo-splash-screen` plugin in `app.json` (200pt wide, Platinum background); held until Lexend loads in `src/app/_layout.tsx` |
 
 ### Rules
 - Don't redraw, recolour, stretch or add effects. Keep the gradients as drawn.
 - Light grounds only (white or platinum). On dark grounds, place the logo on a platinum tile; no dark version exists yet.
 - The fine orbit and nucleus detail disappears below about 32px; at very small sizes prefer the B mark over the full wordmark.
-- In the app header, the text wordmark `BOND` may still be used on its own without the mark.
+- In the app header, use the atoms (`bond-logo-atoms.png`, cropped to `assets/logo/bond-logo-atoms-header.png`) at 36px tall, left of the `BOND` text wordmark in grape, together on a platinum tile (`BondLogo` in `src/components/bond-logo.tsx`). Atoms rather than the B, so the B isn't repeated. Don't go smaller: the orbit detail is lost below about 32px.
+- The Your Network tab icon (`ConnectionIcon`, two overlapping circles) is a UI icon, not the logo; the atoms lose their detail at tab-icon size.
 
 ## Voice
 - Plain, warm, specific — like a helpful neighbour. e.g. "Trade an hour of design for an hour of bookkeeping."

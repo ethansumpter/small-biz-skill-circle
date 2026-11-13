@@ -10,7 +10,7 @@ export type Business = {
 };
 
 /**
- * Swapkit is scoped to the two functions small businesses most often need
+ * Bond is scoped to the two functions small businesses most often need
  * outside help with: Sales and Marketing. Every skill a member can offer or
  * ask for comes from these two groups.
  */
