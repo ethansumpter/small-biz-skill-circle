@@ -69,6 +69,7 @@ Stack: `"Lexend", ui-sans-serif, system-ui, sans-serif`
 ## Logo
 - `bond-logo.png` — two overlapping rings with orbiting dots + "Bond" wordmark (navy) + "Stronger Together". 1560×672, on white.
 - `bond-mark.png` — rings only, transparent. 637×372. Use where space is tight or name is set separately.
+- In the app header, use the wordmark only (`BOND`, navy on platinum), without the rings.
 - Rules: don't redraw/recolour; light grounds only (white/platinum). On dark grounds, place the mark on a platinum tile — no dark version exists yet.
 
 ## Voice

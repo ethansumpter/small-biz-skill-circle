@@ -1,10 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, type ScrollViewInstance, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AI_BUTTON_CLEARANCE } from '@/components/ai-assistant-button';
-import { BondLogo } from '@/components/bond-logo';
 import { ActionRail } from '@/components/discover/action-rail';
 import { CardMenu } from '@/components/discover/card-menu';
 import { DiscoverCard } from '@/components/discover/discover-card';
@@ -26,7 +24,6 @@ const RAIL_CLEARANCE = AI_BUTTON_CLEARANCE + 52 * 2 + space[3] * 3;
  */
 export default function DiscoverScreen() {
   const colors = useBondColors();
-  const insets = useSafeAreaInsets();
   const { currentUserId } = useCurrentUser();
   const { getCompany } = useCompanies();
   const { demoProposals } = useDemoProposals();
@@ -76,16 +73,13 @@ export default function DiscoverScreen() {
   return (
     <View style={[styles.root, { backgroundColor: colors.surface }]}>
       {/* Top bar + filter row stay put while the card scrolls */}
-      <View style={[styles.top, { paddingTop: insets.top + space[2], borderBottomColor: colors.line }]}>
-        <View style={styles.topBar}>
-          <BondLogo />
-          {company ? (
-            <Text style={[type.caption, { color: colors.inkMuted }]}>
-              {feed.length} {feed.length === 1 ? 'business' : 'businesses'} to see
-            </Text>
-          ) : null}
-        </View>
+      <View style={[styles.filters, { borderBottomColor: colors.line }]}>
         <FilterBar filters={filters} onChange={setFilters} />
+        {company ? (
+          <Text style={[type.caption, styles.count, { color: colors.inkMuted }]}>
+            {feed.length} {feed.length === 1 ? 'business' : 'businesses'} to see
+          </Text>
+        ) : null}
       </View>
 
       <ScrollView
@@ -167,7 +161,7 @@ export default function DiscoverScreen() {
         <View
           accessibilityLiveRegion="polite"
           pointerEvents="none"
-          style={[styles.toast, { top: insets.top + 104, backgroundColor: colors.ink }]}
+          style={[styles.toast, { top: 104, backgroundColor: colors.ink }]}
         >
           <Text style={[type.label, { color: colors.surface }]}>{toast}</Text>
         </View>
@@ -202,13 +196,8 @@ function EmptyState({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  top: { gap: space[3], paddingBottom: space[3], borderBottomWidth: StyleSheet.hairlineWidth },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: space[4],
-  },
+  filters: { gap: space[2], paddingVertical: space[3], borderBottomWidth: StyleSheet.hairlineWidth },
+  count: { paddingHorizontal: space[4] },
   content: { padding: space[4] },
   empty: { alignItems: 'flex-start', gap: space[3], paddingVertical: space[6] },
   toast: {

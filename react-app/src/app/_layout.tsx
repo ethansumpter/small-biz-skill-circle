@@ -6,7 +6,9 @@ import {
 } from '@expo-google-fonts/lexend';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, View } from 'react-native';
 
+import { AppHeader } from '@/components/app-header';
 import { PreviewProvider } from '@/state/preview';
 
 export default function RootLayout() {
@@ -18,14 +20,22 @@ export default function RootLayout() {
 
   return (
     <PreviewProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="leads/[id]" />
-        <Stack.Screen name="network/[id]" />
-        <Stack.Screen name="settings" />
-        <Stack.Screen name="demo-panel" />
-      </Stack>
+      {/* One fixed header above every page; it stays put while screens change underneath. */}
+      <View style={styles.root}>
+        <AppHeader />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="leads/[id]" />
+          <Stack.Screen name="network/[id]" />
+          <Stack.Screen name="settings" />
+          <Stack.Screen name="demo-panel" />
+        </Stack>
+      </View>
       <StatusBar style="auto" />
     </PreviewProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+});

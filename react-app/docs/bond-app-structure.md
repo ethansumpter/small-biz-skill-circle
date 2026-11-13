@@ -6,7 +6,7 @@
 Bond is a **B2B collaboration-matching phone app** (Hinge-style UX) that matches small businesses on what they *can offer* and what they are *looking for*, so they can run joint promotions, bundles and skill/service swaps.
 
 ## Global layout (phone, portrait)
-- **Top bar:** `BOND` logo (left); screen-specific icons (right).
+- **Top bar:** one fixed header on **every page**, tabs and pushed screens alike (`AppHeader`, rendered once in the root layout so it never scrolls or moves when you navigate): `BOND` wordmark on a platinum tile (left, no rings); page-specific icons (right; currently only Profile has them). Pushed screens put their own back/title bar underneath it. Filter rows sit just below it and also stay put while the content scrolls.
 - **Bottom tab bar, in this order:**
   1. **Discover** — one company profile at a time
   2. **Your Network** — incoming proposals/likes
@@ -17,7 +17,7 @@ Bond is a **B2B collaboration-matching phone app** (Hinge-style UX) that matches
 
 ## 1. Discover
 Vertical scroll card showing **one profile at a time**. Top → bottom:
-1. **Filter row** (chips): Location, Industry, more…; filter icon at left.
+1. **Filter row** (chips): Location, Industry, more…; filter icon at left. A count of businesses left to see sits under it.
 2. **Offer / Looking-for box** — the firm's "I can offer" / "I am looking for" proposal. Always shown first. Overflow (⋮) → Block, Report.
 3. **Company details** — name, verification badge/tag, location, firm size, industry.
 4. **Prompts** (Hinge-style Q&A).
@@ -72,7 +72,7 @@ Example card: *Looking for a local café partner — Christmas joint promotion �
 - **Composer:** text field, voice/mic, attach images/files.
 
 ## 5. Profile
-**Header:** `BOND` logo; top-right icons **Preferences** (sliders) and **Settings** (gear). Centre: firm logo/avatar with **pencil** badge → Edit profile.
+**Header:** the shared top bar shows icons **Preferences** (sliders) and **Settings** (gear). Centre: firm logo/avatar in an ink-coloured ring, with **pencil** badge → Edit profile, and the company name beneath it.
 **Tabs under avatar:** Get More · Safety · Overview.
 
 - **Get More** (in-app purchases): Boost profile (premium visibility) · Premium subscription.

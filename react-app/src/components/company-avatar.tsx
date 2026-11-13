@@ -9,7 +9,18 @@ import { radius, useBondColors } from '@/theme/tokens';
  * A company's logo in a circle. Falls back to a building silhouette when the
  * company has no image in assets/images/companies/ yet.
  */
-export function CompanyAvatar({ companyId, size = 48 }: { companyId: string; size?: number }) {
+export function CompanyAvatar({
+  companyId,
+  size = 48,
+  borderWidth = 0,
+  borderColor,
+}: {
+  companyId: string;
+  size?: number;
+  /** Optional ring drawn inside the circle (the image still fills it). */
+  borderWidth?: number;
+  borderColor?: string;
+}) {
   const colors = useBondColors();
   const { getCompany } = useCompanies();
   const company = getCompany(companyId);
@@ -21,6 +32,8 @@ export function CompanyAvatar({ companyId, size = 48 }: { companyId: string; siz
     borderRadius: radius.full,
     overflow: 'hidden' as const,
     backgroundColor: colors.accent,
+    borderWidth,
+    borderColor,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   };

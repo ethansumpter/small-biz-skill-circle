@@ -1,20 +1,18 @@
 import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { IconButton } from '@/components/ui';
 import { space, type, useBondColors } from '@/theme/tokens';
 
-/** Back button and title for screens pushed on the root stack. */
+/** Back button and title for screens pushed on the root stack, below the global AppHeader. */
 export function StackHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   const colors = useBondColors();
-  const insets = useSafeAreaInsets();
 
   return (
     <View
       style={[
         styles.header,
-        { paddingTop: insets.top + space[1], backgroundColor: colors.surfaceRaised, borderBottomColor: colors.line },
+        { backgroundColor: colors.surfaceRaised, borderBottomColor: colors.line },
       ]}
     >
       <IconButton icon="chevron-back" label="Back" onPress={() => router.back()} />
@@ -38,7 +36,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: space[2],
     paddingHorizontal: space[2],
-    paddingBottom: space[2],
+    paddingVertical: space[1],
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   titles: { flex: 1 },

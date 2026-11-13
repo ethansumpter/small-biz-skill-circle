@@ -1,15 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { fonts, space, useBondColors } from '@/theme/tokens';
 
 /** Temporary screen body until each tab is built out. */
 export function PlaceholderScreen({ title }: { title: string }) {
   const colors = useBondColors();
-  const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface, paddingTop: insets.top }]}>
+    <View style={[styles.container, { backgroundColor: colors.surface}]}>
       <Text style={[styles.title, { color: colors.ink }]}>{title}</Text>
     </View>
   );

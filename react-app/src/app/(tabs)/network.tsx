@@ -1,10 +1,8 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AI_BUTTON_CLEARANCE } from '@/components/ai-assistant-button';
-import { BondLogo } from '@/components/bond-logo';
 import { FilterBar } from '@/components/discover/filter-bar';
 import { NetworkTile } from '@/components/network/network-tile';
 import { Card, PrimaryButton, SectionTitle } from '@/components/ui';
@@ -22,7 +20,6 @@ const GAP = space[3];
  */
 export default function NetworkScreen() {
   const colors = useBondColors();
-  const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { incoming, saved } = useNetwork();
   const { getCompany } = useCompanies();
@@ -54,10 +51,7 @@ export default function NetworkScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.surface }]}>
-      <View style={[styles.top, { paddingTop: insets.top + space[2], borderBottomColor: colors.line }]}>
-        <View style={styles.topBar}>
-          <BondLogo />
-        </View>
+      <View style={[styles.filters, { borderBottomColor: colors.line }]}>
         <FilterBar filters={filters} onChange={setFilters} primary={['location', 'identity', 'size']} more={[]} />
       </View>
 
@@ -126,8 +120,7 @@ export default function NetworkScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  top: { gap: space[3], paddingBottom: space[3], borderBottomWidth: StyleSheet.hairlineWidth },
-  topBar: { paddingHorizontal: space[4] },
+  filters: { paddingVertical: space[3], borderBottomWidth: StyleSheet.hairlineWidth },
   content: { padding: space[4], gap: space[6], width: '100%', maxWidth: MAX_WIDTH, alignSelf: 'center' },
   intro: { gap: space[1] },
   section: { gap: space[3] },

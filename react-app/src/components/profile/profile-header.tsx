@@ -1,34 +1,30 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { BondLogo } from '@/components/bond-logo';
 import { CompanyAvatar } from '@/components/company-avatar';
-import { IconButton } from '@/components/ui';
-import { useCurrentUser } from '@/state/preview';
-import { radius, space, useBondColors } from '@/theme/tokens';
+import { useCompanies, useCurrentUser } from '@/state/preview';
+import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
 const AVATAR_SIZE = 144;
+const AVATAR_BORDER = 4;
 
-/** Top bar (logo, Preferences, Settings) and the firm's logo with edit badge. */
+/** The firm's bordered logo with edit badge, and its name. (The top bar is the shared AppHeader.) */
 export function ProfileHeader() {
   const colors = useBondColors();
   const { currentUserId } = useCurrentUser();
+  const { getCompany } = useCompanies();
 
   return (
     <View style={styles.container}>
-      <View style={styles.topBar}>
-        <BondLogo />
-        <View style={styles.actions}>
-          <IconButton icon="options-outline" label="Preferences" onPress={() => notInPreview('Preferences')} />
-          <IconButton icon="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
-        </View>
-      </View>
-
       {/* Firm logo or other image (assets/images/companies/), else a building silhouette. */}
       <View style={styles.avatarWrap}>
-        <CompanyAvatar companyId={currentUserId} size={AVATAR_SIZE} />
+        <CompanyAvatar
+          companyId={currentUserId}
+          size={AVATAR_SIZE}
+          borderWidth={AVATAR_BORDER}
+          borderColor={colors.ink}
+        />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Edit profile"
@@ -39,19 +35,18 @@ export function ProfileHeader() {
           <Ionicons name="pencil" size={18} color={colors.surface} />
         </Pressable>
       </View>
+
+      <Text accessibilityRole="header" style={[type.heading, styles.name, { color: colors.ink }]}>
+        {getCompany(currentUserId).name}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { gap: space[6] },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  actions: { flexDirection: 'row' },
   avatarWrap: { alignSelf: 'center' },
+  name: { textAlign: 'center', marginTop: -space[3] },
   editBadge: {
     position: 'absolute',
     top: 4,

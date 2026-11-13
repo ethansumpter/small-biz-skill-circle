@@ -26,7 +26,7 @@ export default function LeadThreadScreen() {
 
   if (!lead) {
     return (
-      <View style={[styles.missing, { backgroundColor: colors.surface, paddingTop: insets.top }]}>
+      <View style={[styles.missing, { backgroundColor: colors.surface}]}>
         <Text style={[type.body, { color: colors.ink }]}>This match is no longer available.</Text>
         <Pressable accessibilityRole="button" onPress={() => router.back()}>
           <Text style={[type.label, { color: colors.link }]}>Back to Leads</Text>
@@ -74,7 +74,7 @@ export default function LeadThreadScreen() {
       <View
         style={[
           styles.header,
-          { paddingTop: insets.top + space[1], backgroundColor: colors.surfaceRaised, borderBottomColor: colors.line },
+          { backgroundColor: colors.surfaceRaised, borderBottomColor: colors.line },
         ]}
       >
         <IconButton icon="chevron-back" label="Back" onPress={() => router.back()} />
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: space[1],
-    paddingBottom: space[2],
+    paddingVertical: space[1],
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   who: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space[2] },
