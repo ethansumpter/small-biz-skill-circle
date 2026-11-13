@@ -1,18 +1,19 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { TabTrigger, type TabTriggerSlotProps } from 'expo-router/ui';
 import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RingsMark } from '@/components/bond-logo';
 import { GlassSurface } from '@/components/glass';
-import { fonts, radius, space, useBondColors } from '@/theme/tokens';
+import { radius, space, useBondColors } from '@/theme/tokens';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
 type BondTab = {
   name: string;
   href: '/' | '/network' | '/new-proposal' | '/leads' | '/profile';
+  /** Read out by screen readers; the bar shows icons only. */
   label: string;
   /** 'rings' draws Bond's two-overlapping-circles "match" motif. */
   icon: IconName | 'rings';
@@ -92,26 +93,22 @@ export function BondTabBar({ glass, onHeight }: { glass: boolean; onHeight?: (he
 }
 
 /** Pill height; corners are exactly half of it (glass needs a real radius, not 999). */
-const PILL_HEIGHT = 64;
+const PILL_HEIGHT = 60;
 /** Selected tab on glass: a faint ink wash instead of the solid powder-blue pill. */
 const GLASS_SELECTED = 'rgba(84, 74, 99, 0.12)';
 const CENTRE_SIZE = 52;
 const CENTRE_SIZE_GLASS = 44;
 
 function TabIcon({ name, color }: { name: BondTab['icon']; color: string }) {
-  if (name === 'rings') return <RingsMark color={color} size={16} />;
+  if (name === 'rings') return <RingsMark color={color} size={18} />;
   if (name === 'add') return null;
-  return <Ionicons name={name} size={22} color={color} />;
+  return <Ionicons name={name} size={24} color={color} />;
 }
 
 type ButtonProps = TabTriggerSlotProps & { tab: BondTab; ref?: ComponentProps<typeof Pressable>['ref'] };
 
-/** Below this width "Your Network" doesn't fit at 12px; iOS can shrink text to fit, Android and web can't. */
-const NARROW_SCREEN = 400;
-
 function TabButton({ tab, glass, isFocused, ...props }: ButtonProps & { glass: boolean }) {
   const colors = useBondColors();
-  const narrow = useWindowDimensions().width < NARROW_SCREEN;
 
   return (
     <Pressable
@@ -127,18 +124,6 @@ function TabButton({ tab, glass, isFocused, ...props }: ButtonProps & { glass: b
           color={isFocused ? (glass ? colors.ink : colors.onAccent) : colors.inkMuted}
         />
       </View>
-      <Text
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.85}
-        style={[
-          styles.label,
-          narrow && styles.labelNarrow,
-          { color: isFocused ? colors.ink : colors.inkMuted, fontFamily: isFocused ? fonts.medium : fonts.regular },
-        ]}
-      >
-        {tab.label}
-      </Text>
     </Pressable>
   );
 }
@@ -184,20 +169,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: space[1],
     minHeight: 48,
   },
   indicator: {
     width: 56,
-    height: 28,
-    borderRadius: radius.full,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  label: {
-    fontSize: 12,
-    lineHeight: 16,
-    letterSpacing: 0.24,
   },
   centreGlass: {
     width: CENTRE_SIZE_GLASS,
@@ -207,7 +186,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  labelNarrow: { fontSize: 11, letterSpacing: 0 },
   centre: {
     width: CENTRE_SIZE,
     height: CENTRE_SIZE,
