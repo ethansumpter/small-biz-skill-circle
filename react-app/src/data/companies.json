@@ -5,6 +5,7 @@
     {
       "id": "c01",
       "name": "Kiln & Clay Studio",
+      "ownerName": "Hannah Okafor",
       "initials": "KC",
       "profileImage": "assets/images/companies/c01-kiln-and-clay-studio.png",
       "industry": "Ceramics",
@@ -59,6 +60,7 @@
     {
       "id": "c02",
       "name": "Wick & Wild Candle Co.",
+      "ownerName": "Priya Sharma",
       "initials": "WW",
       "profileImage": "assets/images/companies/c02-wick-and-wild-candle-co.png",
       "industry": "Home fragrance",
@@ -104,6 +106,7 @@
     {
       "id": "c03",
       "name": "Oak & Grain Workshop",
+      "ownerName": "Tom Whitaker",
       "initials": "OG",
       "profileImage": "assets/images/companies/c03-oak-and-grain-workshop.png",
       "industry": "Woodworking",
@@ -149,6 +152,7 @@
     {
       "id": "c04",
       "name": "Northfield Audio",
+      "ownerName": "Daniel Mensah",
       "initials": "NA",
       "profileImage": "assets/images/companies/c04-northfield-audio.png",
       "industry": "Consumer audio",
@@ -187,6 +191,7 @@
     {
       "id": "c05",
       "name": "Loomhouse Textiles",
+      "ownerName": "Eleanor Hartley",
       "initials": "LT",
       "profileImage": "assets/images/companies/c05-loomhouse-textiles.png",
       "industry": "Textile weaving",
@@ -225,6 +230,7 @@
     {
       "id": "c06",
       "name": "Good Boy Goods",
+      "ownerName": "Jess Barker",
       "initials": "GB",
       "profileImage": "assets/images/companies/c06-good-boy-goods.png",
       "industry": "Pet accessories",
@@ -263,6 +269,7 @@
     {
       "id": "c07",
       "name": "Hide & Thread Leather",
+      "ownerName": "Marcus Reid",
       "initials": "HT",
       "profileImage": "assets/images/companies/c07-hide-and-thread-leather.png",
       "industry": "Leatherwork",
@@ -300,6 +307,7 @@
     {
       "id": "c08",
       "name": "Nib & Ledger Stationery",
+      "ownerName": "Fiona Campbell",
       "initials": "NL",
       "profileImage": "assets/images/companies/c08-nib-and-ledger-stationery.png",
       "industry": "Pens & stationery",
@@ -338,6 +346,7 @@
     {
       "id": "c09",
       "name": "Brightframe Photography",
+      "ownerName": "Aisha Khan",
       "initials": "BP",
       "profileImage": "assets/images/companies/c09-brightframe-photography.png",
       "industry": "Event photography",
@@ -383,6 +392,7 @@
     {
       "id": "c10",
       "name": "Reel North Studio",
+      "ownerName": "Liam Doyle",
       "initials": "RN",
       "profileImage": "assets/images/companies/c10-reel-north-studio.png",
       "industry": "Social content creation",
@@ -421,6 +431,7 @@
     {
       "id": "c11",
       "name": "Keyhouse Estates",
+      "ownerName": "Rachel Greenwood",
       "initials": "KE",
       "profileImage": "assets/images/companies/c11-keyhouse-estates.png",
       "industry": "Estate agency",
@@ -466,6 +477,7 @@
     {
       "id": "c12",
       "name": "Clear Space Staging",
+      "ownerName": "Megan Ashworth",
       "initials": "CS",
       "profileImage": "assets/images/companies/c12-clear-space-staging.png",
       "industry": "Home staging & decluttering",
@@ -504,6 +516,7 @@
     {
       "id": "c13",
       "name": "Forge Fitness",
+      "ownerName": "Kwame Boateng",
       "initials": "FF",
       "profileImage": "assets/images/companies/c13-forge-fitness.png",
       "industry": "Personal training",
@@ -541,6 +554,7 @@
     {
       "id": "c14",
       "name": "Fuel Well Nutrition",
+      "ownerName": "Laura Pennington",
       "initials": "FW",
       "profileImage": "assets/images/companies/c14-fuel-well-nutrition.png",
       "industry": "Registered nutrition",
@@ -586,6 +600,7 @@
     {
       "id": "c15",
       "name": "Studio Lark Hair",
+      "ownerName": "Chloe Atkinson",
       "initials": "SL",
       "profileImage": "assets/images/companies/c15-studio-lark-hair.png",
       "industry": "Hair styling",
@@ -624,6 +639,7 @@
     {
       "id": "c16",
       "name": "True Tone Colour Studio",
+      "ownerName": "Imogen Wade",
       "initials": "TT",
       "profileImage": "assets/images/companies/c16-true-tone-colour-studio.png",
       "industry": "Colour analysis",
@@ -661,6 +677,7 @@
     {
       "id": "c17",
       "name": "Tally & Co. Accountants",
+      "ownerName": "Sanjay Patel",
       "initials": "TC",
       "profileImage": "assets/images/companies/c17-tally-and-co-accountants.png",
       "industry": "Accounting",
@@ -706,6 +723,7 @@
     {
       "id": "c18",
       "name": "Peopleworks HR",
+      "ownerName": "Ruth Holloway",
       "initials": "PH",
       "profileImage": "assets/images/companies/c18-peopleworks-hr.png",
       "industry": "Fractional HR",

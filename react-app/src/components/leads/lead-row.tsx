@@ -4,11 +4,15 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { CompanyAvatar } from '@/components/company-avatar';
 import type { Lead } from '@/data/demo-leads';
+import { useCompanies } from '@/state/preview';
 import { space, type, useBondColors } from '@/theme/tokens';
 
-/** One matched company in the Leads list. */
+/** One matched company in the Leads list: company, then its owner's name (shown once matched), then the latest message. */
 export function LeadRow({ lead, last }: { lead: Lead; last?: boolean }) {
   const colors = useBondColors();
+  const { getCompany } = useCompanies();
+  // Looked up live so demo panel edits show straight away.
+  const owner = getCompany(lead.id).ownerName;
   const latest = lead.messages.at(-1);
   const preview = latest
     ? `${latest.from === 'me' ? 'You: ' : ''}${latest.attachment ? `${latest.text} (${latest.attachment})` : latest.text}`
@@ -17,7 +21,7 @@ export function LeadRow({ lead, last }: { lead: Lead; last?: boolean }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${lead.company}. ${preview}`}
+      accessibilityLabel={`${lead.company}${owner ? `, ${owner}` : ''}. ${preview}`}
       onPress={() => router.push({ pathname: '/leads/[id]', params: { id: lead.id } })}
       style={({ pressed }) => [
         styles.row,
@@ -33,6 +37,11 @@ export function LeadRow({ lead, last }: { lead: Lead; last?: boolean }) {
           </Text>
           {lead.muted ? <Ionicons name="notifications-off-outline" size={16} color={colors.inkMuted} /> : null}
         </View>
+        {owner ? (
+          <Text numberOfLines={1} style={[type.caption, { color: colors.inkMuted }]}>
+            {owner}
+          </Text>
+        ) : null}
         <Text
           numberOfLines={1}
           style={[latest ? type.body : type.label, { color: latest ? colors.inkMuted : colors.link }]}

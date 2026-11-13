@@ -5,7 +5,7 @@ import data from './leads.json';
 /**
  * Demo matches and chat for the logged-in account (c01) — see docs/bond-demo-data.md
  * ("Leads: demo chat"). Stored in leads.json so the demo panel can edit them.
- * Fictional. No owner or personal names.
+ * Fictional. Owner names are looked up from companies.json where shown (Leads only).
  */
 export type Message = {
   id: string;

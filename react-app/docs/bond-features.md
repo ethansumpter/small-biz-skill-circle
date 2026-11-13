@@ -10,6 +10,7 @@ Fair, equivalent exchange of skills/services between businesses. Matching is dri
 | Field | Notes |
 |---|---|
 | Company name + details | Name, location, firm size (Micro / SME), verification status |
+| Owner's name | The account holder's full name (usually the SME owner). Name only, no job title or role. Field `ownerName` |
 | Proprietary details | Identity / company details section |
 | Industry | Sector the firm operates in |
 | Interests | Collaboration interests, Cross-promotion, Product collaborations, Service collaborations |
@@ -20,7 +21,7 @@ Fair, equivalent exchange of skills/services between businesses. Matching is dri
 | Links | Website, LinkedIn, Instagram, Facebook, Google Business Profile |
 | Visibility toggles | Per-field show/hide |
 
-**Privacy rule:** no owner/personal names on Discover — show the business, not the person.
+**Privacy rule:** show the business, not the person, until there's a match. No owner/personal names on Discover or Your Network. The owner's full name appears only on your own Profile and in Leads (chat list and thread header) once you've matched.
 
 ### Collaboration goal setting
 - Both parties select cooperative goals (e.g. *Reach new customers*, *Reduce marketing costs*, *Launch a new product*).

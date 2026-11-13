@@ -3,7 +3,7 @@
 > Context for AI agents. Fixed demo content for the Bond prototype. All companies, reviews and links are **fictional**; links use the reserved `.example` domain. Follow the screen layout in `bond-app-structure.md`, the field rules in `bond-features.md` and the voice in `bond-brand-kit.md` (plain, warm, specific; no hype, no emoji).
 
 ## Data rules for the demo
-- **No owner or personal names** on profiles, cards or comments. Companies speak as "we".
+- Each company has an **owner** (`ownerName`, full name only, no role), shown only on that company's own Profile and in Leads after a match. **No owner or personal names anywhere else**: Discover and Network cards, offers, prompts, reviews and comments stay business-only. Companies speak as "we".
 - All firms are in or near **Leeds, West Yorkshire**. Distances are from the demo user.
 - Each company: 1 active proposal (max 3 allowed), 3 gallery images, 2–3 prompts, 1–2 platform reviews.
 - Firm size: **Micro** = 1–9 staff, **SME** = 10–249.
@@ -30,26 +30,26 @@
 
 ## Companies
 
-| ID | Company | Industry | Location | Size | Verified | Rating |
-|---|---|---|---|---|---|---|
-| c01 | Kiln & Clay Studio | Ceramics | Chapel Allerton, Leeds | Micro | ✓ | 4.9 |
-| c02 | Wick & Wild Candle Co. | Home fragrance | Headingley, Leeds | Micro | ✓ | 4.8 |
-| c03 | Oak & Grain Workshop | Woodworking | Kirkstall, Leeds | Micro | ✓ | 4.9 |
-| c04 | Northfield Audio | Consumer audio | Holbeck, Leeds | SME | ✓ | 4.7 |
-| c05 | Loomhouse Textiles | Textile weaving | Saltaire, Bradford (9 mi) | Micro | ✓ | 4.9 |
-| c06 | Good Boy Goods | Pet accessories | Horsforth, Leeds | Micro | – | 4.6 |
-| c07 | Hide & Thread Leather | Leatherwork | Leeds city centre | Micro | ✓ | 4.8 |
-| c08 | Nib & Ledger Stationery | Pens & stationery | Harrogate (15 mi) | SME | ✓ | 4.7 |
-| c09 | Brightframe Photography | Event photography | Roundhay, Leeds | Micro | ✓ | 4.9 |
-| c10 | Reel North Studio | Social content creation | Leeds Dock | Micro | ✓ | 4.6 |
-| c11 | Keyhouse Estates | Estate agency | Meanwood, Leeds | SME | ✓ | 4.5 |
-| c12 | Clear Space Staging | Home staging & decluttering | Oakwood, Leeds | Micro | ✓ | 4.8 |
-| c13 | Forge Fitness | Personal training | Kirkstall, Leeds | Micro | ✓ | 4.8 |
-| c14 | Fuel Well Nutrition | Registered nutrition | Headingley, Leeds | Micro | ✓ | 4.9 |
-| c15 | Studio Lark Hair | Hair styling | Chapel Allerton, Leeds | Micro | ✓ | 4.7 |
-| c16 | True Tone Colour Studio | Colour analysis | Leeds city centre | Micro | – | 4.8 |
-| c17 | Tally & Co. Accountants | Accounting | Wellington Place, Leeds | SME | ✓ | 4.8 |
-| c18 | Peopleworks HR | Fractional HR | Leeds city centre (remote-first) | Micro | ✓ | 4.7 |
+| ID | Company | Owner | Industry | Location | Size | Verified | Rating |
+|---|---|---|---|---|---|---|---|
+| c01 | Kiln & Clay Studio | Hannah Okafor | Ceramics | Chapel Allerton, Leeds | Micro | ✓ | 4.9 |
+| c02 | Wick & Wild Candle Co. | Priya Sharma | Home fragrance | Headingley, Leeds | Micro | ✓ | 4.8 |
+| c03 | Oak & Grain Workshop | Tom Whitaker | Woodworking | Kirkstall, Leeds | Micro | ✓ | 4.9 |
+| c04 | Northfield Audio | Daniel Mensah | Consumer audio | Holbeck, Leeds | SME | ✓ | 4.7 |
+| c05 | Loomhouse Textiles | Eleanor Hartley | Textile weaving | Saltaire, Bradford (9 mi) | Micro | ✓ | 4.9 |
+| c06 | Good Boy Goods | Jess Barker | Pet accessories | Horsforth, Leeds | Micro | – | 4.6 |
+| c07 | Hide & Thread Leather | Marcus Reid | Leatherwork | Leeds city centre | Micro | ✓ | 4.8 |
+| c08 | Nib & Ledger Stationery | Fiona Campbell | Pens & stationery | Harrogate (15 mi) | SME | ✓ | 4.7 |
+| c09 | Brightframe Photography | Aisha Khan | Event photography | Roundhay, Leeds | Micro | ✓ | 4.9 |
+| c10 | Reel North Studio | Liam Doyle | Social content creation | Leeds Dock | Micro | ✓ | 4.6 |
+| c11 | Keyhouse Estates | Rachel Greenwood | Estate agency | Meanwood, Leeds | SME | ✓ | 4.5 |
+| c12 | Clear Space Staging | Megan Ashworth | Home staging & decluttering | Oakwood, Leeds | Micro | ✓ | 4.8 |
+| c13 | Forge Fitness | Kwame Boateng | Personal training | Kirkstall, Leeds | Micro | ✓ | 4.8 |
+| c14 | Fuel Well Nutrition | Laura Pennington | Registered nutrition | Headingley, Leeds | Micro | ✓ | 4.9 |
+| c15 | Studio Lark Hair | Chloe Atkinson | Hair styling | Chapel Allerton, Leeds | Micro | ✓ | 4.7 |
+| c16 | True Tone Colour Studio | Imogen Wade | Colour analysis | Leeds city centre | Micro | – | 4.8 |
+| c17 | Tally & Co. Accountants | Sanjay Patel | Accounting | Wellington Place, Leeds | SME | ✓ | 4.8 |
+| c18 | Peopleworks HR | Ruth Holloway | Fractional HR | Leeds city centre (remote-first) | Micro | ✓ | 4.7 |
 
 ### Profile details
 

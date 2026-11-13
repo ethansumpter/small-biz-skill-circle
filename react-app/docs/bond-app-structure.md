@@ -30,7 +30,7 @@ Vertical scroll card showing **one profile at a time**. Top → bottom:
 **Rules:**
 - Sending a like/proposal **requires a comment** (short intro, e.g. "Hi, I'm Alex, a photographer. I'd love to work with you!").
 - After cross / like / proposal, **auto-advance** to the next profile.
-- Data rule: **never show owner names** — company identity only.
+- Data rule: **never show owner names** here — company identity only. (Owner names appear only on your own Profile and in Leads after a match; see `bond-features.md`, privacy rule.)
 
 **Demo build decisions (not in the spec):**
 - Filters are single-choice per category. The filter icon opens every category, **Location** and **Industry** open their own, and **More…** opens Firm size, Identity and Collaboration type.
@@ -71,13 +71,13 @@ Example card: *Looking for a local café partner — Christmas joint promotion �
 - **Form groups:** *The exchange* (What are you looking for? · What can you offer?) and *The collaboration* (Type · Goal) are required and always shown. The five optional fields (partner type, location, firm size, budget, requirements) sit behind **Add more detail**, which shows how many are filled. Picked chips are ink with a tick. **Post proposal** adds it for the session and returns to the tab, which shows a dismissible *Proposal added. Preview only…* note.
 
 ## 4. Leads (chats)
-- List of matched companies → chat thread.
-- **Thread header:** company logo + name (tap → their profile); ⋮ menu: Unmatch, Mute, Report, Block, Enable notifications.
+- List of matched companies → chat thread. Each row: company name, the owner's full name under it, then the latest message.
+- **Thread header:** company logo + name, with the owner's full name first in the line under it (then industry · location) (tap → their profile); ⋮ menu: Unmatch, Mute, Report, Block, Enable notifications.
 - Comment bubble (the original proposal note) pinned at top of thread.
 - **Composer:** text field, voice/mic, attach images/files.
 
 ## 5. Profile
-**Header:** the shared top bar shows icons **Preferences** (sliders) and **Settings** (gear). Centre: firm logo/avatar in an ink-coloured ring, with **pencil** badge → Edit profile, and the company name beneath it.
+**Header:** the shared top bar shows icons **Preferences** (sliders) and **Settings** (gear). Centre: firm logo/avatar in an ink-coloured ring, with **pencil** badge → Edit profile, the company name beneath it, and the owner's full name (no role) under that.
 **Tabs under avatar:** Get More · Safety · Overview.
 
 - **Get More** (in-app purchases): Boost profile (premium visibility) · Premium subscription.

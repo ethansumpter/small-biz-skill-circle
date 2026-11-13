@@ -17,7 +17,7 @@ const SECTIONS: { key: string; title: string; fields: string[] }[] = [
   {
     key: 'basics',
     title: 'Basics',
-    fields: ['id', 'name', 'initials', 'industry', 'location', 'distanceMiles', 'size', 'verified', 'rating'],
+    fields: ['id', 'name', 'ownerName', 'initials', 'industry', 'location', 'distanceMiles', 'size', 'verified', 'rating'],
   },
   { key: 'profile', title: 'Profile', fields: ['offer', 'lookingFor', 'interests', 'prompts'] },
   { key: 'media', title: 'Images & links', fields: ['profileImage', 'gallery', 'links'] },

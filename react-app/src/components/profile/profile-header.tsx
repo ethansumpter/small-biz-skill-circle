@@ -9,11 +9,12 @@ import { notInPreview } from '@/utils/preview';
 const AVATAR_SIZE = 144;
 const AVATAR_BORDER = 4;
 
-/** The firm's bordered logo with edit badge, and its name. (The top bar is the shared AppHeader.) */
+/** The firm's bordered logo with edit badge, its name, and the owner's full name. (The top bar is the shared AppHeader.) */
 export function ProfileHeader() {
   const colors = useBondColors();
   const { currentUserId } = useCurrentUser();
   const { getCompany } = useCompanies();
+  const company = getCompany(currentUserId);
 
   return (
     <View style={styles.container}>
@@ -36,9 +37,14 @@ export function ProfileHeader() {
         </Pressable>
       </View>
 
-      <Text accessibilityRole="header" style={[type.heading, styles.name, { color: colors.ink }]}>
-        {getCompany(currentUserId).name}
-      </Text>
+      <View style={styles.names}>
+        <Text accessibilityRole="header" style={[type.heading, styles.center, { color: colors.ink }]}>
+          {company.name}
+        </Text>
+        {company.ownerName ? (
+          <Text style={[type.body, styles.center, { color: colors.inkMuted }]}>{company.ownerName}</Text>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -46,7 +52,8 @@ export function ProfileHeader() {
 const styles = StyleSheet.create({
   container: { gap: space[6] },
   avatarWrap: { alignSelf: 'center' },
-  name: { textAlign: 'center', marginTop: -space[3] },
+  names: { gap: 2, marginTop: -space[3] },
+  center: { textAlign: 'center' },
   editBadge: {
     position: 'absolute',
     top: 4,

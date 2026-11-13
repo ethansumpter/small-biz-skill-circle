@@ -9,7 +9,7 @@ import { Composer } from '@/components/leads/composer';
 import { MessageBubble } from '@/components/leads/message-bubble';
 import { type ThreadAction, ThreadMenu } from '@/components/leads/thread-menu';
 import { IconButton } from '@/components/ui';
-import { useLeads } from '@/state/preview';
+import { useCompanies, useLeads } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { confirmAction } from '@/utils/dialog';
 import { notInPreview } from '@/utils/preview';
@@ -20,6 +20,7 @@ export default function LeadThreadScreen() {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
   const { leads, sendMessage, toggleMute, unmatch } = useLeads();
+  const { getCompany } = useCompanies();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const lead = leads.find((l) => l.id === id);
@@ -89,9 +90,11 @@ export default function LeadThreadScreen() {
             <Text numberOfLines={1} style={[type.label, { color: colors.ink }]}>
               {lead.company}
             </Text>
+            {/* Owner's name first: shown once you've matched (docs/bond-features.md, privacy rule). */}
             <Text numberOfLines={1} style={[type.caption, { color: colors.inkMuted }]}>
-              {lead.industry} · {lead.location}
-              {lead.muted ? ' · Muted' : ''}
+              {[getCompany(lead.id).ownerName, lead.industry, lead.location, lead.muted ? 'Muted' : '']
+                .filter(Boolean)
+                .join(' · ')}
             </Text>
           </View>
         </Pressable>
