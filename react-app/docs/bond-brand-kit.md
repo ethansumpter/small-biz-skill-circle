@@ -1,22 +1,24 @@
 # Bond — Brand Kit
 
-> Context for AI agents. Source: Bond Design System artifact (tokens.css / tokens.json / README). Use semantic tokens in UI code; use brand tokens directly only in marketing/illustration.
+> Context for AI agents. Source: Bond Brand Kit PDF (colour scheme, typeface, logo, general theme), plus the Bond Design System artifact for derived and semantic tokens. Where they disagree, the Brand Kit PDF wins. Use semantic tokens in UI code; use brand tokens directly only in marketing/illustration.
 
 ## Brand
 - **Name:** Bond (formerly Swapkit) · **Tagline:** "Stronger Together"
 - **What it is:** matches small businesses by skills/offers so they can trade expertise and collaborate.
 - **Feel:** calm, friendly, trustworthy — "a neighbour who knows a lot of people", not a growth-hacking startup.
+- **General theme:** minimalist and futuristic, with a neutral palette. The brand is about **unity and innovation**: think Star Trek (optimistic, clean, collaborative), not Blade Runner (dark, gritty, neon).
 
 ## Colour
 ### Brand palette (60 / 30 / 20)
 | Token | Hex | Share | Role |
 |---|---|---|---|
 | `--platinum` | `#F0F3F5` | 60% | Page ground; text on grape |
-| `--vintage-grape` | `#544A63` | 30% | Text, headings, dark panels, primary buttons |
-| `--powder-blue` | `#A2B2D8` | 20% | Highlights, chips, selected states, illustration |
-| `--navy` | `#212445` | — | Logo wordmark; headlines that must match the logo |
+| `--vintage-grape` | `#544A63` | 30% | Text, headings, logo and wordmark, dark panels, primary buttons |
+| `--powder-blue` | `#A2B2D8` | 20% | Highlights, chips, selected states, logo orbits, illustration |
 
-*(Design-system README table lists 25% / 15%; tokens say 30% / 20%. Treat as approximate.)*
+These three are the whole brand palette. *(The Brand Kit lists 60 / 30 / 20, which sums to 110%; read it as dominant / secondary / accent rather than exact shares.)*
+
+Navy (`#212445`) is no longer a brand colour: the new logo and wordmark are grape. `brand.navy` still exists in `src/theme/tokens.ts` and is used by the header wordmark in `src/components/bond-logo.tsx`; move those to grape when the code is next updated.
 
 ### Derived
 | Token | Hex | Use |
@@ -40,12 +42,20 @@
 Dark mode: `data-theme="dark"` on the page wrapper.
 
 ### Contrast rules (WCAG 2.1)
-- ✅ Any text: Grape↔Platinum (7.4), Navy on Platinum (13.4), Navy on Powder Blue (7.1), Grape-deep on Powder Blue (6.7).
-- ⚠️ Large/bold only (24px+ or 18.5px bold): Powder Blue on Grape, Grape on Powder Blue (3.9).
-- ❌ Never text: Powder Blue↔Platinum (1.9), Navy on Grape (1.8).
-- Thin/Extra-Light/Light weights only on Grape/Platinum pairings.
+The Brand Kit shows all six pairings of the three colours at every weight. In the app, use them within these limits:
+
+| Pairing | Ratio | Use |
+|---|---|---|
+| Grape text on Platinum / Platinum text on Grape | 7.4 | ✅ Any text, any weight |
+| Grape-deep text on Powder Blue | 6.7 | ✅ Any text (use for small text on blue fills) |
+| Grape text on Powder Blue / Powder Blue text on Grape | 3.9 | ⚠️ Large or bold only (24px+, or 18.5px+ bold). Powder Blue on Grape: Bold (700)+ |
+| Powder Blue text on Platinum / Platinum text on Powder Blue | 1.9 | ❌ Never for text people must read; decorative or logo use only |
+
+- Thin / Extra Light / Light weights only on the Grape↔Platinum pairings.
 
 ## Typography — Lexend only
+The Brand Kit uses one typeface across all nine weights: Thin (100), Extra Light (200), Light (300), Standard (400), Medium (500), Semi Bold (600), Bold (700), Extra Bold (800), Black (900).
+
 `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap">`
 Stack: `"Lexend", ui-sans-serif, system-ui, sans-serif`
 
@@ -58,7 +68,8 @@ Stack: `"Lexend", ui-sans-serif, system-ui, sans-serif`
 | label | 500 | 14/20 | Buttons, chips, form labels |
 | caption | 400 | 12/16, 0.02em | Metadata (ink/ink-muted only) |
 
-- Thin (100) / Extra Light (200) only at ≥32px. Black (900) for logotype/posters.
+- Thin (100) / Extra Light (200) only at ≥32px. Black (900) for posters and big display moments.
+- The logo wordmark ("ond" after the B) is a regular weight, so don't set "Bond" in Black next to the logo.
 - Powder-blue text on grape → use Bold (700)+.
 
 ## Spacing & shape
@@ -74,12 +85,40 @@ Stack: `"Lexend", ui-sans-serif, system-ui, sans-serif`
 - Never fade glass (opacity below 1 stops it rendering); buttons shrink slightly on press instead.
 
 ## Logo
-- `bond-logo.png` — two overlapping rings with orbiting dots + "Bond" wordmark (navy) + "Stronger Together". 1560×672, on white.
-- `bond-mark.png` — rings only, transparent. 637×372. Use where space is tight or name is set separately.
-- In the app header, use the wordmark only (`BOND`, navy on platinum), without the rings.
-- Rules: don't redraw/recolour; light grounds only (white/platinum). On dark grounds, place the mark on a platinum tile — no dark version exists yet.
+The two stacked atoms stand for the two SMEs. The electron on the top orbit is what makes it an atom, and it's what makes the bond. Drawn in grape (outline, nuclei) and powder blue (orbits, electron), with gradient orbits.
+
+All files are 2000×2000 transparent PNGs in `assets/logo/` (full-size originals are in the Teams chat).
+
+| File | Contents | Use |
+|---|---|---|
+| `bond-logo-wordmark.png` | B outline with the two atoms inside, followed by "ond" | Full logo: splash, onboarding, marketing, anywhere the name isn't set nearby. Sits left of centre in its square. |
+| `bond-logo-b.png` | B outline with the two atoms inside, no text | Primary mark: **Expo app icon**, favicon, avatars, small square spaces |
+| `bond-logo-atoms.png` | The two atoms only, no B outline | Decorative or illustrative use, loading states, places where the B would repeat a nearby "Bond" |
+
+### App icon
+- Use `bond-logo-b.png` on a solid Platinum (`#F0F3F5`) background.
+- iOS needs an opaque 1024×1024 PNG (no transparency), so flatten the mark onto Platinum.
+- Android adaptive icon: the B as the foreground, kept inside the central safe zone (about 66% of the canvas), with a Platinum background; monochrome version in a single colour.
+- Favicon and splash use the same mark.
+- Generated from `bond-logo-b.png` (wired up in `app.json`):
+
+| File | Size | Contents |
+|---|---|---|
+| `assets/icon.png` | 1024×1024, opaque | B at 68% height on Platinum |
+| `assets/android-icon-foreground.png` | 1024×1024, transparent | B at 55% height (inside safe zone) |
+| `assets/android-icon-background.png` | 1024×1024, opaque | Solid Platinum (`adaptiveIcon.backgroundColor` is `#F0F3F5` too) |
+| `assets/android-icon-monochrome.png` | 1024×1024, transparent | B silhouette in white, 55% height |
+| `assets/favicon.png` | 48×48, opaque | B on Platinum |
+| `assets/splash-icon.png` | 1024×1024, transparent | B at 90% height (not referenced in `app.json` yet; no splash config) |
+
+### Rules
+- Don't redraw, recolour, stretch or add effects. Keep the gradients as drawn.
+- Light grounds only (white or platinum). On dark grounds, place the logo on a platinum tile; no dark version exists yet.
+- The fine orbit and nucleus detail disappears below about 32px; at very small sizes prefer the B mark over the full wordmark.
+- In the app header, the text wordmark `BOND` may still be used on its own without the mark.
 
 ## Voice
 - Plain, warm, specific — like a helpful neighbour. e.g. "Trade an hour of design for an hour of bookkeeping."
+- Lean into unity and innovation: businesses getting further together, framed hopefully. Optimistic about the future, never dystopian or edgy.
 - Name the skill and the business, not the feature.
 - No hype, no urgency, no emoji.
