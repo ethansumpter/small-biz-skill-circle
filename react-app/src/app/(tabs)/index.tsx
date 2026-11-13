@@ -75,7 +75,7 @@ export default function DiscoverScreen() {
     <View style={[styles.root, { backgroundColor: colors.surface }]}>
       {/* Top bar + filter row stay put while the card scrolls */}
       <View style={[styles.filters, { borderBottomColor: colors.line }]}>
-        <FilterBar filters={filters} onChange={setFilters} />
+        <FilterBar filters={filters} onChange={setFilters} resultCount={feed.length} />
         {company ? (
           <Text style={[type.caption, styles.count, { color: colors.inkMuted }]}>
             {feed.length} {feed.length === 1 ? 'business' : 'businesses'} to see

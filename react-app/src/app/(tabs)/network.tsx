@@ -53,7 +53,13 @@ export default function NetworkScreen() {
   return (
     <View style={[styles.root, { backgroundColor: colors.surface }]}>
       <View style={[styles.filters, { borderBottomColor: colors.line }]}>
-        <FilterBar filters={filters} onChange={setFilters} primary={['location', 'identity', 'size']} more={[]} />
+        <FilterBar
+          filters={filters}
+          onChange={setFilters}
+          primary={['location', 'identity', 'size']}
+          more={[]}
+          resultCount={proposals.length + savedCompanies.length}
+        />
       </View>
 
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}>

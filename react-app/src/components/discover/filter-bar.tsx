@@ -1,33 +1,72 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeInLeft,
+  FadeInRight,
+  FadeOut,
+  LinearTransition,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import { FILTER_LABELS, FILTER_OPTIONS, type FilterKey, type Filters, industriesOf } from '@/data/discover';
 import { useCompanies } from '@/state/preview';
-import { radius, space, type, useBondColors } from '@/theme/tokens';
+import { fonts, radius, space, type, useBondColors } from '@/theme/tokens';
+
+const CHIP_HEIGHT = 36;
+
+/** Motion (see expo-animation guidance): strong ease-out for UI, iOS sheet curve for the sheet. */
+const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
+const EASE_SHEET = Easing.bezier(0.32, 0.72, 0, 1);
+const SHEET_IN_MS = 300;
+const SHEET_OUT_MS = 200;
+/** Chip colour, ×, Clear all: small state changes. */
+const CHIP_MS = 180;
+/** Row reflow when a chip's width changes or Clear all appears. */
+const reflow = LinearTransition.duration(CHIP_MS).easing(EASE_OUT);
+const appear = FadeIn.duration(CHIP_MS).easing(EASE_OUT);
+const disappear = FadeOut.duration(120).easing(EASE_OUT);
 
 /**
- * Filter row: filter icon (all filters), a chip per `primary` filter, and
- * More… for the rest. Each opens a sheet of single-choice options.
- * Defaults are Discover's (docs/bond-app-structure.md §1).
+ * Filter row (docs/bond-app-structure.md §1, laid out per
+ * docs/discover-section-mockup.png): a bare filter icon (all filters) with a
+ * count badge, a chip per `primary` filter, More… for the rest, then Clear all
+ * once anything is on. Set chips fill with ink and get an × to clear them in
+ * one tap. Each chip opens a sheet of single-choice options; changes apply
+ * straight away, and the sheet's button shows `resultCount` when given.
  */
 export function FilterBar({
   filters,
   onChange,
   primary = ['location', 'industry'],
   more = ['size', 'identity', 'collaboration'],
+  resultCount,
 }: {
   filters: Filters;
   onChange: (next: Filters) => void;
   primary?: FilterKey[];
   more?: FilterKey[];
+  /** How many businesses the current filters leave; shown on the sheet's button. */
+  resultCount?: number;
 }) {
   const colors = useBondColors();
   const [sheet, setSheet] = useState<FilterKey[] | null>(null);
   const all = [...primary, ...more];
-  const activeCount = Object.values(filters).filter(Boolean).length;
+  const activeCount = all.filter((k) => filters[k]).length;
   const moreCount = more.filter((k) => filters[k]).length;
+
+  const clear = (keys: FilterKey[]) => {
+    const next = { ...filters };
+    keys.forEach((k) => delete next[k]);
+    onChange(next);
+  };
 
   return (
     <>
@@ -35,39 +74,58 @@ export function FilterBar({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={activeCount ? `All filters, ${activeCount} on` : 'All filters'}
+          hitSlop={6}
           onPress={() => setSheet(all)}
-          style={({ pressed }) => [
-            styles.iconChip,
-            { borderColor: colors.line, backgroundColor: colors.surfaceRaised, opacity: pressed ? 0.7 : 1 },
-          ]}
+          style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.6 : 1 }]}
         >
-          <Ionicons name="options-outline" size={18} color={colors.ink} />
+          <Ionicons name="options-outline" size={24} color={colors.ink} />
           {activeCount ? (
-            <View style={[styles.count, { backgroundColor: colors.focusRing }]}>
-              <Text style={[type.caption, { color: colors.surfaceRaised }]}>{activeCount}</Text>
-            </View>
+            <Animated.View
+              entering={appear}
+              exiting={disappear}
+              style={[styles.badge, { backgroundColor: colors.ink, borderColor: colors.surface }]}
+            >
+              <Text style={[styles.badgeText, { color: colors.surface }]}>{activeCount}</Text>
+            </Animated.View>
           ) : null}
         </Pressable>
+
         {primary.map((key) => (
           <FilterChip
             key={key}
-            label={filters[key] ?? FILTER_LABELS[key]}
-            active={!!filters[key]}
+            name={FILTER_LABELS[key]}
+            value={filters[key]}
             onPress={() => setSheet([key])}
+            onClear={() => clear([key])}
           />
         ))}
         {more.length ? (
           <FilterChip
-            label={moreCount ? `More (${moreCount})` : 'More…'}
-            active={moreCount > 0}
+            name="More"
+            value={moreCount ? `More · ${moreCount}` : undefined}
             onPress={() => setSheet(more)}
+            onClear={() => clear(more)}
           />
+        ) : null}
+
+        {activeCount > 1 ? (
+          <Animated.View entering={appear} exiting={disappear} layout={reflow}>
+            <Pressable
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={() => clear(all)}
+              style={({ pressed }) => [styles.clearAll, { opacity: pressed ? 0.6 : 1 }]}
+            >
+              <Text style={[type.label, { color: colors.link }]}>Clear all</Text>
+            </Pressable>
+          </Animated.View>
         ) : null}
       </ScrollView>
 
       <FilterSheet
         keys={sheet}
         filters={filters}
+        resultCount={resultCount}
         onChange={onChange}
         onClose={() => setSheet(null)}
       />
@@ -75,36 +133,84 @@ export function FilterBar({
   );
 }
 
-function FilterChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+/**
+ * Outlined chip with a chevron when unset; ink-filled with an × when set.
+ * `value` is what the chip shows when set (the chosen option).
+ */
+function FilterChip({
+  name,
+  value,
+  onPress,
+  onClear,
+}: {
+  name: string;
+  value?: string;
+  onPress: () => void;
+  onClear: () => void;
+}) {
   const colors = useBondColors();
+  const active = !!value;
+  const fg = active ? colors.surface : colors.ink;
+
   return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [
+    // Colour cross-fades (CSS transition); width changes reflow the row smoothly.
+    <Animated.View
+      layout={reflow}
+      style={[
         styles.chip,
+        styles.chipTransition,
         active
-          ? { backgroundColor: colors.accent, borderColor: colors.accent }
+          ? { backgroundColor: colors.ink, borderColor: colors.ink }
           : { backgroundColor: colors.surfaceRaised, borderColor: colors.line },
-        pressed && { opacity: 0.7 },
       ]}
     >
-      <Text numberOfLines={1} style={[type.label, { color: active ? colors.onAccent : colors.ink }]}>
-        {label}
-      </Text>
-      <Ionicons name="chevron-down" size={14} color={active ? colors.onAccent : colors.inkMuted} />
-    </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={active ? `${name}: ${value}. Change` : `${name} filter`}
+        onPress={onPress}
+        style={({ pressed }) => [styles.chipMain, active && styles.chipMainActive, pressed && { opacity: 0.6 }]}
+      >
+        <Text numberOfLines={1} style={[type.label, styles.chipText, { color: fg }]}>
+          {value ?? name}
+        </Text>
+        {active ? null : (
+          <Animated.View entering={appear}>
+            <Ionicons name="chevron-down" size={14} color={colors.inkMuted} />
+          </Animated.View>
+        )}
+      </Pressable>
+      {active ? (
+        <Animated.View entering={appear} style={styles.fullHeight}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Clear ${name}`}
+            hitSlop={{ top: 6, bottom: 6, right: 6 }}
+            onPress={onClear}
+            style={({ pressed }) => [styles.chipClear, pressed && { opacity: 0.6 }]}
+          >
+            <Ionicons name="close" size={16} color={fg} />
+          </Pressable>
+        </Animated.View>
+      ) : null}
+    </Animated.View>
   );
 }
 
+/**
+ * Bottom sheet with two levels so it never shows every option at once:
+ * several categories → one row each (name + current choice), tap to open;
+ * one category → a plain list of its options with "Any" first and a tick.
+ */
 function FilterSheet({
   keys,
   filters,
+  resultCount,
   onChange,
   onClose,
 }: {
   keys: FilterKey[] | null;
   filters: Filters;
+  resultCount?: number;
   onChange: (next: Filters) => void;
   onClose: () => void;
 }) {
@@ -114,71 +220,193 @@ function FilterSheet({
   const options = useMemo(() => ({ ...FILTER_OPTIONS, industry: industriesOf(companies) }), [companies]);
   const insets = useSafeAreaInsets();
   const shown = keys ?? [];
-  const title = shown.length === 1 ? FILTER_LABELS[shown[0]] : 'Filters';
-  const anyShownActive = shown.some((k) => filters[k]);
+  // The category opened from the overview, when the sheet was opened with several.
+  const [opened, setOpened] = useState<FilterKey | null>(null);
+  // Which way the last level change went; null until the user moves between levels,
+  // so the first level doesn't slide in on top of the sheet's own entrance.
+  const [direction, setDirection] = useState<'forward' | 'back' | null>(null);
+  const current: FilterKey | null = shown.length === 1 ? shown[0] : opened;
+  const canGoBack = shown.length > 1 && current !== null;
 
-  const clearShown = () => {
+  const openCategory = (key: FilterKey) => {
+    setDirection('forward');
+    setOpened(key);
+  };
+  const backToOverview = () => {
+    setDirection('back');
+    setOpened(null);
+  };
+
+  // Sheet entrance/exit: 0 = hidden, 1 = shown. Slides up by its own height while the
+  // backdrop fades; with Reduce Motion it only fades. Runs on the UI thread.
+  const reduced = useReducedMotion();
+  const progress = useSharedValue(0);
+  const sheetHeight = useSharedValue(800);
+  const closing = useRef(false);
+  const visible = keys !== null;
+
+  useEffect(() => {
+    if (!visible) return;
+    closing.current = false;
+    progress.set(0);
+    progress.set(withTiming(1, { duration: SHEET_IN_MS, easing: EASE_SHEET }));
+  }, [visible, progress]);
+
+  const finishClose = () => {
+    setOpened(null);
+    setDirection(null);
+    onClose();
+  };
+  // Play the exit, then tell the parent; the content stays put until it's gone.
+  const close = () => {
+    if (closing.current) return;
+    closing.current = true;
+    progress.set(
+      withTiming(0, { duration: SHEET_OUT_MS, easing: EASE_OUT }, (finished) => {
+        if (finished) scheduleOnRN(finishClose);
+      }),
+    );
+  };
+
+  const backdropStyle = useAnimatedStyle(() => ({ opacity: progress.get() }));
+  const sheetStyle = useAnimatedStyle(() =>
+    reduced
+      ? { opacity: progress.get() }
+      : { transform: [{ translateY: (1 - progress.get()) * sheetHeight.get() }] },
+  );
+
+  const levelEntering =
+    direction === null
+      ? undefined
+      : reduced
+        ? FadeIn.duration(CHIP_MS)
+        : (direction === 'forward' ? FadeInRight : FadeInLeft).duration(220).easing(EASE_OUT);
+
+  const scope = current ? [current] : shown;
+  const anyActive = scope.some((k) => filters[k]);
+  const clearScope = () => {
     const next = { ...filters };
-    shown.forEach((k) => delete next[k]);
+    scope.forEach((k) => delete next[k]);
     onChange(next);
   };
 
+  const doneLabel =
+    resultCount === undefined
+      ? 'Done'
+      : resultCount === 0
+        ? 'No matches. Try fewer filters'
+        : `Show ${resultCount} ${resultCount === 1 ? 'business' : 'businesses'}`;
+
   return (
-    <Modal visible={keys !== null} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable accessibilityLabel="Close filters" style={styles.backdrop} onPress={onClose} />
-      <View
-        style={[styles.sheet, { backgroundColor: colors.surfaceRaised, paddingBottom: Math.max(insets.bottom, space[4]) }]}
+    <Modal visible={visible} transparent animationType="none" onRequestClose={close}>
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]} />
+      <Pressable accessibilityLabel="Close filters" style={styles.flex} onPress={close} />
+      <Animated.View
+        onLayout={(e) => sheetHeight.set(e.nativeEvent.layout.height)}
+        style={[
+          styles.sheet,
+          { backgroundColor: colors.surfaceRaised, paddingBottom: Math.max(insets.bottom, space[4]) },
+          sheetStyle,
+        ]}
       >
+        <View style={[styles.handle, { backgroundColor: colors.line }]} />
         <View style={styles.sheetHead}>
+          {canGoBack ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="All filters"
+              hitSlop={8}
+              onPress={backToOverview}
+              style={styles.back}
+            >
+              <Ionicons name="chevron-back" size={22} color={colors.ink} />
+            </Pressable>
+          ) : null}
           <Text accessibilityRole="header" style={[type.subheading, styles.flex, { color: colors.ink }]}>
-            {title}
+            {current ? FILTER_LABELS[current] : 'Filters'}
           </Text>
-          {anyShownActive ? (
-            <Pressable accessibilityRole="button" hitSlop={8} onPress={clearShown}>
-              <Text style={[type.label, { color: colors.link }]}>Clear</Text>
+          {anyActive ? (
+            <Pressable accessibilityRole="button" hitSlop={8} onPress={clearScope}>
+              <Text style={[type.label, { color: colors.link }]}>{current ? 'Clear' : 'Clear all'}</Text>
             </Pressable>
           ) : null}
         </View>
 
-        <ScrollView style={styles.sheetBody} contentContainerStyle={styles.groups}>
-          {shown.map((key) => (
-            <View key={key} style={styles.group}>
-              {shown.length > 1 ? (
-                <Text style={[type.label, { color: colors.inkMuted }]}>{FILTER_LABELS[key]}</Text>
-              ) : null}
-              <View accessibilityRole="radiogroup" accessibilityLabel={FILTER_LABELS[key]} style={styles.options}>
-                {options[key].map((option) => {
-                  const selected = filters[key] === option;
+        <ScrollView style={styles.sheetBody}>
+          {/* Keyed by level so each change re-enters: forward slides in from the right, back from the left. */}
+          <Animated.View key={current ?? 'all'} entering={levelEntering}>
+            {current ? (
+              <View accessibilityRole="radiogroup" accessibilityLabel={FILTER_LABELS[current]}>
+                {[undefined, ...options[current]].map((option, i, list) => {
+                  const selected = filters[current] === option;
                   return (
                     <Pressable
-                      key={option}
+                      key={option ?? 'any'}
                       accessibilityRole="radio"
                       accessibilityState={{ checked: selected }}
-                      onPress={() => onChange({ ...filters, [key]: selected ? undefined : option })}
-                      style={[
-                        styles.option,
-                        selected
-                          ? { backgroundColor: colors.accent, borderColor: colors.accent }
-                          : { backgroundColor: colors.surfaceRaised, borderColor: colors.line },
+                      onPress={() => {
+                        onChange({ ...filters, [current]: option });
+                        if (shown.length > 1) backToOverview();
+                      }}
+                      style={({ pressed }) => [
+                        styles.listRow,
+                        i < list.length - 1 && { borderBottomColor: colors.line, borderBottomWidth: StyleSheet.hairlineWidth },
+                        pressed && { opacity: 0.6 },
                       ]}
                     >
-                      <Text style={[type.label, { color: selected ? colors.onAccent : colors.ink }]}>{option}</Text>
+                      <Text
+                        style={[
+                          selected ? type.label : type.body,
+                          styles.flex,
+                          { color: option ? colors.ink : colors.inkMuted },
+                        ]}
+                      >
+                        {option ?? 'Any'}
+                      </Text>
+                      {selected ? (
+                        <Animated.View entering={appear}>
+                          <Ionicons name="checkmark" size={20} color={colors.ink} />
+                        </Animated.View>
+                      ) : null}
                     </Pressable>
                   );
                 })}
               </View>
-            </View>
-          ))}
+            ) : (
+              shown.map((key, i) => (
+                <Pressable
+                  key={key}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${FILTER_LABELS[key]}: ${filters[key] ?? 'Any'}`}
+                  onPress={() => openCategory(key)}
+                  style={({ pressed }) => [
+                    styles.listRow,
+                    i < shown.length - 1 && { borderBottomColor: colors.line, borderBottomWidth: StyleSheet.hairlineWidth },
+                    pressed && { opacity: 0.6 },
+                  ]}
+                >
+                  <Text style={[type.body, styles.flex, { color: colors.ink }]}>{FILTER_LABELS[key]}</Text>
+                  <Text
+                    numberOfLines={1}
+                    style={[filters[key] ? type.label : type.body, styles.rowValue, { color: filters[key] ? colors.ink : colors.inkMuted }]}
+                  >
+                    {filters[key] ?? 'Any'}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={18} color={colors.inkMuted} />
+                </Pressable>
+              ))
+            )}
+          </Animated.View>
         </ScrollView>
 
         <Pressable
           accessibilityRole="button"
-          onPress={onClose}
+          onPress={close}
           style={({ pressed }) => [styles.done, { backgroundColor: colors.ink, opacity: pressed ? 0.85 : 1 }]}
         >
-          <Text style={[type.label, { color: colors.surface }]}>Done</Text>
+          <Text style={[type.label, { color: colors.surface }]}>{doneLabel}</Text>
         </Pressable>
-      </View>
+      </Animated.View>
     </Modal>
   );
 }
@@ -186,55 +414,66 @@ function FilterSheet({
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   row: { gap: space[2], paddingHorizontal: space[4], alignItems: 'center' },
-  iconChip: {
-    width: 40,
-    height: 36,
-    borderRadius: radius.full,
-    borderWidth: 1,
+  iconButton: {
+    width: CHIP_HEIGHT,
+    height: CHIP_HEIGHT,
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: space[1],
   },
-  count: {
+  badge: {
     position: 'absolute',
-    top: -4,
+    top: -2,
     right: -4,
     minWidth: 18,
     height: 18,
-    borderRadius: radius.full,
+    borderRadius: 9,
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 3,
   },
+  badgeText: { fontFamily: fonts.semibold, fontSize: 10, lineHeight: 12 },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space[1],
-    height: 36,
-    maxWidth: 220,
-    paddingHorizontal: space[3],
-    borderRadius: radius.full,
+    height: CHIP_HEIGHT,
+    maxWidth: 240,
+    borderRadius: CHIP_HEIGHT / 2,
     borderWidth: 1,
   },
-  backdrop: { flex: 1, backgroundColor: 'rgba(33, 36, 69, 0.4)' },
+  chipMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[1],
+    height: '100%',
+    paddingHorizontal: space[3],
+    flexShrink: 1,
+  },
+  fullHeight: { height: '100%' },
+  chipTransition: {
+    transitionProperty: ['backgroundColor', 'borderColor'],
+    transitionDuration: CHIP_MS,
+    transitionTimingFunction: 'ease-out',
+  },
+  chipMainActive: { paddingRight: space[1] },
+  chipText: { flexShrink: 1 },
+  chipClear: { height: '100%', paddingLeft: space[1], paddingRight: space[3], justifyContent: 'center' },
+  clearAll: { height: CHIP_HEIGHT, justifyContent: 'center', paddingHorizontal: space[1] },
+  backdrop: { backgroundColor: 'rgba(33, 36, 69, 0.4)' },
   sheet: {
     maxHeight: '80%',
-    borderTopLeftRadius: radius.md,
-    borderTopRightRadius: radius.md,
+    borderTopLeftRadius: radius.md * 2,
+    borderTopRightRadius: radius.md * 2,
     paddingHorizontal: space[4],
-    paddingTop: space[4],
-    gap: space[3],
+    paddingTop: space[2],
+    gap: space[4],
   },
+  handle: { alignSelf: 'center', width: 36, height: 5, borderRadius: 3 },
   sheetHead: { flexDirection: 'row', alignItems: 'center' },
   sheetBody: { flexGrow: 0 },
-  groups: { gap: space[4] },
-  group: { gap: space[2] },
-  options: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
-  option: {
-    borderRadius: radius.full,
-    borderWidth: 1,
-    paddingHorizontal: space[3],
-    minHeight: 40,
-    justifyContent: 'center',
-  },
-  done: { minHeight: 48, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  back: { marginRight: space[2], marginLeft: -space[1] },
+  listRow: { flexDirection: 'row', alignItems: 'center', gap: space[2], minHeight: 52 },
+  rowValue: { maxWidth: '50%' },
+  done: { minHeight: 52, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
 });
