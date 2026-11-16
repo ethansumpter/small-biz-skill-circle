@@ -41,6 +41,7 @@ export default function RootLayout() {
           <Stack.Screen name="settings" />
           <Stack.Screen name="edit-profile" />
           <Stack.Screen name="demo-panel" />
+          <Stack.Screen name="assistant" />
         </Stack>
       </View>
       <StatusBar style="auto" />

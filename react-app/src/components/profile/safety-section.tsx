@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import type { ComponentProps } from 'react';
 import type Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -30,7 +31,9 @@ export function SafetySection() {
           label={item.label}
           detail={i === 0 ? verifiedDetail : item.detail}
           last={i === ITEMS.length - 1}
-          onPress={() => notInPreview(item.label)}
+          onPress={() =>
+            item.label === 'Help centre and AI assistant' ? router.push('/assistant') : notInPreview(item.label)
+          }
         />
       ))}
     </Card>

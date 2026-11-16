@@ -53,6 +53,7 @@ Leads (chat) → Unmatch | Mute | Report | Block
 - Floating bubble on every screen; also reachable from Safety → Help centre.
 - Roles: help & support, explain matches, help draft proposals/comments, suggest collaborations.
 - Uses AI-matching data only with the user's **AI-matching data permission** (Settings → Privacy & data).
+- **Demo build:** scripted replies from the demo data, no live model (see `bond-app-structure.md`, *AI assistant*). Adds two sales & marketing helpers on top of the spec's roles: **plan a joint campaign** (offer, post, email subject, discount code, how to measure it) and **analyse our website** (what the AI matching infers from the firm's link).
 
 ## Trust & safety
 Business verification · block list · report profiles/reviews/chats · company help line · personal-safety guidance · pause/delete account · download/delete my data (GDPR-style).

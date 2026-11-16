@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router';
 import { Pressable, StyleSheet } from 'react-native';
 
 import Animated from 'react-native-reanimated';
@@ -6,7 +7,6 @@ import Animated from 'react-native-reanimated';
 import { GlassSurface, useLiquidGlass, useTabBarOverlap } from '@/components/glass';
 import { useTabBarSlideStyle } from '@/components/tab-bar-visibility';
 import { overlay, space, useBondColors } from '@/theme/tokens';
-import { notInPreview } from '@/utils/preview';
 
 const SIZE = 56;
 
@@ -34,7 +34,7 @@ export function AiAssistantButton() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="AI assistant"
-        onPress={() => notInPreview('AI assistant')}
+        onPress={() => router.push('/assistant')}
         style={({ pressed }) => [
           styles.button,
           // Glass must stay fully opaque, so it shrinks on press instead of fading.

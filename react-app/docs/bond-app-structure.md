@@ -17,6 +17,19 @@ Bond is a **B2B collaboration-matching phone app** (Hinge-style UX) that matches
 - **Hide on scroll:** the tab bar floats over the bottom of every tab (tab content scrolls underneath and pads clear of it). Scrolling down slides it off the bottom; scrolling up, or getting near the top, slides it back (220ms). The AI bubble and Discover's save/cross buttons drop down with it. Switching tabs always shows it. Small scroll jiggles (under 12px) are ignored.
 - **iOS 26+:** the tab bar is a liquid glass pill and the floating buttons are glass (see brand kit, *iOS liquid glass*). Other platforms use the solid full-width bar.
 
+## AI assistant
+Opened from the floating bubble (every tab) and **Profile → Safety → Help centre and AI assistant**. A chat screen on the root stack (`/assistant`), below the global header with a back bar: *Bond assistant · AI help for your business · Preview*.
+
+**Demo build decisions (not in the spec):**
+- **Scripted, not a live model.** Replies are built from the session's demo data (`src/utils/assistant.ts`), so the demo works offline and never says something we can't stand behind. Nothing is sent; the chat resets when closed.
+- Opens with a greeting naming the logged-in business, then six **quick-action chips** that stay under the latest reply: *Who should we team up with?* · *Why did we match?* · *Help me write a proposal* · *Plan a joint campaign* · *Analyse our website* · *How is our data used?* Typed questions are matched to the same six by keyword; anything else gets a short "here's what I can help with" reply.
+- Replies are a bubble with a lead sentence, labelled sections and, where useful, one link to the next step (Open Discover, Start a proposal, Go to Leads / Message them in Leads).
+- **Partners** only suggests firms with a real signal (a shared demo proposal, or one side's *looking for* matching the other's *offer*); never matched or blocked firms.
+- **Why did we match** uses the three checks from the spec's "Why this match" panel: company profile, customer base, cooperation objectives. Business names only (privacy rule).
+- **Joint campaign** plans a two-week offer with the first matched partner: campaign, social post, email subject, joint offer with a code (`BOND-` + both initials + `10`) and how to measure it (code uses and new customers per business). Both owners approve before anything goes out.
+- **Website analysis** shows what the AI matching would infer from the firm's website link (per the matching algorithm in `bond-features.md`).
+- A footer note says answers come from demo data and nothing is sent. A short "Thinking…" line shows for 0.7s before each reply.
+
 ## 1. Discover
 Vertical scroll card showing **one profile at a time**. Top → bottom:
 1. **Filter row** (chips): Location, Industry, more…; filter icon at left. A count of businesses left to see sits under it.
