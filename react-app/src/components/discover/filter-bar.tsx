@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -11,6 +11,7 @@ import Animated, {
   useReducedMotion,
 } from 'react-native-reanimated';
 
+import { AiSparkle } from '@/components/ai-sparkle';
 import { BottomSheet } from '@/components/bottom-sheet';
 import { FILTER_LABELS, FILTER_OPTIONS, type FilterKey, type Filters, industriesOf } from '@/data/discover';
 import { useCompanies } from '@/state/preview';
@@ -29,9 +30,9 @@ const disappear = FadeOut.duration(120).easing(EASE_OUT);
 
 /**
  * Filter row (docs/bond-app-structure.md §1, laid out per
- * docs/discover-section-mockup.png): a bare filter icon (all filters) with a
- * count badge, a chip per `primary` filter, More… for the rest, then Clear all
- * once anything is on. Set chips fill with ink and get an × to clear them in
+ * docs/discover-section-mockup.png): a bare filter icon (all filters, including
+ * the `more` ones) with a count badge, an AI matching pill when `aiMatching` is
+ * set, a chip per `primary` filter, then Clear all once two or more are on. Set chips fill with ink and get an × to clear them in
  * one tap. Each chip opens a sheet of single-choice options; changes apply
  * straight away, and the sheet's button shows `resultCount` when given.
  */
@@ -41,19 +42,24 @@ export function FilterBar({
   primary = ['location', 'industry'],
   more = ['size', 'identity', 'collaboration'],
   resultCount,
+  aiMatching: showAi = false,
 }: {
   filters: Filters;
   onChange: (next: Filters) => void;
   primary?: FilterKey[];
+  /** Filters with no chip of their own; reached from the filter icon. */
   more?: FilterKey[];
   /** How many businesses the current filters leave; shown on the sheet's button. */
   resultCount?: number;
+  /** Show the AI matching pill and toggle (Discover only). Display only: it doesn't change the feed. */
+  aiMatching?: boolean;
 }) {
   const colors = useBondColors();
   const [sheet, setSheet] = useState<FilterKey[] | null>(null);
+  // AI matching on/off: display only for the demo. Resets when the screen reloads.
+  const [aiOn, setAiOn] = useState(true);
   const all = [...primary, ...more];
   const activeCount = all.filter((k) => filters[k]).length;
-  const moreCount = more.filter((k) => filters[k]).length;
 
   const clear = (keys: FilterKey[]) => {
     const next = { ...filters };
@@ -83,6 +89,10 @@ export function FilterBar({
           ) : null}
         </Pressable>
 
+        {showAi ? (
+          <AiChip on={aiOn} onPress={() => setSheet(all)} />
+        ) : null}
+
         {primary.map((key) => (
           <FilterChip
             key={key}
@@ -92,14 +102,6 @@ export function FilterBar({
             onClear={() => clear([key])}
           />
         ))}
-        {more.length ? (
-          <FilterChip
-            name="More"
-            value={moreCount ? `More · ${moreCount}` : undefined}
-            onPress={() => setSheet(more)}
-            onClear={() => clear(more)}
-          />
-        ) : null}
 
         {activeCount > 1 ? (
           <Animated.View entering={appear} exiting={disappear} layout={reflow}>
@@ -121,8 +123,38 @@ export function FilterBar({
         resultCount={resultCount}
         onChange={onChange}
         onClose={() => setSheet(null)}
+        ai={showAi ? { on: aiOn, onChange: setAiOn } : undefined}
       />
     </>
+  );
+}
+
+/**
+ * AI matching pill, first in the row: just the AI sparkle in a round chip, on a
+ * powder-blue fill when on and outlined when off. Opens all filters, where the toggle is.
+ */
+function AiChip({ on, onPress }: { on: boolean; onPress: () => void }) {
+  const colors = useBondColors();
+  return (
+    <Animated.View
+      layout={reflow}
+      style={[
+        styles.chip,
+        styles.chipTransition,
+        on
+          ? { backgroundColor: colors.accent, borderColor: colors.accent }
+          : { backgroundColor: colors.surfaceRaised, borderColor: colors.line },
+      ]}
+    >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`AI matching ${on ? 'on' : 'off'}. Open filters`}
+        onPress={onPress}
+        style={({ pressed }) => [styles.aiChip, pressed && { opacity: 0.6 }]}
+      >
+        <AiSparkle size={18} color={on ? colors.onAccent : colors.inkMuted} />
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -200,12 +232,15 @@ function FilterSheet({
   resultCount,
   onChange,
   onClose,
+  ai,
 }: {
   keys: FilterKey[] | null;
   filters: Filters;
   resultCount?: number;
   onChange: (next: Filters) => void;
   onClose: () => void;
+  /** AI matching toggle at the top of the overview; omitted where AI matching doesn't apply. */
+  ai?: { on: boolean; onChange: (on: boolean) => void };
 }) {
   const colors = useBondColors();
   // Industries follow the session's companies, so demo panel edits show up here.
@@ -327,28 +362,49 @@ function FilterSheet({
               })}
             </View>
           ) : (
-            shown.map((key, i) => (
-              <Pressable
-                key={key}
-                accessibilityRole="button"
-                accessibilityLabel={`${FILTER_LABELS[key]}: ${filters[key] ?? 'Any'}`}
-                onPress={() => openCategory(key)}
-                style={({ pressed }) => [
-                  styles.listRow,
-                  i < shown.length - 1 && { borderBottomColor: colors.line, borderBottomWidth: StyleSheet.hairlineWidth },
-                  pressed && { opacity: 0.6 },
-                ]}
-              >
-                <Text style={[type.body, styles.flex, { color: colors.ink }]}>{FILTER_LABELS[key]}</Text>
-                <Text
-                  numberOfLines={1}
-                  style={[filters[key] ? type.label : type.body, styles.rowValue, { color: filters[key] ? colors.ink : colors.inkMuted }]}
+            <>
+              {ai ? (
+                <View style={[styles.aiRow, { backgroundColor: colors.surface }]}>
+                  <View style={[styles.aiIcon, { backgroundColor: colors.surfaceRaised, borderColor: colors.line }]}>
+                    <AiSparkle size={18} />
+                  </View>
+                  <View style={styles.flex}>
+                    <Text style={[type.label, { color: colors.ink }]}>AI matching</Text>
+                    <Text style={[type.caption, { color: colors.inkMuted }]}>
+                      Ranks businesses by how well your offers and needs fit
+                    </Text>
+                  </View>
+                  <Switch
+                    accessibilityLabel="AI matching"
+                    value={ai.on}
+                    onValueChange={ai.onChange}
+                    trackColor={{ true: colors.focusRing, false: colors.line }}
+                  />
+                </View>
+              ) : null}
+              {shown.map((key, i) => (
+                <Pressable
+                  key={key}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${FILTER_LABELS[key]}: ${filters[key] ?? 'Any'}`}
+                  onPress={() => openCategory(key)}
+                  style={({ pressed }) => [
+                    styles.listRow,
+                    i < shown.length - 1 && { borderBottomColor: colors.line, borderBottomWidth: StyleSheet.hairlineWidth },
+                    pressed && { opacity: 0.6 },
+                  ]}
                 >
-                  {filters[key] ?? 'Any'}
-                </Text>
-                <Ionicons name="chevron-forward" size={18} color={colors.inkMuted} />
-              </Pressable>
-            ))
+                  <Text style={[type.body, styles.flex, { color: colors.ink }]}>{FILTER_LABELS[key]}</Text>
+                  <Text
+                    numberOfLines={1}
+                    style={[filters[key] ? type.label : type.body, styles.rowValue, { color: filters[key] ? colors.ink : colors.inkMuted }]}
+                  >
+                    {filters[key] ?? 'Any'}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={18} color={colors.inkMuted} />
+                </Pressable>
+              ))}
+            </>
           )}
         </Animated.View>
       </ScrollView>
@@ -411,6 +467,7 @@ const styles = StyleSheet.create({
   },
   chipMainActive: { paddingRight: space[1] },
   chipText: { flexShrink: 1 },
+  aiChip: { width: CHIP_HEIGHT - 2, height: '100%', alignItems: 'center', justifyContent: 'center' },
   chipClear: { height: '100%', paddingLeft: space[1], paddingRight: space[3], justifyContent: 'center' },
   clearAll: { height: CHIP_HEIGHT, justifyContent: 'center', paddingHorizontal: space[1] },
   sheetHead: { flexDirection: 'row', alignItems: 'center' },
@@ -418,5 +475,22 @@ const styles = StyleSheet.create({
   back: { marginRight: space[2], marginLeft: -space[1] },
   listRow: { flexDirection: 'row', alignItems: 'center', gap: space[2], minHeight: 52 },
   rowValue: { maxWidth: '50%' },
+  aiRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[3],
+    padding: space[3],
+    borderRadius: radius.md,
+    marginTop: space[2],
+    marginBottom: space[1],
+  },
+  aiIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.full,
+    borderWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   done: { minHeight: 52, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
 });

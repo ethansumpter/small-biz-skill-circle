@@ -7,7 +7,7 @@ import { BottomSheet } from '@/components/bottom-sheet';
 import { CompanyAvatar } from '@/components/company-avatar';
 import type { Company } from '@/data/companies';
 import { proposalTypesFor } from '@/data/discover';
-import { useCurrentUser } from '@/state/preview';
+import { useCurrentUser, usePlans } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
 
 const MAX_COMMENT = 280;
@@ -42,6 +42,7 @@ export function LikeSheet({
   const [error, setError] = useState('');
   const [focused, setFocused] = useState(false);
   const { user } = useCurrentUser();
+  const { plans } = usePlans();
   // Example from the mockup, in business voice (no owner names on Discover).
   const industry = user.industry.toLowerCase();
   const example = `e.g. Hi, we're ${user.name}, ${/^[aeiou]/.test(industry) ? 'an' : 'a'} ${industry} business. We'd love to work with you!`;
@@ -69,7 +70,7 @@ export function LikeSheet({
   const status =
     error ||
     (outOfLikes
-      ? "You've used today's likes on the Free plan. Bond Plus has unlimited likes."
+      ? `You've used today's likes on the ${plans.free.name} plan. ${plans.plus.name} has unlimited likes.`
       : Number.isFinite(likesLeft)
         ? `${likesLeft} ${likesLeft === 1 ? 'like' : 'likes'} left today`
         : 'Unlimited likes');

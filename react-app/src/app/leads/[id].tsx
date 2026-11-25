@@ -19,7 +19,9 @@ export default function LeadThreadScreen() {
   const colors = useBondColors();
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
-  const { leads, sendMessage, toggleMute, unmatch } = useLeads();
+  const { leads, sendMessage, isMessageLiked, toggleMessageLike, toggleMute, unmatch } = useLeads();
+  // A like's heart changes the content size; don't let that jump the chat to the bottom.
+  const likeToggled = useRef(false);
   const { getCompany } = useCompanies();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -106,7 +108,13 @@ export default function LeadThreadScreen() {
         style={styles.root}
         contentContainerStyle={styles.messages}
         keyboardDismissMode="interactive"
-        onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
+        onContentSizeChange={() => {
+          if (likeToggled.current) {
+            likeToggled.current = false;
+            return;
+          }
+          scrollRef.current?.scrollToEnd({ animated: false });
+        }}
       >
         {lead.pinnedComment ? (
           <View style={[styles.pinned, { backgroundColor: colors.surfaceRaised, borderColor: colors.line }]}>
@@ -123,7 +131,17 @@ export default function LeadThreadScreen() {
             You matched with {lead.company}. Say hello and suggest a first step.
           </Text>
         ) : (
-          lead.messages.map((message) => <MessageBubble key={message.id} message={message} />)
+          lead.messages.map((message) => (
+            <MessageBubble
+              key={message.id}
+              message={message}
+              liked={isMessageLiked(lead.id, message.id)}
+              onToggleLike={() => {
+                likeToggled.current = true;
+                toggleMessageLike(lead.id, message.id);
+              }}
+            />
+          ))
         )}
       </ScrollView>
 

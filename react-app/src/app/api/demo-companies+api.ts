@@ -12,7 +12,7 @@ import { CORE_PLAN_IDS, PLAN_ID_PATTERN } from '@/data/plans';
  *   - src/data/companies.json: `companies` and `proposals` (other keys kept as-is)
  *   - src/data/leads.json: `leads`, the Leads chats (other keys kept as-is)
  *   - src/data/plans.json: `plans`, keyed by plan id (other keys kept as-is). Plans can
- *     be added; Free, Boost and Bond Plus can't be removed.
+ *     be added; Free, Boosts and Bond Pro can't be removed.
  * A POST only writes the datasets it includes. Not part of the Bond product: it
  * exists so the demo data can be edited.
  *
@@ -185,8 +185,8 @@ async function saveData(body: {
         throw new BadRequest('`plans` must be an object of plan objects, keyed by plan id.');
       }
       const current = await readJson<PlansFile>(PLANS_FILE);
-      // Plans can be added (and added ones removed), but the app looks up Free, Boost and
-      // Bond Plus by id, so those must stay.
+      // Plans can be added (and added ones removed), but the app looks up Free, Boosts and
+      // Bond Pro by id, so those must stay.
       const missing = CORE_PLAN_IDS.filter((id) => !(id in plans));
       if (missing.length) {
         throw new BadRequest(`The ${missing.join(', ')} plan can't be removed: the app uses it.`, 409);
@@ -206,6 +206,12 @@ async function saveData(body: {
         }
         if (typeof p.pricePence !== 'number' || !Number.isInteger(p.pricePence) || p.pricePence < 0) {
           throw new BadRequest(`Plan "${p.name}" needs a price in pence of 0 or more.`);
+        }
+        if (
+          p.maxPricePence !== undefined &&
+          (typeof p.maxPricePence !== 'number' || !Number.isInteger(p.maxPricePence) || p.maxPricePence < p.pricePence)
+        ) {
+          throw new BadRequest(`Plan "${p.name}": the top of the price range must be in pence and at least the price.`);
         }
         const period = p.period;
         if (

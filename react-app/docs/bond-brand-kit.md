@@ -43,6 +43,8 @@ Tint scrims and shadows with grape-deep, never navy or black.
 | `--link` / `--focus-ring` | `#4A5A8A` | `#A2B2D8` | Links; 2px focus outline |
 | `--line` | `#D5D9E2` | `#3D3549` | Dividers, input borders (never text) |
 
+**Discover swipe wash** (only use): green `#2E9E5B` for like / swipe right and red `#D64545` for pass / swipe left, laid over the card at up to 45% opacity while it's dragged (`swipeTint` in `src/theme/tokens.ts`). Never used for text or elsewhere in the UI.
+
 Dark mode: `data-theme="dark"` on the page wrapper.
 
 ### Contrast rules (WCAG 2.1)
@@ -87,6 +89,11 @@ Stack: `"Lexend", ui-sans-serif, system-ui, sans-serif`
 - Give glass shapes an exact corner radius (half the height), not `radius.full`; glass doesn't draw true circles from 999.
 - Icons and labels on glass keep their normal ink / ink-muted tokens.
 - Never fade glass (opacity below 1 stops it rendering); buttons shrink slightly on press instead.
+
+## AI mark
+- A **four-point sparkle** (`star-four-points` from MaterialCommunityIcons, via the shared `AiSparkle` component) marks anything AI-powered: the assistant bubble and the AI matching toggle in the filters.
+- Colour: `--link` (grape-blue in light mode, powder blue in dark). It's decorative, so the label beside it (or the button's accessible name) says what it is.
+- A generic sparkle, not another company's AI logo: don't copy a specific product's shape or gradient.
 
 ## Logo
 The two stacked atoms stand for the two SMEs. The electron on the top orbit is what makes it an atom, and it's what makes the bond. Drawn in grape (outline, nuclei) and powder blue (orbits, electron), with gradient orbits.

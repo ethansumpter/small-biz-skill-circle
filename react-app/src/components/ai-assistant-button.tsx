@@ -1,9 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import Animated from 'react-native-reanimated';
 
+import { AiSparkle } from '@/components/ai-sparkle';
 import { GlassSurface, useLiquidGlass, useTabBarOverlap } from '@/components/glass';
 import { useTabBarSlideStyle } from '@/components/tab-bar-visibility';
 import { overlay, space, useBondColors } from '@/theme/tokens';
@@ -47,7 +48,13 @@ export function AiAssistantButton() {
           style={styles.surface}
           fallbackStyle={[styles.solid, { backgroundColor: colors.surfaceRaised, borderColor: colors.ink }]}
         >
-          <Ionicons name="happy-outline" size={30} color={colors.ink} />
+          <View>
+            <Ionicons name="happy-outline" size={30} color={colors.ink} />
+            {/* AI sparkle tucked onto the smiley's top-right */}
+            <View style={styles.sparkle}>
+              <AiSparkle size={14} />
+            </View>
+          </View>
         </GlassSurface>
       </Pressable>
     </Animated.View>
@@ -63,6 +70,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  sparkle: { position: 'absolute', top: -7, right: -9 },
   solid: {
     borderWidth: 2,
     // One shadow for iOS, Android and web (the old shadow* props are deprecated on web).

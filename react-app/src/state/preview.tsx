@@ -96,6 +96,10 @@ type PreviewState = {
   addProposal: (input: ProposalInput) => void;
   leads: Lead[];
   sendMessage: (leadId: string, text: string) => void;
+  /** Messages liked by double-tapping in a Leads chat, as `${leadId}/${messageId}`. Kept apart from the
+   * messages so the demo panel's chat editor never saves them to leads.json. */
+  likedMessages: string[];
+  toggleMessageLike: (leadId: string, messageId: string) => void;
   toggleMute: (leadId: string) => void;
   unmatch: (leadId: string) => void;
   discover: DiscoverState;
@@ -131,6 +135,7 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
   const [discover, setDiscover] = useState<DiscoverState>(() => seedDiscover(DEMO_USER_ID));
   const [incoming, setIncoming] = useState<IncomingProposal[]>(DEMO_INCOMING);
   const [leads, setLeads] = useState<Lead[]>(DEMO_LEADS);
+  const [likedMessages, setLikedMessages] = useState<string[]>([]);
 
   // A different account starts with its own fresh Discover feed.
   const setCurrentUserId = useCallback((id: string) => {
@@ -225,6 +230,11 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const toggleMessageLike = useCallback((leadId: string, messageId: string) => {
+    const key = `${leadId}/${messageId}`;
+    setLikedMessages((current) => (current.includes(key) ? current.filter((k) => k !== key) : [...current, key]));
+  }, []);
+
   const toggleMute = useCallback((leadId: string) => {
     setLeads((current) => current.map((lead) => (lead.id === leadId ? { ...lead, muted: !lead.muted } : lead)));
   }, []);
@@ -264,6 +274,8 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
       addProposal,
       leads: liveLeads,
       sendMessage,
+      likedMessages,
+      toggleMessageLike,
       toggleMute,
       unmatch,
       discover,
@@ -288,6 +300,8 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
       addProposal,
       liveLeads,
       sendMessage,
+      likedMessages,
+      toggleMessageLike,
       toggleMute,
       unmatch,
       discover,
@@ -336,8 +350,12 @@ export function usePlans() {
 }
 
 export function useLeads() {
-  const { leads, sendMessage, toggleMute, unmatch, replaceLeads } = usePreview();
-  return { leads, sendMessage, toggleMute, unmatch, replaceLeads };
+  const { leads, sendMessage, likedMessages, toggleMessageLike, toggleMute, unmatch, replaceLeads } = usePreview();
+  const isMessageLiked = useCallback(
+    (leadId: string, messageId: string) => likedMessages.includes(`${leadId}/${messageId}`),
+    [likedMessages],
+  );
+  return { leads, sendMessage, isMessageLiked, toggleMessageLike, toggleMute, unmatch, replaceLeads };
 }
 
 /** The demo company the app is logged in as (defaults to c01; switchable in the demo panel). */

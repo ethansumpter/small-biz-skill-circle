@@ -22,7 +22,7 @@
 | Your Network | 2 incoming proposals (`c03`, `c12`), 1 saved (`c09`) |
 | ＋ Proposals | 1 of 3 active (`p01`) |
 | Leads | 1 live chat with Wick & Wild (`c02`), 1 matched but not started (`c10`) |
-| Profile → Get More | Boost: £4.99 for 7 days. Bond Plus: £14.99/month |
+| Profile → Get More | Bond Pro: £19.99–£29.99/month (proposed). Boosts: £4.99 for 7 days each. Expert services (Awesome Molecules): quoted per project |
 
 **Discover order:** c02, c03, c05, c07, c09, c10, c11, c12, c04, c06, c08, c13, c14, c15, c16, c17, c18.
 
@@ -32,7 +32,7 @@
 
 | ID | Company | Owner | Industry | Location | Size | Verified | Rating |
 |---|---|---|---|---|---|---|---|
-| c01 | Kiln & Clay Studio | Hannah Okafor | Ceramics | Chapel Allerton, Leeds | Micro | ✓ | 4.9 |
+| c01 | Kiln & Clay Studio | Sarah Jones | Ceramics | Chapel Allerton, Leeds | Micro | ✓ | 4.9 |
 | c02 | Wick & Wild Candle Co. | Priya Sharma | Home fragrance | Headingley, Leeds | Micro | ✓ | 4.8 |
 | c03 | Oak & Grain Workshop | Tom Whitaker | Woodworking | Kirkstall, Leeds | Micro | ✓ | 4.9 |
 | c04 | Northfield Audio | Daniel Mensah | Consumer audio | Holbeck, Leeds | SME | ✓ | 4.7 |
@@ -266,9 +266,12 @@ Stored in `src/data/plans.json` (prices in pence, formatted by the app; the Free
 
 | Product | Price | Benefit |
 |---|---|---|
-| Free | £0 | 3 active proposals, 10 likes a day |
-| Boost | £4.99 / 7 days | Shown first in Discover within 10 miles |
-| Bond Plus | £14.99 / month | Unlimited likes, see who saved you, "Why this match" detail, priority verification |
+| Free | £0 | *Get matched and start.* 3 active proposals, 10 likes a day |
+| Bond Pro | £19.99–£29.99 / month (proposed; `maxPricePence` sets the top of the range) | *Recurring subscription.* Unlimited likes, see who saved you, "Why this match" detail, priority verification |
+| Boosts (add-on) | £4.99 / 7 days each | *Profile and proposal boosts.* Profile boost: shown first in Discover within 10 miles. Proposal boost: your proposal shown first to matching businesses |
+| Expert services (add-on) | Quoted per project | Optional fractional expert services from Awesome Molecules. Not a plan: fixed text on Get More, not in `plans.json` |
+
+Bond Pro's price is proposed and to be validated during the pilot, but Get More doesn't say so on screen. Bond Pro keeps the plan id `plus` and Boosts the id `boost`, since the app looks them up by id.
 
 ## Filter options (Discover / Network)
 *How the demo matches them:* a company with no `distanceMiles` is in Leeds and counts as within 5 miles. **Maker** = interests include Product collaborations; **Service provider** = interests include Service collaborations. **Collaboration type** uses the company's proposals. Logged in as another company, Discover shows everyone else in the order above, with c01 last.

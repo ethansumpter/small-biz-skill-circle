@@ -11,7 +11,7 @@ import { diffJson, type Json } from '@/utils/json-diff';
 /**
  * The demo panel's editor for one plan in plans.json: name, type, price (entered
  * in pounds, stored in pence), billing period, benefits and limits. The plan id
- * is fixed because the app looks plans up by it. Free, Boost and Bond Plus can't
+ * is fixed because the app looks plans up by it. Free, Boosts and Bond Pro can't
  * be deleted; added plans can.
  */
 
@@ -42,7 +42,7 @@ export function PlanDetail({
   position: string;
   onChange: (next: EditRecord) => void;
   onDiscard: () => void;
-  /** Shown for added plans only; the app needs Free, Boost and Bond Plus. */
+  /** Shown for added plans only; the app needs Free, Boosts and Bond Pro. */
   onDelete?: () => void;
   onBack?: () => void;
   onPrev?: () => void;

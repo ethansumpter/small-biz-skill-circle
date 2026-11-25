@@ -1,46 +1,37 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { type ComponentRef, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import Animated from 'react-native-reanimated';
+import { router } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useBottomClearance } from '@/components/ai-assistant-button';
-import { useTabBarScrollHandler } from '@/components/tab-bar-visibility';
-import { ACTION_RAIL_WIDTH, ActionRail } from '@/components/discover/action-rail';
-import { CardMenu } from '@/components/discover/card-menu';
-import { DiscoverCard } from '@/components/discover/discover-card';
 import { FilterBar } from '@/components/discover/filter-bar';
 import { LikeSheet } from '@/components/discover/like-sheet';
+import { SwipeDeck } from '@/components/discover/swipe-deck';
 import { Card, PrimaryButton } from '@/components/ui';
 import { DISCOVER_ORDER, type Filters, matchesFilters } from '@/data/discover';
 import { useCompanies, useCurrentUser, useDemoProposals, useDiscover, usePlans } from '@/state/preview';
 import { radius, space, type, useBondColors } from '@/theme/tokens';
-import { notInPreview } from '@/utils/preview';
-
-/** Extra room for the floating action rail (two buttons) above the AI bubble. */
-const RAIL_EXTRA = ACTION_RAIL_WIDTH * 2 + space[3] * 3;
 
 /**
- * Discover: one company at a time (docs/bond-app-structure.md §1, laid out
- * per docs/discover-section-mockup.png). Cross, like and proposal move on to
- * the next company; save doesn't.
+ * Discover: one company at a time as a swipeable overview card
+ * (docs/bond-app-structure.md §1). Swipe right to like, left to pass; tap the
+ * card for the full profile at /discover/[id]. A like still needs a comment, so
+ * swiping right opens the like sheet and the card comes back if it's closed
+ * without sending.
  */
 export default function DiscoverScreen() {
   const colors = useBondColors();
   const bottomClearance = useBottomClearance();
-  // Hides the tab bar while scrolling down, shows it scrolling up.
-  const onScroll = useTabBarScrollHandler();
   const { currentUserId } = useCurrentUser();
   const { getCompany } = useCompanies();
   const { demoProposals } = useDemoProposals();
-  const { passed, sent, saved, blocked, passCompany, toggleSaved, sendLike, blockCompany, restartDiscover } =
-    useDiscover();
+  const { passed, sent, blocked, passCompany, sendLike, restartDiscover } = useDiscover();
 
   const [filters, setFilters] = useState<Filters>({});
   const [proposalType, setProposalType] = useState<string | undefined>();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const scrollRef = useRef<ComponentRef<typeof Animated.ScrollView>>(null);
+  const [returnToken, setReturnToken] = useState(0);
 
   const remaining = useMemo(() => {
     const done = new Set([...passed, ...blocked, ...sent.map((s) => s.companyId), currentUserId]);
@@ -54,9 +45,8 @@ export default function DiscoverScreen() {
   const { likesPerDay } = usePlans();
   const likesLeft = Math.max(0, likesPerDay - sent.length);
 
-  // New company: back to the top, no proposal type picked.
+  // New company: no proposal type picked.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
     setProposalType(undefined);
   }, [company?.id]);
 
@@ -75,11 +65,17 @@ export default function DiscoverScreen() {
     );
   };
 
+  const closeSheet = () => {
+    setSheetOpen(false);
+    // Swiped right but didn't send: bring the card back.
+    setReturnToken((n) => n + 1);
+  };
+
   return (
     <View style={[styles.root, { backgroundColor: colors.surface }]}>
-      {/* Top bar + filter row stay put while the card scrolls */}
+      {/* Filter row stays put under the top bar */}
       <View style={[styles.filters, { borderBottomColor: colors.line }]}>
-        <FilterBar filters={filters} onChange={setFilters} resultCount={feed.length} />
+        <FilterBar filters={filters} onChange={setFilters} resultCount={feed.length} aiMatching />
         {company ? (
           <Text style={[type.caption, styles.count, { color: colors.inkMuted }]}>
             {feed.length} {feed.length === 1 ? 'business' : 'businesses'} to see
@@ -87,56 +83,17 @@ export default function DiscoverScreen() {
         ) : null}
       </View>
 
-      <Animated.ScrollView
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        ref={scrollRef}
-        style={styles.root}
-        contentContainerStyle={[styles.content, { paddingBottom: bottomClearance + (company ? RAIL_EXTRA : 0) }]}
-      >
-        {company ? (
-          <DiscoverCard
-            company={company}
-            proposalType={proposalType}
-            onProposalType={setProposalType}
-            onOpenMenu={() => setMenuOpen(true)}
-            onComment={() => setSheetOpen(true)}
-            onSendProposal={() => setSheetOpen(true)}
-          />
-        ) : remaining.length > 0 ? (
-          <EmptyState
-            icon="funnel-outline"
-            title="No businesses match these filters"
-            body="Try fewer filters to see more of Leeds."
-            action="Clear filters"
-            onAction={() => setFilters({})}
-          />
-        ) : (
-          <EmptyState
-            icon="checkmark-done-outline"
-            title="You've seen everyone for now"
-            body={
-              passed.length
-                ? `You passed on ${passed.length} ${passed.length === 1 ? 'business' : 'businesses'}. You can look at them again.`
-                : 'New businesses will show up here as they join.'
-            }
-            action={passed.length ? 'Show passed businesses again' : undefined}
-            onAction={restartDiscover}
-          />
-        )}
-      </Animated.ScrollView>
-
       {company ? (
-        <>
-          <ActionRail
-            companyName={company.name}
-            saved={saved.includes(company.id)}
-            onSave={() => {
-              const wasSaved = saved.includes(company.id);
-              toggleSaved(company.id);
-              setToast(wasSaved ? `Removed ${company.name} from saved.` : `Saved ${company.name} for later.`);
+        <View style={[styles.stage, { paddingBottom: bottomClearance }]}>
+          <SwipeDeck
+            top={company}
+            next={feed[1]}
+            returnToken={returnToken}
+            onOpen={(c) => router.push({ pathname: '/discover/[id]', params: { id: c.id } })}
+            onSwipe={(c, direction) => {
+              if (direction === 'left') passCompany(c.id);
+              else setSheetOpen(true);
             }}
-            onCross={() => passCompany(company.id)}
           />
           <LikeSheet
             company={company}
@@ -144,25 +101,35 @@ export default function DiscoverScreen() {
             proposalType={proposalType}
             onProposalType={setProposalType}
             likesLeft={likesLeft}
-            onClose={() => setSheetOpen(false)}
+            onClose={closeSheet}
             onSend={send}
           />
-          <CardMenu
-            visible={menuOpen}
-            companyName={company.name}
-            onClose={() => setMenuOpen(false)}
-            onBlock={() => {
-              setMenuOpen(false);
-              blockCompany(company.id);
-              setToast(`Blocked ${company.name}. They won't appear in Discover.`);
-            }}
-            onReport={() => {
-              setMenuOpen(false);
-              notInPreview('Report');
-            }}
-          />
-        </>
-      ) : null}
+        </View>
+      ) : (
+        <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingBottom: bottomClearance }]}>
+          {remaining.length > 0 ? (
+            <EmptyState
+              icon="funnel-outline"
+              title="No businesses match these filters"
+              body="Try fewer filters to see more of Leeds."
+              action="Clear filters"
+              onAction={() => setFilters({})}
+            />
+          ) : (
+            <EmptyState
+              icon="checkmark-done-outline"
+              title="You've seen everyone for now"
+              body={
+                passed.length
+                  ? `You passed on ${passed.length} ${passed.length === 1 ? 'business' : 'businesses'}. You can look at them again.`
+                  : 'New businesses will show up here as they join.'
+              }
+              action={passed.length ? 'Show passed businesses again' : undefined}
+              onAction={restartDiscover}
+            />
+          )}
+        </ScrollView>
+      )}
 
       {toast ? (
         <View
@@ -206,6 +173,7 @@ const styles = StyleSheet.create({
   filters: { gap: space[2], paddingVertical: space[3], borderBottomWidth: StyleSheet.hairlineWidth },
   count: { paddingHorizontal: space[4] },
   content: { padding: space[4] },
+  stage: { flex: 1, paddingTop: space[4], paddingHorizontal: space[4], gap: space[4] },
   empty: { alignItems: 'flex-start', gap: space[3], paddingVertical: space[6] },
   toast: {
     position: 'absolute',

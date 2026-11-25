@@ -1,9 +1,10 @@
 {
-  "source": "docs/bond-demo-data.md (Monetisation). Demo values only: nothing is ever charged. Prices are in pence; the app formats them. `limits` are enforced in the app; null means unlimited.",
+  "source": "docs/bond-demo-data.md (Monetisation). Demo values only: nothing is ever charged. Prices are in pence; the app formats them. `maxPricePence` makes the price a range (proposed pricing, to be validated during the pilot). `limits` are enforced in the app; null means unlimited.",
   "currency": "GBP",
   "plans": {
     "free": {
       "name": "Free",
+      "tagline": "Get matched and start",
       "type": "plan",
       "pricePence": 0,
       "period": null,
@@ -17,7 +18,8 @@
       }
     },
     "boost": {
-      "name": "Boost",
+      "name": "Boosts",
+      "tagline": "Profile and proposal boosts",
       "type": "one-off",
       "pricePence": 499,
       "period": {
@@ -25,14 +27,17 @@
         "unit": "day"
       },
       "benefits": [
-        "Shown first in Discover within 10 miles"
+        "Profile boost: shown first in Discover within 10 miles",
+        "Proposal boost: your proposal shown first to matching businesses"
       ],
       "limits": {}
     },
     "plus": {
-      "name": "Bond Plus",
+      "name": "Bond Pro",
+      "tagline": "Recurring subscription",
       "type": "subscription",
-      "pricePence": 1499,
+      "pricePence": 1999,
+      "maxPricePence": 2999,
       "period": {
         "count": 1,
         "unit": "month"

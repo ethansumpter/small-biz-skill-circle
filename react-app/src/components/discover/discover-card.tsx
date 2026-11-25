@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { CompanyAvatar } from '@/components/company-avatar';
 import { Card, Chip, SectionTitle } from '@/components/ui';
@@ -10,8 +10,8 @@ import { radius, space, type, useBondColors } from '@/theme/tokens';
 import { notInPreview } from '@/utils/preview';
 
 /**
- * One company on Discover, top to bottom as in docs/bond-app-structure.md §1:
- * offer/looking-for (with ⋮), company details, prompts, mini gallery,
+ * One company's full profile, top to bottom as in docs/bond-app-structure.md §1:
+ * company details, offer/looking-for (with ⋮), prompts, mini gallery,
  * proposal block, reviews. Company identity only, never owner names.
  */
 export function DiscoverCard({
@@ -21,6 +21,7 @@ export function DiscoverCard({
   onOpenMenu,
   onComment,
   onSendProposal,
+  canPropose,
 }: {
   company: Company;
   proposalType: string | undefined;
@@ -28,16 +29,54 @@ export function DiscoverCard({
   onOpenMenu: () => void;
   /** Comment bubble on the offer box. Omit to hide it (e.g. Your Network). */
   onComment?: () => void;
-  /** 👍 in the proposal box. Omit to show only their open proposals. */
+  /** 👍 in the proposal box. Omit to hide it. */
   onSendProposal?: () => void;
+  /**
+   * Show the proposal-type picker. Defaults to on when `onSendProposal` is given; pass true to
+   * show it without the 👍 (the page sends from its own bar). Off shows only their open proposals.
+   */
+  canPropose?: boolean;
 }) {
   const colors = useBondColors();
   const { demoProposals } = useDemoProposals();
   const openProposals = companyProposals(company, demoProposals).filter((p) => p.status === 'Open');
+  const picker = canPropose ?? !!onSendProposal;
 
   return (
     <View style={styles.card}>
-      {/* 1. Offer / looking for — always first */}
+      {/* 1. Company details */}
+      <Card>
+        <View style={styles.identity}>
+          <CompanyAvatar companyId={company.id} size={64} />
+          <View style={styles.flex}>
+            <Text accessibilityRole="header" style={[type.heading, { color: colors.ink }]}>
+              {company.name}
+            </Text>
+            <View style={styles.badges}>
+              {company.verified ? (
+                <View style={[styles.badge, { backgroundColor: colors.accent }]}>
+                  <Ionicons name="shield-checkmark" size={14} color={colors.onAccent} />
+                  <Text style={[type.caption, { color: colors.onAccent }]}>Verified</Text>
+                </View>
+              ) : null}
+              <View style={styles.rating} accessibilityLabel={`Rated ${company.rating.toFixed(1)} out of 5`}>
+                <Ionicons name="star" size={14} color={colors.ink} />
+                <Text style={[type.label, { color: colors.ink }]}>{company.rating.toFixed(1)}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <Detail icon="location-outline" text={company.location} />
+        <Detail icon="people-outline" text={company.size === 'SME' ? 'SME' : 'Micro business'} />
+        <Detail icon="briefcase-outline" text={company.industry} />
+        <View style={styles.chips}>
+          {company.interests.map((interest) => (
+            <Chip key={interest} label={interest} />
+          ))}
+        </View>
+      </Card>
+
+      {/* 2. Offer / looking for */}
       <Card style={styles.offer}>
         <View style={styles.offerRow}>
           <View style={styles.offerText}>
@@ -72,38 +111,6 @@ export function DiscoverCard({
         </View>
       </Card>
 
-      {/* 2. Company details */}
-      <Card>
-        <View style={styles.identity}>
-          <CompanyAvatar companyId={company.id} size={64} />
-          <View style={styles.flex}>
-            <Text accessibilityRole="header" style={[type.heading, { color: colors.ink }]}>
-              {company.name}
-            </Text>
-            <View style={styles.badges}>
-              {company.verified ? (
-                <View style={[styles.badge, { backgroundColor: colors.accent }]}>
-                  <Ionicons name="shield-checkmark" size={14} color={colors.onAccent} />
-                  <Text style={[type.caption, { color: colors.onAccent }]}>Verified</Text>
-                </View>
-              ) : null}
-              <View style={styles.rating} accessibilityLabel={`Rated ${company.rating.toFixed(1)} out of 5`}>
-                <Ionicons name="star" size={14} color={colors.ink} />
-                <Text style={[type.label, { color: colors.ink }]}>{company.rating.toFixed(1)}</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-        <Detail icon="location-outline" text={company.location} />
-        <Detail icon="people-outline" text={company.size === 'SME' ? 'SME' : 'Micro business'} />
-        <Detail icon="briefcase-outline" text={company.industry} />
-        <View style={styles.chips}>
-          {company.interests.map((interest) => (
-            <Chip key={interest} label={interest} />
-          ))}
-        </View>
-      </Card>
-
       {/* 3. Prompts */}
       {company.prompts.map((prompt) => (
         <Card key={prompt.question}>
@@ -133,9 +140,9 @@ export function DiscoverCard({
       </View>
 
       {/* 5. Proposal block — pick the kind of proposal, then 👍 to send (mockup) */}
-      {onSendProposal || openProposals.length ? (
+      {picker || openProposals.length ? (
         <Card>
-          {onSendProposal ? (
+          {picker ? (
             <>
               <View style={styles.proposalHead}>
                 <View style={styles.flex}>
@@ -144,19 +151,21 @@ export function DiscoverCard({
                     Pick the kind of proposal, then send it with a comment. With none picked, it goes as a like.
                   </Text>
                 </View>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    proposalType ? `Send a ${proposalType} proposal to ${company.name}` : `Send a like to ${company.name}`
-                  }
-                  onPress={onSendProposal}
-                  style={({ pressed }) => [
-                    styles.send,
-                    { backgroundColor: colors.ink, transform: [{ scale: pressed ? 0.94 : 1 }] },
-                  ]}
-                >
-                  <Ionicons name="thumbs-up" size={24} color={colors.surface} />
-                </Pressable>
+                {onSendProposal ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      proposalType ? `Send a ${proposalType} proposal to ${company.name}` : `Send a like to ${company.name}`
+                    }
+                    onPress={onSendProposal}
+                    style={({ pressed }) => [
+                      styles.send,
+                      { backgroundColor: colors.ink, transform: [{ scale: pressed ? 0.94 : 1 }] },
+                    ]}
+                  >
+                    <Ionicons name="thumbs-up" size={24} color={colors.surface} />
+                  </Pressable>
+                ) : null}
               </View>
 
               <View accessibilityRole="radiogroup" accessibilityLabel="Kind of proposal" style={styles.typeList}>
@@ -215,11 +224,7 @@ export function DiscoverCard({
         {company.reviews.length === 0 ? (
           <Text style={[type.body, { color: colors.inkMuted }]}>No reviews yet.</Text>
         ) : (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.reviews}
-          >
+          <View style={styles.reviews}>
             {company.reviews.map((review) => (
               <Card key={review.fromId} style={styles.review}>
                 <View style={styles.reviewTop}>
@@ -233,13 +238,13 @@ export function DiscoverCard({
                     {'★'.repeat(review.stars)}
                   </Text>
                 </View>
-                <Text style={[type.body, styles.flex, { color: colors.ink }]}>{review.text}</Text>
+                <Text style={[type.body, { color: colors.ink }]}>{review.text}</Text>
                 <Pressable accessibilityRole="button" hitSlop={8} onPress={() => notInPreview('Report review')}>
                   <Text style={[type.caption, { color: colors.link }]}>Report review</Text>
                 </Pressable>
               </Card>
             ))}
-          </ScrollView>
+          </View>
         )}
       </View>
     </View>
@@ -319,7 +324,7 @@ const styles = StyleSheet.create({
   },
   typeNumber: { width: 24, height: 24, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' },
   proposal: { borderRadius: radius.sm, padding: space[3], gap: space[1] },
-  reviews: { gap: space[3], paddingRight: space[4] },
-  review: { width: 260 },
+  reviews: { gap: space[3] },
+  review: { alignSelf: 'stretch' },
   reviewTop: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
 });

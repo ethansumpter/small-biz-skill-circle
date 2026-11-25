@@ -12,9 +12,13 @@ export type PlanId = CorePlanId | (string & {});
 
 export type Plan = {
   name: string;
+  /** One line under the name on Get More, e.g. "Get matched and start". */
+  tagline?: string;
   /** "plan": the default tier; "one-off": a single purchase for `period`; "subscription": renews every `period`. */
   type: 'plan' | 'one-off' | 'subscription';
   pricePence: number;
+  /** Top of a price range (proposed pricing, e.g. Bond Pro £19.99–£29.99). Omit for a single price. */
+  maxPricePence?: number;
   period: { count: number; unit: 'day' | 'week' | 'month' | 'year' } | null;
   benefits: string[];
   /** Enforced in the app. Missing means no limit set by this plan; null means unlimited. */
@@ -28,7 +32,7 @@ export const BUNDLED_PLANS = data.plans as unknown as Plans;
 
 export const isCorePlan = (id: string) => (CORE_PLAN_IDS as readonly string[]).includes(id);
 
-/** Everything on sale (all plans but Free): Boost, Bond Plus, then any added plans in file order. */
+/** Everything on sale (all plans but Free): Boosts, Bond Pro, then any added plans in file order. */
 export function paidPlans(plans: Plans): (Plan & { id: string })[] {
   const ids = ['boost', 'plus', ...Object.keys(plans).filter((id) => !isCorePlan(id))];
   return ids.filter((id) => plans[id]).map((id) => ({ id, ...plans[id] }));
@@ -73,10 +77,17 @@ export function freeLimits(plans: Plans) {
 /** 3 → "3", Infinity → "unlimited". */
 export const formatLimit = (n: number) => (Number.isFinite(n) ? String(n) : 'unlimited');
 
-/** "£0", "£4.99 for 7 days", "£14.99 / month". */
+const pounds = (pence: number) => {
+  const p = pence / 100;
+  return `£${Number.isInteger(p) ? p : p.toFixed(2)}`;
+};
+
+/** "£0", "£4.99 for 7 days", "£14.99 / month", "£19.99–£29.99 / month". */
 export function formatPrice(plan: Plan): string {
-  const pounds = plan.pricePence / 100;
-  const amount = `£${Number.isInteger(pounds) ? pounds : pounds.toFixed(2)}`;
+  const amount =
+    plan.maxPricePence && plan.maxPricePence > plan.pricePence
+      ? `${pounds(plan.pricePence)}–${pounds(plan.maxPricePence)}`
+      : pounds(plan.pricePence);
   if (!plan.period || plan.pricePence === 0) return amount;
   const { count, unit } = plan.period;
   if (plan.type === 'subscription') return count === 1 ? `${amount} / ${unit}` : `${amount} every ${count} ${unit}s`;

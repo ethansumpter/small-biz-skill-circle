@@ -59,8 +59,9 @@ Leads (chat) → Unmatch | Mute | Report | Block
 Business verification · block list · report profiles/reviews/chats · company help line · personal-safety guidance · pause/delete account · download/delete my data (GDPR-style).
 
 ## Monetisation
-- **Subscription** (premium tier).
-- **Boost** — paid premium visibility in others' Discover feeds.
+- **Free** — get matched and start.
+- **Bond Pro** (subscription, premium tier) — proposed £19.99–£29.99/month, to be validated during the pilot.
+- **Premium add-ons** — profile/proposal **Boosts** (paid premium visibility) and optional **Awesome Molecules** fractional expert services.
 - Value-based monetisation model (details TBD).
 
 ## Open questions in the spec

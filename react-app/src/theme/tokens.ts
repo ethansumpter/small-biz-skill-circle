@@ -35,6 +35,12 @@ export const brand = {
   grapeDeep: '#2E2838',
 };
 
+/** Discover swipe wash: green for like (right), red for pass (left). Shown at up to 45% opacity over the card. */
+export const swipeTint = {
+  like: '#2E9E5B',
+  pass: '#D64545',
+} as const;
+
 /** Overlays tinted with grape-deep (#2E2838), never navy or black: sheet/menu backdrops and floating-button shadows. */
 export const overlay = {
   scrim: 'rgba(46, 40, 56, 0.4)',
