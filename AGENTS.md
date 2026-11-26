@@ -31,3 +31,4 @@ use the editor.
 
 - Use separate TanStack content routes inside a shared app shell so every navigation destination has its own URL and metadata.
 - Keep preview-only business, match, conversation and cooperation state in one React provider; it is intentionally reset on reload and must not imply real delivery or billing.
+- `promo-video/` is a separate Remotion project for Bond's promo video. It has its own `package.json`, and its rules are in `promo-video/AGENTS.md`. Don't import from it in the web app.

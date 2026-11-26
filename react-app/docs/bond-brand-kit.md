@@ -43,7 +43,7 @@ Tint scrims and shadows with grape-deep, never navy or black.
 | `--link` / `--focus-ring` | `#4A5A8A` | `#A2B2D8` | Links; 2px focus outline |
 | `--line` | `#D5D9E2` | `#3D3549` | Dividers, input borders (never text) |
 
-**Discover swipe wash** (only use): green `#2E9E5B` for like / swipe right and red `#D64545` for pass / swipe left, laid over the card at up to 45% opacity while it's dragged (`swipeTint` in `src/theme/tokens.ts`). Never used for text or elsewhere in the UI.
+**Discover swipe wash** (only use): green `#2E9E5B` for like / swipe right and red `#D64545` for pass / swipe left, laid over the card at up to 45% opacity while it's dragged (`swipeTint` in `src/theme/tokens.ts`). Never used for text or elsewhere in the UI. The promo video (`../promo-video`) uses them for its Pass/Like reactions in the swipe scene, and nowhere else.
 
 Dark mode: `data-theme="dark"` on the page wrapper.
 
@@ -130,6 +130,12 @@ All files are 2000×2000 transparent PNGs in `assets/logo/` (full-size originals
 - The fine orbit and nucleus detail disappears below about 32px; at very small sizes prefer the B mark over the full wordmark.
 - In the app header, use the atoms (`bond-logo-atoms.png`, cropped to `assets/logo/bond-logo-atoms-header.png`) at 36px tall, left of the `BOND` text wordmark in grape, together on a platinum tile (`BondLogo` in `src/components/bond-logo.tsx`). Atoms rather than the B, so the B isn't repeated. Don't go smaller: the orbit detail is lost below about 32px.
 - The Your Network tab icon (`ConnectionIcon`, two overlapping circles) is a UI icon, not the logo; the atoms lose their detail at tab-icon size.
+
+## Promo video
+The promo video is a Remotion project in `../promo-video`. Its README has the scenes and commands.
+- Use a flat Platinum (`#F0F3F5`) background, the same as the app screenshots, with no gradients or glows.
+- Text is Grape in Lexend. Key phrases are highlighted with a powder-blue pill behind grape-deep text.
+- Show screenshots in an iPhone 17 Pro frame (silver). Transitions use the two-overlapping-circles motif.
 
 ## Voice
 - Plain, warm, specific — like a helpful neighbour. e.g. "Trade an hour of design for an hour of bookkeeping."

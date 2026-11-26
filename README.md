@@ -79,6 +79,15 @@ src/
 
 `src/routeTree.gen.ts` is generated automatically; don't edit it by hand.
 
+## Other projects in this repo
+
+| Folder | What it is |
+| --- | --- |
+| [`react-app/`](react-app) | Bond, the Expo / React Native mobile app. See its `CLAUDE.md` and `docs/` |
+| [`promo-video/`](promo-video) | Bond's promo video, built with [Remotion](https://www.remotion.dev/docs) from the app screenshots. See [`promo-video/README.md`](promo-video/README.md) |
+
+Each has its own `package.json`; run its commands from inside that folder.
+
 ## Deploying and syncing with Lovable
 
 This repo is connected to Lovable:
